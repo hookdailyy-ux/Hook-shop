@@ -458,7 +458,7 @@ function ProductDialog({ product }: { product?: Product }) {
                   <SelectValue placeholder="Select subcategory" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="__none__">None</SelectItem>
                   {subcategories?.map((s) => (
                     <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
                   ))}
