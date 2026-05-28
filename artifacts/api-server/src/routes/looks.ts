@@ -8,7 +8,10 @@ const router: IRouter = Router();
 async function getLookWithProducts(lookId: number) {
   const [look] = await db.select().from(looksTable).where(eq(looksTable.id, lookId));
   if (!look) return null;
-  const linkRows = await db.select().from(lookProductsTable).where(eq(lookProductsTable.lookId, lookId));
+  const { asc } = await import("drizzle-orm");
+  const linkRows = await db.select().from(lookProductsTable)
+    .where(eq(lookProductsTable.lookId, lookId))
+    .orderBy(asc(lookProductsTable.sortOrder));
   const products = await Promise.all(
     linkRows.map((lr) => db.select().from(productsTable).where(eq(productsTable.id, lr.productId)).then(([p]) => p))
   );
@@ -48,7 +51,7 @@ router.post("/looks", async (req, res) => {
     }).returning();
     if (data.productIds && data.productIds.length > 0) {
       await db.insert(lookProductsTable).values(
-        data.productIds.map((pid) => ({ lookId: look.id, productId: pid }))
+        data.productIds.map((pid, i) => ({ lookId: look.id, productId: pid, sortOrder: i }))
       );
     }
     const result = await getLookWithProducts(look.id);
@@ -92,7 +95,7 @@ router.patch("/looks/:id", async (req, res) => {
       await db.delete(lookProductsTable).where(eq(lookProductsTable.lookId, id));
       if (data.productIds.length > 0) {
         await db.insert(lookProductsTable).values(
-          data.productIds.map((pid) => ({ lookId: id, productId: pid }))
+          data.productIds.map((pid, i) => ({ lookId: id, productId: pid, sortOrder: i }))
         );
       }
     }

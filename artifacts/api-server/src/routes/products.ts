@@ -4,8 +4,6 @@ import { eq, and } from "drizzle-orm";
 import { z } from "zod";
 
 const router: IRouter = Router();
-const categoryEnum = ["women", "men", "electronics", "home"] as const;
-
 function serializeProduct(p: typeof productsTable.$inferSelect) {
   return {
     ...p,
@@ -50,6 +48,7 @@ router.post("/products", async (req, res) => {
       images: z.array(z.string()).optional(),
       affiliateUrl: z.string().min(1),
       brand: z.string().optional(),
+      material: z.string().optional(),
       colors: z.array(z.string()).optional(),
       sizes: z.array(z.string()).optional(),
       featured: z.boolean().optional(),
@@ -67,6 +66,7 @@ router.post("/products", async (req, res) => {
       images: data.images ?? [],
       affiliateUrl: data.affiliateUrl,
       brand: data.brand ?? null,
+      material: data.material ?? null,
       colors: data.colors ?? [],
       sizes: data.sizes ?? [],
       featured: data.featured ?? false,
@@ -105,6 +105,7 @@ router.patch("/products/:id", async (req, res) => {
       images: z.array(z.string()).optional(),
       affiliateUrl: z.string().optional(),
       brand: z.string().optional(),
+      material: z.string().optional(),
       colors: z.array(z.string()).optional(),
       sizes: z.array(z.string()).optional(),
       featured: z.boolean().optional(),

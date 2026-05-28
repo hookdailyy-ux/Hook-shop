@@ -14,6 +14,7 @@ export const productsTable = pgTable("products", {
   images: jsonb("images").$type<string[]>().notNull().default([]),
   affiliateUrl: text("affiliate_url").notNull(),
   brand: text("brand"),
+  material: text("material"),
   colors: jsonb("colors").$type<string[]>().notNull().default([]),
   sizes: jsonb("sizes").$type<string[]>().notNull().default([]),
   featured: boolean("featured").notNull().default(false),

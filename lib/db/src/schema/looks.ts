@@ -14,6 +14,7 @@ export const lookProductsTable = pgTable("look_products", {
   id: serial("id").primaryKey(),
   lookId: integer("look_id").notNull(),
   productId: integer("product_id").notNull(),
+  sortOrder: integer("sort_order").notNull().default(0),
 });
 
 export const insertLookSchema = createInsertSchema(looksTable).omit({ id: true, createdAt: true });
