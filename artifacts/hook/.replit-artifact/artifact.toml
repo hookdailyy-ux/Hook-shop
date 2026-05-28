@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "HOOK"
+version = "1.0.0"
+id = "artifacts/hook"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23730
+
+[services.development]
+run = "pnpm --filter @workspace/hook run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/hook", "run", "build" ]
+publicDir = "artifacts/hook/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23730"
+BASE_PATH = "/"

@@ -1,15 +1,22 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: HOOK affiliate fashion website API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: products
+    description: Product operations
+  - name: looks
+    description: Shop the Look operations
+  - name: newsletter
+    description: Newsletter subscription
+  - name: admin
+    description: Admin dashboard operations
 paths:
   /healthz:
     get:
@@ -24,6 +31,254 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /products:
+    get:
+      operationId: listProducts
+      tags: [products]
+      summary: List products
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: featured
+          in: query
+          schema:
+            type: boolean
+        - name: trending
+          in: query
+          schema:
+            type: boolean
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+    post:
+      operationId: createProduct
+      tags: [products]
+      summary: Create a product
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductInput"
+      responses:
+        "201":
+          description: Created product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+
+  /products/{id}:
+    get:
+      operationId: getProduct
+      tags: [products]
+      summary: Get a product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateProduct
+      tags: [products]
+      summary: Update a product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductUpdate"
+      responses:
+        "200":
+          description: Updated product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+    delete:
+      operationId: deleteProduct
+      tags: [products]
+      summary: Delete a product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /looks:
+    get:
+      operationId: listLooks
+      tags: [looks]
+      summary: List curated looks
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of looks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Look"
+    post:
+      operationId: createLook
+      tags: [looks]
+      summary: Create a look
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LookInput"
+      responses:
+        "201":
+          description: Created look
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Look"
+
+  /looks/{id}:
+    get:
+      operationId: getLook
+      tags: [looks]
+      summary: Get a look
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Look
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Look"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateLook
+      tags: [looks]
+      summary: Update a look
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LookUpdate"
+      responses:
+        "200":
+          description: Updated look
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Look"
+    delete:
+      operationId: deleteLook
+      tags: [looks]
+      summary: Delete a look
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /newsletter:
+    post:
+      operationId: subscribeNewsletter
+      tags: [newsletter]
+      summary: Subscribe to newsletter
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewsletterInput"
+      responses:
+        "201":
+          description: Subscribed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NewsletterSubscriber"
+
+  /admin/stats:
+    get:
+      operationId: getAdminStats
+      tags: [admin]
+      summary: Get admin dashboard statistics
+      responses:
+        "200":
+          description: Admin stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminStats"
+
+  /admin/products:
+    get:
+      operationId: listAdminProducts
+      tags: [admin]
+      summary: List all products for admin (with full details)
+      responses:
+        "200":
+          description: All products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +289,176 @@ components:
       required:
         - status
 
+    Product:
+      type: object
+      required: [id, title, category, affiliateUrl, createdAt]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        category:
+          type: string
+          enum: [women, men, electronics, home]
+        price:
+          type: ["string", "null"]
+        originalPrice:
+          type: ["string", "null"]
+        imageUrl:
+          type: ["string", "null"]
+        affiliateUrl:
+          type: string
+        brand:
+          type: ["string", "null"]
+        featured:
+          type: boolean
+        trending:
+          type: boolean
+        createdAt:
+          type: string
+
+    ProductInput:
+      type: object
+      required: [title, category, affiliateUrl]
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+          enum: [women, men, electronics, home]
+        price:
+          type: string
+        originalPrice:
+          type: string
+        imageUrl:
+          type: string
+        affiliateUrl:
+          type: string
+        brand:
+          type: string
+        featured:
+          type: boolean
+        trending:
+          type: boolean
+
+    ProductUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+          enum: [women, men, electronics, home]
+        price:
+          type: string
+        originalPrice:
+          type: string
+        imageUrl:
+          type: string
+        affiliateUrl:
+          type: string
+        brand:
+          type: string
+        featured:
+          type: boolean
+        trending:
+          type: boolean
+
+    Look:
+      type: object
+      required: [id, title, createdAt]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        imageUrl:
+          type: ["string", "null"]
+        products:
+          type: array
+          items:
+            $ref: "#/components/schemas/Product"
+        createdAt:
+          type: string
+
+    LookInput:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        imageUrl:
+          type: string
+        productIds:
+          type: array
+          items:
+            type: integer
+
+    LookUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        imageUrl:
+          type: string
+        productIds:
+          type: array
+          items:
+            type: integer
+
+    NewsletterSubscriber:
+      type: object
+      required: [id, email, createdAt]
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        createdAt:
+          type: string
+
+    NewsletterInput:
+      type: object
+      required: [email]
+      properties:
+        email:
+          type: string
+
+    AdminStats:
+      type: object
+      required: [totalProducts, totalLooks, totalSubscribers, productsByCategory, featuredCount, trendingCount]
+      properties:
+        totalProducts:
+          type: integer
+        totalLooks:
+          type: integer
+        totalSubscribers:
+          type: integer
+        productsByCategory:
+          type: object
+          properties:
+            women:
+              type: integer
+            men:
+              type: integer
+            electronics:
+              type: integer
+            home:
+              type: integer
+          required: [women, men, electronics, home]
+        featuredCount:
+          type: integer
+        trendingCount:
+          type: integer
