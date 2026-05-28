@@ -5,10 +5,12 @@ import looksRouter from "./looks";
 import newsletterRouter from "./newsletter";
 import adminRouter from "./admin";
 import subcategoriesRouter from "./subcategories";
+import authRouter from "./auth";
 
 const router: IRouter = Router();
 
 router.use(healthRouter);
+router.use(authRouter);
 router.use(productsRouter);
 router.use(looksRouter);
 router.use(newsletterRouter);

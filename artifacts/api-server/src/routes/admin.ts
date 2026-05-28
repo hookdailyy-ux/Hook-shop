@@ -1,10 +1,11 @@
 import { Router, type IRouter } from "express";
 import { db, productsTable, looksTable, newsletterTable } from "@workspace/db";
 import { sql, eq } from "drizzle-orm";
+import { requireAdmin } from "../middlewares/requireAdmin";
 
 const router: IRouter = Router();
 
-router.get("/admin/stats", async (req, res) => {
+router.get("/admin/stats", requireAdmin, async (req, res) => {
   try {
     const [{ count: totalProducts }] = await db.select({ count: sql<number>`count(*)::int` }).from(productsTable);
     const [{ count: totalLooks }] = await db.select({ count: sql<number>`count(*)::int` }).from(looksTable);
@@ -44,7 +45,7 @@ router.get("/admin/stats", async (req, res) => {
   }
 });
 
-router.get("/admin/products", async (req, res) => {
+router.get("/admin/products", requireAdmin, async (req, res) => {
   try {
     const products = await db.select().from(productsTable);
     res.json(products.map((p) => ({ ...p, createdAt: p.createdAt.toISOString() })));

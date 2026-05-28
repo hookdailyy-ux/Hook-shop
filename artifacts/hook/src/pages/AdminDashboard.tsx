@@ -40,9 +40,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { X, Plus, Trash2, Pencil } from "lucide-react";
+import { X, Plus, Trash2, Pencil, LogOut } from "lucide-react";
+import { useAdminAuth } from "@/contexts/AdminAuthContext";
+import { useLocation } from "wouter";
 
-type Tab = "dashboard" | "products" | "looks" | "categories";
+type Tab = "dashboard" | "products" | "looks" | "categories" | "settings";
 
 const CATEGORIES = [
   { value: "women", label: "Women" },
@@ -53,16 +55,23 @@ const CATEGORIES = [
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<Tab>("dashboard");
+  const { logout } = useAdminAuth();
+  const [, navigate] = useLocation();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/");
+  };
 
   return (
     <div className="min-h-screen pb-32" style={{ background: "hsl(var(--background))" }}>
-      <div className="border-b border-border sticky top-14 md:top-16 z-30 bg-background/95 backdrop-blur-sm">
+      <div className="border-b border-border sticky top-0 z-30 bg-background/95 backdrop-blur-sm">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="flex items-center gap-0 overflow-x-auto" style={{ scrollbarWidth: "none" }}>
             <h1 className="font-serif text-lg font-light tracking-wide shrink-0 pr-8 py-4 border-r border-border mr-4 hidden md:block">
               Admin
             </h1>
-            {(["dashboard", "products", "looks", "categories"] as Tab[]).map((tab) => (
+            {(["dashboard", "products", "looks", "categories", "settings"] as Tab[]).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -76,6 +85,16 @@ export default function AdminDashboard() {
                 {tab}
               </button>
             ))}
+            <div className="ml-auto shrink-0">
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 px-4 py-4 text-xs tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors"
+                data-testid="button-logout"
+              >
+                <LogOut className="h-3.5 w-3.5" />
+                <span className="hidden md:inline">Logout</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -85,6 +104,7 @@ export default function AdminDashboard() {
         {activeTab === "products" && <ProductsTab />}
         {activeTab === "looks" && <LooksTab />}
         {activeTab === "categories" && <CategoriesTab />}
+        {activeTab === "settings" && <SettingsTab />}
       </div>
     </div>
   );
@@ -897,6 +917,108 @@ function CategoriesTab() {
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+
+function SettingsTab() {
+  const { toast } = useToast();
+  const [form, setForm] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
+  const [loading, setLoading] = useState(false);
+
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (form.newPassword !== form.confirmPassword) {
+      toast({ title: "Passwords do not match", variant: "destructive" });
+      return;
+    }
+    if (form.newPassword.length < 6) {
+      toast({ title: "Password must be at least 6 characters", variant: "destructive" });
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await fetch(`${BASE}/api/auth/password`, {
+        method: "PUT",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          currentPassword: form.currentPassword,
+          newPassword: form.newPassword,
+        }),
+      });
+      const body = await res.json() as { ok?: boolean; error?: string };
+      if (res.ok && body.ok) {
+        toast({ title: "Password updated successfully" });
+        setForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+      } else {
+        toast({ title: body.error ?? "Failed to update password", variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Network error. Please try again.", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="max-w-md">
+      <div className="mb-8">
+        <h2 className="font-serif text-2xl font-light mb-1">Settings</h2>
+        <p className="text-xs text-muted-foreground tracking-wide">Manage your admin credentials.</p>
+      </div>
+
+      <div className="border border-border p-6">
+        <h3 className="text-xs tracking-widest uppercase font-medium mb-6">Change Password</h3>
+        <form onSubmit={handlePasswordChange} className="space-y-4">
+          <div className="space-y-2">
+            <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Current Password</label>
+            <Input
+              type="password"
+              value={form.currentPassword}
+              onChange={(e) => setForm((f) => ({ ...f, currentPassword: e.target.value }))}
+              required
+              className="border-border"
+              data-testid="input-current-password"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-[10px] uppercase tracking-widest text-muted-foreground">New Password</label>
+            <Input
+              type="password"
+              value={form.newPassword}
+              onChange={(e) => setForm((f) => ({ ...f, newPassword: e.target.value }))}
+              required
+              minLength={6}
+              className="border-border"
+              data-testid="input-new-password"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Confirm New Password</label>
+            <Input
+              type="password"
+              value={form.confirmPassword}
+              onChange={(e) => setForm((f) => ({ ...f, confirmPassword: e.target.value }))}
+              required
+              className="border-border"
+              data-testid="input-confirm-password"
+            />
+          </div>
+          <div className="pt-2">
+            <Button
+              type="submit"
+              disabled={loading}
+              className="text-xs tracking-widest uppercase"
+              data-testid="button-change-password"
+            >
+              {loading ? "Updating..." : "Update Password"}
+            </Button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
