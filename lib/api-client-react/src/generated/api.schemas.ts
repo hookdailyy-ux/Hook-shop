@@ -3,10 +3,41 @@
  * Do not edit manually.
  * Api
  * HOOK affiliate fashion website API
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 export interface HealthStatus {
   status: string;
+}
+
+export type SubcategoryCategory = typeof SubcategoryCategory[keyof typeof SubcategoryCategory];
+
+
+export const SubcategoryCategory = {
+  women: 'women',
+  men: 'men',
+  electronics: 'electronics',
+  home: 'home',
+} as const;
+
+export interface Subcategory {
+  id: number;
+  category: SubcategoryCategory;
+  name: string;
+}
+
+export type SubcategoryInputCategory = typeof SubcategoryInputCategory[keyof typeof SubcategoryInputCategory];
+
+
+export const SubcategoryInputCategory = {
+  women: 'women',
+  men: 'men',
+  electronics: 'electronics',
+  home: 'home',
+} as const;
+
+export interface SubcategoryInput {
+  category: SubcategoryInputCategory;
+  name: string;
 }
 
 export type ProductCategory = typeof ProductCategory[keyof typeof ProductCategory];
@@ -26,14 +57,19 @@ export interface Product {
   description?: string | null;
   category: ProductCategory;
   /** @nullable */
+  subcategory?: string | null;
+  /** @nullable */
   price?: string | null;
   /** @nullable */
   originalPrice?: string | null;
   /** @nullable */
   imageUrl?: string | null;
+  images?: string[];
   affiliateUrl: string;
   /** @nullable */
   brand?: string | null;
+  colors?: string[];
+  sizes?: string[];
   featured?: boolean;
   trending?: boolean;
   createdAt: string;
@@ -53,11 +89,15 @@ export interface ProductInput {
   title: string;
   description?: string;
   category: ProductInputCategory;
+  subcategory?: string;
   price?: string;
   originalPrice?: string;
   imageUrl?: string;
+  images?: string[];
   affiliateUrl: string;
   brand?: string;
+  colors?: string[];
+  sizes?: string[];
   featured?: boolean;
   trending?: boolean;
 }
@@ -76,11 +116,15 @@ export interface ProductUpdate {
   title?: string;
   description?: string;
   category?: ProductUpdateCategory;
+  subcategory?: string;
   price?: string;
   originalPrice?: string;
   imageUrl?: string;
+  images?: string[];
   affiliateUrl?: string;
   brand?: string;
+  colors?: string[];
+  sizes?: string[];
   featured?: boolean;
   trending?: boolean;
 }
@@ -136,8 +180,13 @@ export interface AdminStats {
   trendingCount: number;
 }
 
+export type ListSubcategoriesParams = {
+category?: string;
+};
+
 export type ListProductsParams = {
 category?: string;
+subcategory?: string;
 featured?: boolean;
 trending?: boolean;
 limit?: number;

@@ -4,35 +4,33 @@ import { eq, and } from "drizzle-orm";
 import { z } from "zod";
 
 const router: IRouter = Router();
+const categoryEnum = ["women", "men", "electronics", "home"] as const;
+
+function serializeProduct(p: typeof productsTable.$inferSelect) {
+  return {
+    ...p,
+    images: Array.isArray(p.images) ? p.images : [],
+    colors: Array.isArray(p.colors) ? p.colors : [],
+    sizes: Array.isArray(p.sizes) ? p.sizes : [],
+    createdAt: p.createdAt.toISOString(),
+  };
+}
 
 router.get("/products", async (req, res) => {
   try {
-    const { category, featured, trending, limit } = req.query;
-    let query = db.select().from(productsTable);
+    const { category, subcategory, featured, trending, limit } = req.query;
     const conditions = [];
-    if (category && typeof category === "string") {
-      conditions.push(eq(productsTable.category, category));
-    }
-    if (featured === "true") {
-      conditions.push(eq(productsTable.featured, true));
-    }
-    if (trending === "true") {
-      conditions.push(eq(productsTable.trending, true));
-    }
-    let results;
-    if (conditions.length > 0) {
-      results = await db.select().from(productsTable).where(and(...conditions));
-    } else {
-      results = await db.select().from(productsTable);
-    }
-    if (limit) {
-      results = results.slice(0, parseInt(limit as string));
-    }
-    const mapped = results.map((p) => ({
-      ...p,
-      createdAt: p.createdAt.toISOString(),
-    }));
-    res.json(mapped);
+    if (category && typeof category === "string") conditions.push(eq(productsTable.category, category));
+    if (subcategory && typeof subcategory === "string") conditions.push(eq(productsTable.subcategory, subcategory));
+    if (featured === "true") conditions.push(eq(productsTable.featured, true));
+    if (trending === "true") conditions.push(eq(productsTable.trending, true));
+
+    let results = conditions.length > 0
+      ? await db.select().from(productsTable).where(and(...conditions))
+      : await db.select().from(productsTable);
+
+    if (limit) results = results.slice(0, parseInt(limit as string));
+    res.json(results.map(serializeProduct));
   } catch (err) {
     req.log.error({ err }, "Failed to list products");
     res.status(500).json({ error: "Internal server error" });
@@ -44,12 +42,16 @@ router.post("/products", async (req, res) => {
     const schema = z.object({
       title: z.string().min(1),
       description: z.string().optional(),
-      category: z.enum(["women", "men", "electronics", "home"]),
+      category: z.enum(categoryEnum),
+      subcategory: z.string().optional(),
       price: z.string().optional(),
       originalPrice: z.string().optional(),
       imageUrl: z.string().optional(),
+      images: z.array(z.string()).optional(),
       affiliateUrl: z.string().min(1),
       brand: z.string().optional(),
+      colors: z.array(z.string()).optional(),
+      sizes: z.array(z.string()).optional(),
       featured: z.boolean().optional(),
       trending: z.boolean().optional(),
     });
@@ -58,15 +60,19 @@ router.post("/products", async (req, res) => {
       title: data.title,
       description: data.description ?? null,
       category: data.category,
+      subcategory: data.subcategory ?? null,
       price: data.price ?? null,
       originalPrice: data.originalPrice ?? null,
       imageUrl: data.imageUrl ?? null,
+      images: data.images ?? [],
       affiliateUrl: data.affiliateUrl,
       brand: data.brand ?? null,
+      colors: data.colors ?? [],
+      sizes: data.sizes ?? [],
       featured: data.featured ?? false,
       trending: data.trending ?? false,
     }).returning();
-    res.status(201).json({ ...product, createdAt: product.createdAt.toISOString() });
+    res.status(201).json(serializeProduct(product));
   } catch (err) {
     req.log.error({ err }, "Failed to create product");
     res.status(400).json({ error: "Invalid input" });
@@ -78,7 +84,7 @@ router.get("/products/:id", async (req, res) => {
     const id = parseInt(req.params.id);
     const [product] = await db.select().from(productsTable).where(eq(productsTable.id, id));
     if (!product) return res.status(404).json({ error: "Not found" });
-    res.json({ ...product, createdAt: product.createdAt.toISOString() });
+    res.json(serializeProduct(product));
   } catch (err) {
     req.log.error({ err }, "Failed to get product");
     res.status(500).json({ error: "Internal server error" });
@@ -91,19 +97,23 @@ router.patch("/products/:id", async (req, res) => {
     const schema = z.object({
       title: z.string().optional(),
       description: z.string().optional(),
-      category: z.enum(["women", "men", "electronics", "home"]).optional(),
+      category: z.enum(categoryEnum).optional(),
+      subcategory: z.string().optional(),
       price: z.string().optional(),
       originalPrice: z.string().optional(),
       imageUrl: z.string().optional(),
+      images: z.array(z.string()).optional(),
       affiliateUrl: z.string().optional(),
       brand: z.string().optional(),
+      colors: z.array(z.string()).optional(),
+      sizes: z.array(z.string()).optional(),
       featured: z.boolean().optional(),
       trending: z.boolean().optional(),
     });
     const data = schema.parse(req.body);
     const [product] = await db.update(productsTable).set(data).where(eq(productsTable.id, id)).returning();
     if (!product) return res.status(404).json({ error: "Not found" });
-    res.json({ ...product, createdAt: product.createdAt.toISOString() });
+    res.json(serializeProduct(product));
   } catch (err) {
     req.log.error({ err }, "Failed to update product");
     res.status(400).json({ error: "Invalid input" });

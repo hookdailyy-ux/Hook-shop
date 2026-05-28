@@ -6,9 +6,6 @@
  * OpenAPI spec version: 0.2.0
  */
 
-export type AdminStatsProductsByCategory = {
-  women: number;
-  men: number;
-  electronics: number;
-  home: number;
+export type ListSubcategoriesParams = {
+category?: string;
 };

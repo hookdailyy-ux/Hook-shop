@@ -1,29 +1,24 @@
 openapi: 3.1.0
 info:
   title: Api
-  version: 0.1.0
+  version: 0.2.0
   description: HOOK affiliate fashion website API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
-    description: Health operations
+  - name: subcategories
   - name: products
-    description: Product operations
   - name: looks
-    description: Shop the Look operations
   - name: newsletter
-    description: Newsletter subscription
   - name: admin
-    description: Admin dashboard operations
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -32,6 +27,81 @@ paths:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
 
+  /subcategories:
+    get:
+      operationId: listSubcategories
+      tags: [subcategories]
+      summary: List subcategories
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of subcategories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Subcategory"
+    post:
+      operationId: createSubcategory
+      tags: [subcategories]
+      summary: Create a subcategory
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubcategoryInput"
+      responses:
+        "201":
+          description: Created subcategory
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Subcategory"
+
+  /subcategories/{id}:
+    patch:
+      operationId: updateSubcategory
+      tags: [subcategories]
+      summary: Update a subcategory
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubcategoryInput"
+      responses:
+        "200":
+          description: Updated subcategory
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Subcategory"
+    delete:
+      operationId: deleteSubcategory
+      tags: [subcategories]
+      summary: Delete a subcategory
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
   /products:
     get:
       operationId: listProducts
@@ -39,6 +109,10 @@ paths:
       summary: List products
       parameters:
         - name: category
+          in: query
+          schema:
+            type: string
+        - name: subcategory
           in: query
           schema:
             type: string
@@ -268,7 +342,7 @@ paths:
     get:
       operationId: listAdminProducts
       tags: [admin]
-      summary: List all products for admin (with full details)
+      summary: List all products for admin
       responses:
         "200":
           description: All products
@@ -286,8 +360,29 @@ components:
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
+
+    Subcategory:
+      type: object
+      required: [id, category, name]
+      properties:
+        id:
+          type: integer
+        category:
+          type: string
+          enum: [women, men, electronics, home]
+        name:
+          type: string
+
+    SubcategoryInput:
+      type: object
+      required: [category, name]
+      properties:
+        category:
+          type: string
+          enum: [women, men, electronics, home]
+        name:
+          type: string
 
     Product:
       type: object
@@ -302,16 +397,30 @@ components:
         category:
           type: string
           enum: [women, men, electronics, home]
+        subcategory:
+          type: ["string", "null"]
         price:
           type: ["string", "null"]
         originalPrice:
           type: ["string", "null"]
         imageUrl:
           type: ["string", "null"]
+        images:
+          type: array
+          items:
+            type: string
         affiliateUrl:
           type: string
         brand:
           type: ["string", "null"]
+        colors:
+          type: array
+          items:
+            type: string
+        sizes:
+          type: array
+          items:
+            type: string
         featured:
           type: boolean
         trending:
@@ -330,16 +439,30 @@ components:
         category:
           type: string
           enum: [women, men, electronics, home]
+        subcategory:
+          type: string
         price:
           type: string
         originalPrice:
           type: string
         imageUrl:
           type: string
+        images:
+          type: array
+          items:
+            type: string
         affiliateUrl:
           type: string
         brand:
           type: string
+        colors:
+          type: array
+          items:
+            type: string
+        sizes:
+          type: array
+          items:
+            type: string
         featured:
           type: boolean
         trending:
@@ -355,16 +478,30 @@ components:
         category:
           type: string
           enum: [women, men, electronics, home]
+        subcategory:
+          type: string
         price:
           type: string
         originalPrice:
           type: string
         imageUrl:
           type: string
+        images:
+          type: array
+          items:
+            type: string
         affiliateUrl:
           type: string
         brand:
           type: string
+        colors:
+          type: array
+          items:
+            type: string
+        sizes:
+          type: array
+          items:
+            type: string
         featured:
           type: boolean
         trending:

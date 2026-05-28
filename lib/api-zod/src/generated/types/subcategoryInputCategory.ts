@@ -6,10 +6,10 @@
  * OpenAPI spec version: 0.2.0
  */
 
-export type ProductUpdateCategory = typeof ProductUpdateCategory[keyof typeof ProductUpdateCategory];
+export type SubcategoryInputCategory = typeof SubcategoryInputCategory[keyof typeof SubcategoryInputCategory];
 
 
-export const ProductUpdateCategory = {
+export const SubcategoryInputCategory = {
   women: 'women',
   men: 'men',
   electronics: 'electronics',

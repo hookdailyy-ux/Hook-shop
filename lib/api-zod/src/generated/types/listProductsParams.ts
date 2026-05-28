@@ -3,11 +3,12 @@
  * Do not edit manually.
  * Api
  * HOOK affiliate fashion website API
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 
 export type ListProductsParams = {
 category?: string;
+subcategory?: string;
 featured?: boolean;
 trending?: boolean;
 limit?: number;

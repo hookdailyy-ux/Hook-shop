@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Api
  * HOOK affiliate fashion website API
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 
 export * from './adminStats';
@@ -11,6 +11,7 @@ export * from './adminStatsProductsByCategory';
 export * from './healthStatus';
 export * from './listLooksParams';
 export * from './listProductsParams';
+export * from './listSubcategoriesParams';
 export * from './look';
 export * from './lookInput';
 export * from './lookUpdate';
@@ -22,3 +23,7 @@ export * from './productInput';
 export * from './productInputCategory';
 export * from './productUpdate';
 export * from './productUpdateCategory';
+export * from './subcategory';
+export * from './subcategoryCategory';
+export * from './subcategoryInput';
+export * from './subcategoryInputCategory';

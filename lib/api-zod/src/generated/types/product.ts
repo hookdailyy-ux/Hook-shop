@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Api
  * HOOK affiliate fashion website API
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import type { ProductCategory } from './productCategory';
 
@@ -14,14 +14,19 @@ export interface Product {
   description?: string | null;
   category: ProductCategory;
   /** @nullable */
+  subcategory?: string | null;
+  /** @nullable */
   price?: string | null;
   /** @nullable */
   originalPrice?: string | null;
   /** @nullable */
   imageUrl?: string | null;
+  images?: string[];
   affiliateUrl: string;
   /** @nullable */
   brand?: string | null;
+  colors?: string[];
+  sizes?: string[];
   featured?: boolean;
   trending?: boolean;
   createdAt: string;

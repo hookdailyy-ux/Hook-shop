@@ -1,17 +1,15 @@
-import { useListProducts } from "@workspace/api-client-react";
+import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
+import { useListProducts, useListSubcategories, getListSubcategoriesQueryKey } from "@workspace/api-client-react";
 import { ProductCard } from "@/components/ProductCard";
 
-interface CategoryPageProps {
-  category: "women" | "men" | "electronics" | "home";
-}
-
-const CATEGORY_DETAILS = {
+const CATEGORY_DETAILS: Record<string, { title: string; description: string }> = {
   women: {
-    title: "Women's Collection",
+    title: "Women",
     description: "Refined essentials and statement pieces. A study in quiet confidence.",
   },
   men: {
-    title: "Men's Collection",
+    title: "Men",
     description: "Structural simplicity. Wardrobe foundations built to last.",
   },
   electronics: {
@@ -24,33 +22,94 @@ const CATEGORY_DETAILS = {
   },
 };
 
+interface CategoryPageProps {
+  category: "women" | "men" | "electronics" | "home";
+}
+
 export default function CategoryPage({ category }: CategoryPageProps) {
-  const { data: products, isLoading } = useListProducts({ category });
+  const [, location] = useLocation();
+  const [activeSub, setActiveSub] = useState<string | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const sub = params.get("sub");
+    setActiveSub(sub);
+  }, [location]);
+
+  const { data: subcategories } = useListSubcategories(
+    { category },
+    { query: { queryKey: getListSubcategoriesQueryKey({ category }) } }
+  );
+
+  const { data: products, isLoading } = useListProducts({
+    category,
+    ...(activeSub ? { subcategory: activeSub } : {}),
+  });
+
   const details = CATEGORY_DETAILS[category];
 
   return (
-    <div className="pt-24 pb-32">
-      <div className="container mx-auto px-4 text-center mb-20 border-b border-border pb-16">
-        <h1 className="font-serif text-5xl font-light mb-6">{details.title}</h1>
-        <p className="text-sm tracking-widest uppercase text-muted-foreground max-w-lg mx-auto leading-relaxed">
+    <div className="pb-32">
+      <div className="container mx-auto px-4 sm:px-6 pt-12 pb-10 md:pt-16 md:pb-14 border-b border-border">
+        <h1 className="font-serif text-4xl md:text-6xl font-light mb-3">{details.title}</h1>
+        <p className="text-xs tracking-widest uppercase text-muted-foreground max-w-md leading-relaxed">
           {details.description}
         </p>
       </div>
 
-      <div className="container mx-auto px-4">
+      {subcategories && subcategories.length > 0 && (
+        <div className="border-b border-border sticky top-14 md:top-16 z-30 bg-background/95 backdrop-blur-sm">
+          <div className="container mx-auto px-4 sm:px-6">
+            <div
+              className="flex gap-0 overflow-x-auto scrollbar-none -mx-4 sm:mx-0 px-4 sm:px-0"
+              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+            >
+              <button
+                onClick={() => setActiveSub(null)}
+                className={`shrink-0 px-5 py-4 text-xs tracking-widest uppercase border-b-2 transition-colors ${
+                  !activeSub
+                    ? "border-foreground text-foreground"
+                    : "border-transparent text-muted-foreground hover:text-foreground"
+                }`}
+                data-testid="filter-all"
+              >
+                All
+              </button>
+              {subcategories.map((sub) => (
+                <button
+                  key={sub.id}
+                  onClick={() => setActiveSub(activeSub === sub.name ? null : sub.name)}
+                  className={`shrink-0 px-5 py-4 text-xs tracking-widest uppercase border-b-2 transition-colors ${
+                    activeSub === sub.name
+                      ? "border-foreground text-foreground"
+                      : "border-transparent text-muted-foreground hover:text-foreground"
+                  }`}
+                  data-testid={`filter-${sub.name.toLowerCase()}`}
+                >
+                  {sub.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="container mx-auto px-4 sm:px-6 mt-10 md:mt-12">
         {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
             {Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="aspect-[3/4] bg-accent/50 animate-pulse" />
             ))}
           </div>
-        ) : products?.length === 0 ? (
-          <div className="text-center py-32 border border-dashed border-border">
-            <p className="text-sm tracking-widest text-muted-foreground uppercase">Collection coming soon.</p>
+        ) : !products || products.length === 0 ? (
+          <div className="text-center py-28 border border-dashed border-border">
+            <p className="text-xs tracking-widest text-muted-foreground uppercase">
+              {activeSub ? `No ${activeSub} products yet.` : "Collection coming soon."}
+            </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-16">
-            {products?.map((product) => (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-10 md:gap-x-8 md:gap-y-16">
+            {products.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>

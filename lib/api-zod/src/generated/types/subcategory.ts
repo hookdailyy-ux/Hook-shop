@@ -5,9 +5,10 @@
  * HOOK affiliate fashion website API
  * OpenAPI spec version: 0.2.0
  */
+import type { SubcategoryCategory } from './subcategoryCategory';
 
-export interface NewsletterSubscriber {
+export interface Subcategory {
   id: number;
-  email: string;
-  createdAt: string;
+  category: SubcategoryCategory;
+  name: string;
 }

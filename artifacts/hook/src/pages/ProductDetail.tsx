@@ -1,88 +1,271 @@
-import { useParams } from "wouter";
-import { useGetProduct, useListProducts, getGetProductQueryKey } from "@workspace/api-client-react";
+import { useState } from "react";
+import { useParams, Link } from "wouter";
+import { useGetProduct, useListProducts, getGetProductQueryKey, getListProductsQueryKey } from "@workspace/api-client-react";
 import { PlaceholderImage } from "@/components/PlaceholderImage";
-import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/ProductCard";
+
+const COLOR_MAP: Record<string, string> = {
+  black: "#1a1a1a",
+  white: "#f5f5f0",
+  beige: "#d4b896",
+  cream: "#f5f0e8",
+  sand: "#c2a882",
+  camel: "#c19a6b",
+  khaki: "#c3b091",
+  navy: "#1b2a4a",
+  olive: "#6b7645",
+  grey: "#888888",
+  gray: "#888888",
+  indigo: "#3a4a7a",
+  natural: "#d4c4a0",
+  oat: "#e8dcc8",
+  slate: "#708090",
+  cognac: "#9b4e2f",
+  tan: "#d2b48c",
+  stone: "#8b8680",
+  "light blue": "#aac4d8",
+  blue: "#3a6a9a",
+  brown: "#8b5e3c",
+  "space grey": "#8a8a8a",
+  silver: "#c0c0c0",
+  "matte white": "#f0ede8",
+  "matte black": "#2a2a2a",
+};
+
+function getColorHex(name: string): string {
+  return COLOR_MAP[name.toLowerCase()] ?? "#d4b896";
+}
 
 export default function ProductDetail() {
   const params = useParams();
   const id = Number(params.id);
+  const [selectedImage, setSelectedImage] = useState(0);
+  const [selectedColor, setSelectedColor] = useState<string | null>(null);
+  const [selectedSize, setSelectedSize] = useState<string | null>(null);
 
   const { data: product, isLoading } = useGetProduct(id, {
-    query: { enabled: !!id, queryKey: getGetProductQueryKey(id) }
+    query: { enabled: !!id, queryKey: getGetProductQueryKey(id) },
   });
 
-  const { data: relatedProducts } = useListProducts({ 
-    category: product?.category, 
-    limit: 4 
-  }, {
-    query: { enabled: !!product?.category }
-  });
+  const { data: relatedProducts } = useListProducts(
+    { category: product?.category ?? "women", limit: 5 },
+    {
+      query: {
+        enabled: !!product?.category,
+        queryKey: getListProductsQueryKey({ category: product?.category ?? "women", limit: 5 }),
+      },
+    }
+  );
 
   if (isLoading) {
-    return <div className="min-h-screen flex items-center justify-center text-sm tracking-widest uppercase">Loading...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-xs tracking-widest uppercase text-muted-foreground animate-pulse">Loading...</p>
+      </div>
+    );
   }
 
   if (!product) {
-    return <div className="min-h-screen flex items-center justify-center text-sm tracking-widest uppercase">Product not found</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-xs tracking-widest uppercase text-muted-foreground">Product not found.</p>
+      </div>
+    );
   }
 
+  const allImages: string[] = [
+    ...(product.imageUrl ? [product.imageUrl] : []),
+    ...(Array.isArray(product.images) ? product.images.filter((img) => img !== product.imageUrl) : []),
+  ];
+  const hasImages = allImages.length > 0;
+
+  const colors = Array.isArray(product.colors) ? product.colors : [];
+  const sizes = Array.isArray(product.sizes) ? product.sizes : [];
+  const categoryPath =
+    product.category === "home"
+      ? "/home-essentials"
+      : product.category === "electronics"
+      ? "/electronics"
+      : `/${product.category}`;
+  const categoryLabel =
+    product.category === "home"
+      ? "Home Essentials"
+      : product.category === "electronics"
+      ? "Electronics"
+      : product.category.charAt(0).toUpperCase() + product.category.slice(1);
+
   return (
-    <div className="pt-12 pb-32">
-      <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-24 mb-32">
-          {/* Images */}
-          <div className="flex flex-col gap-4">
-            {product.imageUrl ? (
-              <img 
-                src={product.imageUrl} 
-                alt={product.title} 
-                className="w-full aspect-[3/4] object-cover"
-              />
-            ) : (
-              <PlaceholderImage label={product.title.substring(0, 2)} aspectRatio="portrait" />
+    <div className="pb-32">
+      {/* Breadcrumb */}
+      <div className="container mx-auto px-4 sm:px-6 py-4 md:py-5">
+        <nav className="flex items-center gap-2 text-[10px] tracking-widest uppercase text-muted-foreground">
+          <Link href="/" className="hover:text-foreground transition-colors">Home</Link>
+          <span>/</span>
+          <Link href={categoryPath} className="hover:text-foreground transition-colors">{categoryLabel}</Link>
+          {product.subcategory && (
+            <>
+              <span>/</span>
+              <Link
+                href={`${categoryPath}?sub=${encodeURIComponent(product.subcategory)}`}
+                className="hover:text-foreground transition-colors"
+              >
+                {product.subcategory}
+              </Link>
+            </>
+          )}
+          <span>/</span>
+          <span className="text-foreground line-clamp-1">{product.title}</span>
+        </nav>
+      </div>
+
+      <div className="container mx-auto px-4 sm:px-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 lg:gap-24">
+
+          {/* Image Gallery */}
+          <div className="flex flex-col gap-3">
+            {/* Main image */}
+            <div className="w-full aspect-[3/4] bg-accent overflow-hidden">
+              {hasImages ? (
+                <img
+                  src={allImages[selectedImage]}
+                  alt={product.title}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <PlaceholderImage aspectRatio="portrait" />
+              )}
+            </div>
+
+            {/* Thumbnail strip */}
+            {allImages.length > 1 && (
+              <div className="flex gap-2 overflow-x-auto" style={{ scrollbarWidth: "none" }}>
+                {allImages.map((img, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setSelectedImage(i)}
+                    className={`shrink-0 w-16 h-20 overflow-hidden border-2 transition-colors ${
+                      selectedImage === i ? "border-foreground" : "border-transparent"
+                    }`}
+                    data-testid={`thumb-${i}`}
+                  >
+                    <img src={img} alt="" className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
             )}
           </div>
 
-          {/* Details */}
-          <div className="flex flex-col justify-center sticky top-24 self-start">
-            <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground mb-4">
-              {product.brand || "HOOK Collection"}
-            </p>
-            <h1 className="font-serif text-4xl lg:text-5xl font-light mb-6">{product.title}</h1>
-            <p className="text-2xl font-light mb-8">
-              {product.price ? `$${product.price}` : "TBA"}
-              {product.originalPrice && (
-                <span className="ml-4 text-muted-foreground line-through text-lg">${product.originalPrice}</span>
-              )}
-            </p>
+          {/* Product Info */}
+          <div className="flex flex-col md:sticky md:top-24 md:self-start">
+            {product.brand && (
+              <p className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground mb-3">
+                {product.brand}
+              </p>
+            )}
 
-            <div className="prose prose-sm text-muted-foreground max-w-none mb-12 font-serif text-lg leading-relaxed">
-              {product.description || "A curated piece from our latest collection. Exclusively selected for its quality, form, and timeless appeal."}
+            <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl font-light leading-tight mb-4">
+              {product.title}
+            </h1>
+
+            <div className="flex items-baseline gap-3 mb-6">
+              <p className="text-xl font-medium">{product.price || "TBA"}</p>
+              {product.originalPrice && (
+                <p className="text-sm text-muted-foreground line-through">{product.originalPrice}</p>
+              )}
             </div>
 
-            <Button 
-              size="lg" 
-              className="w-full rounded-none uppercase tracking-widest text-xs h-14"
-              onClick={() => window.open(product.affiliateUrl, "_blank", "noopener,noreferrer")}
+            {product.description && (
+              <p className="text-sm text-muted-foreground leading-relaxed mb-7">
+                {product.description}
+              </p>
+            )}
+
+            {/* Colors */}
+            {colors.length > 0 && (
+              <div className="mb-6">
+                <p className="text-[10px] tracking-widest uppercase text-muted-foreground mb-3">
+                  Color{selectedColor ? `: ${selectedColor}` : ""}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {colors.map((color) => (
+                    <button
+                      key={color}
+                      onClick={() => setSelectedColor(selectedColor === color ? null : color)}
+                      title={color}
+                      className={`w-8 h-8 transition-all ${
+                        selectedColor === color
+                          ? "ring-2 ring-offset-2 ring-foreground"
+                          : "ring-1 ring-border hover:ring-foreground/40"
+                      }`}
+                      style={{ backgroundColor: getColorHex(color) }}
+                      data-testid={`swatch-${color}`}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Sizes */}
+            {sizes.length > 0 && (
+              <div className="mb-8">
+                <p className="text-[10px] tracking-widest uppercase text-muted-foreground mb-3">
+                  Size{selectedSize ? `: ${selectedSize}` : ""}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {sizes.map((size) => (
+                    <button
+                      key={size}
+                      onClick={() => setSelectedSize(selectedSize === size ? null : size)}
+                      className={`min-w-[44px] h-11 px-3 text-xs tracking-widest border transition-colors ${
+                        selectedSize === size
+                          ? "bg-foreground text-background border-foreground"
+                          : "bg-background text-foreground border-border hover:border-foreground"
+                      }`}
+                      data-testid={`size-${size}`}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* CTA */}
+            <a
+              href={product.affiliateUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full text-center bg-foreground text-background text-xs tracking-widest uppercase py-5 hover:opacity-90 transition-opacity block"
+              data-testid="button-view-amazon"
             >
-              Shop Now
-            </Button>
-            
-            <p className="text-[10px] text-center text-muted-foreground mt-4 uppercase tracking-wider">
-              You will be redirected to the retailer's website to complete your purchase.
+              View on Amazon
+            </a>
+
+            <p className="text-[10px] text-center text-muted-foreground mt-3 tracking-wide">
+              You will be redirected to Amazon to complete your purchase.
             </p>
+
+            {product.subcategory && (
+              <div className="mt-8 pt-6 border-t border-border">
+                <p className="text-[10px] tracking-widest uppercase text-muted-foreground">
+                  Category: {categoryLabel} — {product.subcategory}
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Related */}
-        {relatedProducts && relatedProducts.length > 1 && (
-          <div className="pt-24 border-t border-border">
-            <h2 className="font-serif text-3xl font-light mb-12 text-center">More from this Category</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-              {relatedProducts.filter(p => p.id !== product.id).slice(0, 4).map(p => (
-                <ProductCard key={p.id} product={p} />
-              ))}
+        {/* Related Products */}
+        {relatedProducts && relatedProducts.filter((p) => p.id !== product.id).length > 0 && (
+          <div className="mt-24 pt-16 border-t border-border">
+            <h2 className="font-serif text-2xl md:text-3xl font-light mb-10">You May Also Like</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-10 md:gap-x-8">
+              {relatedProducts
+                .filter((p) => p.id !== product.id)
+                .slice(0, 4)
+                .map((p) => (
+                  <ProductCard key={p.id} product={p} />
+                ))}
             </div>
           </div>
         )}
