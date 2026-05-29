@@ -1,14 +1,7 @@
 import { Link } from "wouter";
-import { useListLooks } from "@workspace/api-client-react";
+import { useListLooks, useListProducts } from "@workspace/api-client-react";
 import { NewsletterForm } from "@/components/NewsletterForm";
 import { Truck, RotateCcw, ShieldCheck, Globe } from "lucide-react";
-
-const DAILY_ESSENTIALS = [
-  { label: "Hoodies", href: "/women?sub=Clothing", abbr: "HD" },
-  { label: "Sneakers", href: "/women?sub=Shoes", abbr: "SN" },
-  { label: "Headphones", href: "/electronics?sub=Headphones", abbr: "HP" },
-  { label: "Accessories", href: "/women?sub=Accessories", abbr: "AC" },
-];
 
 const BENEFITS = [
   { icon: Truck, label: "Free Shipping" },
@@ -17,8 +10,24 @@ const BENEFITS = [
   { icon: Globe, label: "Worldwide" },
 ];
 
+const ELECTRONICS_PLACEHOLDERS = [
+  { label: "Headphones", abbr: "HP" },
+  { label: "Smart Watch", abbr: "SW" },
+  { label: "Speakers", abbr: "SP" },
+  { label: "Accessories", abbr: "AC" },
+];
+
+const HOME_PLACEHOLDERS = [
+  { label: "Candles", abbr: "CA" },
+  { label: "Throws", abbr: "TH" },
+  { label: "Ceramics", abbr: "CE" },
+  { label: "Lighting", abbr: "LT" },
+];
+
 export default function Home() {
   const { data: latestLooks } = useListLooks({ limit: 4 });
+  const { data: electronicsProducts } = useListProducts({ category: "electronics", limit: 4 });
+  const { data: homeProducts } = useListProducts({ category: "home", limit: 4 });
 
   return (
     <div className="flex flex-col">
@@ -119,40 +128,80 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── Daily Essentials ── */}
+      {/* ── Electronics ── */}
       <section className="py-16 md:py-24 bg-[#f5f0e8]">
         <div className="container mx-auto px-4 sm:px-6">
-          <div className="text-center mb-10 md:mb-14">
-            <p className="text-[10px] tracking-[0.3em] uppercase text-muted-foreground mb-2">Categories</p>
-            <h2 className="font-serif text-3xl md:text-4xl font-light">Daily Essentials</h2>
+          <div className="flex items-end justify-between mb-10 md:mb-12">
+            <div>
+              <p className="text-[10px] tracking-[0.3em] uppercase text-muted-foreground mb-1.5">Tech</p>
+              <h2 className="font-serif text-3xl md:text-4xl font-light">Electronics</h2>
+            </div>
+            <Link
+              href="/electronics"
+              className="text-[10px] tracking-[0.2em] uppercase border-b border-foreground pb-0.5 hover:opacity-70 transition-opacity"
+            >
+              View All
+            </Link>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5">
-            {DAILY_ESSENTIALS.map((cat) => (
-              <Link
-                key={cat.label}
-                href={cat.href}
-                className="group block relative overflow-hidden aspect-[3/4] bg-[#ddd5c8]"
-                data-testid={`card-category-${cat.label.toLowerCase()}`}
-              >
-                {/* Placeholder editorial fill */}
-                <div className="absolute inset-0 flex items-end justify-start p-5 md:p-6">
-                  <div>
-                    <p
-                      className="font-serif font-light leading-none mb-3 text-[#2a2318] opacity-[0.08] absolute top-4 right-4 select-none pointer-events-none"
-                      style={{ fontSize: "clamp(3rem, 8vw, 5rem)" }}
-                    >
-                      {cat.abbr}
-                    </p>
-                    <h3 className="font-serif text-xl md:text-2xl font-light text-[#2a2318]">{cat.label}</h3>
-                    <span className="block mt-2 text-[10px] tracking-[0.2em] uppercase text-[#6b5e4e] group-hover:underline underline-offset-4 transition-all">
-                      Shop Now
-                    </span>
-                  </div>
-                </div>
-                <div className="absolute inset-0 bg-[#2a2318]/0 group-hover:bg-[#2a2318]/5 transition-colors duration-500" />
-              </Link>
-            ))}
+            {electronicsProducts && electronicsProducts.length > 0
+              ? electronicsProducts.slice(0, 4).map((product) => (
+                  <HomeProductCard
+                    key={product.id}
+                    title={product.title}
+                    price={product.price ?? undefined}
+                    imageUrl={product.imageUrl ?? undefined}
+                    href={`/product/${product.id}`}
+                  />
+                ))
+              : ELECTRONICS_PLACEHOLDERS.map((item) => (
+                  <HomePlaceholderCard
+                    key={item.label}
+                    label={item.label}
+                    abbr={item.abbr}
+                    href="/electronics"
+                  />
+                ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Home Essentials ── */}
+      <section className="py-16 md:py-24">
+        <div className="container mx-auto px-4 sm:px-6">
+          <div className="flex items-end justify-between mb-10 md:mb-12">
+            <div>
+              <p className="text-[10px] tracking-[0.3em] uppercase text-muted-foreground mb-1.5">Living</p>
+              <h2 className="font-serif text-3xl md:text-4xl font-light">Home Essentials</h2>
+            </div>
+            <Link
+              href="/home-essentials"
+              className="text-[10px] tracking-[0.2em] uppercase border-b border-foreground pb-0.5 hover:opacity-70 transition-opacity"
+            >
+              View All
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5">
+            {homeProducts && homeProducts.length > 0
+              ? homeProducts.slice(0, 4).map((product) => (
+                  <HomeProductCard
+                    key={product.id}
+                    title={product.title}
+                    price={product.price ?? undefined}
+                    imageUrl={product.imageUrl ?? undefined}
+                    href={`/product/${product.id}`}
+                  />
+                ))
+              : HOME_PLACEHOLDERS.map((item) => (
+                  <HomePlaceholderCard
+                    key={item.label}
+                    label={item.label}
+                    abbr={item.abbr}
+                    href="/home-essentials"
+                  />
+                ))}
           </div>
         </div>
       </section>
@@ -172,6 +221,82 @@ export default function Home() {
       </section>
 
     </div>
+  );
+}
+
+function HomeProductCard({
+  title,
+  price,
+  imageUrl,
+  href,
+}: {
+  title: string;
+  price?: string;
+  imageUrl?: string;
+  href: string;
+}) {
+  return (
+    <Link href={href} className="group block">
+      <div className="relative overflow-hidden aspect-[3/4] bg-[#ddd5c8] mb-3 md:mb-4">
+        {imageUrl ? (
+          <img
+            src={imageUrl}
+            alt={title}
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-12 h-12 border border-[#8b7355]/30 flex items-center justify-center">
+              <span className="text-[10px] tracking-widest text-[#8b7355]/60 uppercase">New</span>
+            </div>
+          </div>
+        )}
+        <div className="absolute bottom-0 left-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <span className="block w-full text-center bg-[#2a2318]/85 text-[#f0ebe3] text-[10px] tracking-[0.2em] uppercase py-2.5 backdrop-blur-sm">
+            View Product
+          </span>
+        </div>
+      </div>
+      <p className="text-sm font-medium leading-snug tracking-wide group-hover:underline decoration-1 underline-offset-4 transition-all line-clamp-2">
+        {title}
+      </p>
+      {price && (
+        <p className="text-[11px] text-muted-foreground mt-1 tracking-wide">{price}</p>
+      )}
+    </Link>
+  );
+}
+
+function HomePlaceholderCard({
+  label,
+  abbr,
+  href,
+}: {
+  label: string;
+  abbr: string;
+  href: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className="group block relative overflow-hidden aspect-[3/4] bg-[#ddd5c8]"
+    >
+      <div className="absolute inset-0 flex items-end justify-start p-5 md:p-6">
+        <div>
+          <p
+            className="font-serif font-light leading-none text-[#2a2318] opacity-[0.08] absolute top-4 right-4 select-none pointer-events-none"
+            style={{ fontSize: "clamp(3rem, 8vw, 5rem)" }}
+          >
+            {abbr}
+          </p>
+          <h3 className="font-serif text-xl md:text-2xl font-light text-[#2a2318]">{label}</h3>
+          <span className="block mt-2 text-[10px] tracking-[0.2em] uppercase text-[#6b5e4e] group-hover:underline underline-offset-4 transition-all">
+            Shop Now
+          </span>
+        </div>
+      </div>
+      <div className="absolute inset-0 bg-[#2a2318]/0 group-hover:bg-[#2a2318]/5 transition-colors duration-500" />
+    </Link>
   );
 }
 
