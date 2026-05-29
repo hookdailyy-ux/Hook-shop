@@ -6,6 +6,7 @@ import NotFound from "@/pages/not-found";
 import { AppLayout } from "@/components/AppLayout";
 import Home from "@/pages/Home";
 import ShopTheLook from "@/pages/ShopTheLook";
+import ShopTheSetup from "@/pages/ShopTheSetup";
 import CategoryPage from "@/pages/CategoryPage";
 import ProductDetail from "@/pages/ProductDetail";
 import AdminDashboard from "@/pages/AdminDashboard";
@@ -53,6 +54,7 @@ function Router() {
           <Switch>
             <Route path="/" component={Home} />
             <Route path="/shop-the-look" component={ShopTheLook} />
+            <Route path="/shop-the-setup" component={ShopTheSetup} />
             <Route path="/women" component={() => <CategoryPage category="women" />} />
             <Route path="/men" component={() => <CategoryPage category="men" />} />
             <Route path="/electronics" component={() => <CategoryPage category="electronics" />} />

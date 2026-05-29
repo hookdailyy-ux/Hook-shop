@@ -154,6 +154,31 @@ export interface LookUpdate {
   productIds?: number[];
 }
 
+export interface Setup {
+  id: number;
+  title: string;
+  /** @nullable */
+  description?: string | null;
+  /** @nullable */
+  imageUrl?: string | null;
+  products?: Product[];
+  createdAt: string;
+}
+
+export interface SetupInput {
+  title: string;
+  description?: string;
+  imageUrl?: string;
+  productIds?: number[];
+}
+
+export interface SetupUpdate {
+  title?: string;
+  description?: string;
+  imageUrl?: string;
+  productIds?: number[];
+}
+
 export interface NewsletterSubscriber {
   id: number;
   email: string;
@@ -193,6 +218,10 @@ limit?: number;
 };
 
 export type ListLooksParams = {
+limit?: number;
+};
+
+export type ListSetupsParams = {
 limit?: number;
 };
 

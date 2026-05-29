@@ -11,6 +11,7 @@ tags:
   - name: subcategories
   - name: products
   - name: looks
+  - name: setups
   - name: newsletter
   - name: admin
 paths:
@@ -306,6 +307,100 @@ paths:
         "204":
           description: Deleted
 
+  /setups:
+    get:
+      operationId: listSetups
+      tags: [setups]
+      summary: List curated setups
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of setups
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Setup"
+    post:
+      operationId: createSetup
+      tags: [setups]
+      summary: Create a setup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SetupInput"
+      responses:
+        "201":
+          description: Created setup
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Setup"
+
+  /setups/{id}:
+    get:
+      operationId: getSetup
+      tags: [setups]
+      summary: Get a setup
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Setup
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Setup"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateSetup
+      tags: [setups]
+      summary: Update a setup
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SetupUpdate"
+      responses:
+        "200":
+          description: Updated setup
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Setup"
+    delete:
+      operationId: deleteSetup
+      tags: [setups]
+      summary: Delete a setup
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
   /newsletter:
     post:
       operationId: subscribeNewsletter
@@ -542,6 +637,54 @@ components:
             type: integer
 
     LookUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        imageUrl:
+          type: string
+        productIds:
+          type: array
+          items:
+            type: integer
+
+    Setup:
+      type: object
+      required: [id, title, createdAt]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        imageUrl:
+          type: ["string", "null"]
+        products:
+          type: array
+          items:
+            $ref: "#/components/schemas/Product"
+        createdAt:
+          type: string
+
+    SetupInput:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        imageUrl:
+          type: string
+        productIds:
+          type: array
+          items:
+            type: integer
+
+    SetupUpdate:
       type: object
       properties:
         title:

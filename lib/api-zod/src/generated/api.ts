@@ -329,6 +329,135 @@ export const DeleteLookParams = zod.object({
 
 
 /**
+ * @summary List curated setups
+ */
+export const ListSetupsQueryParams = zod.object({
+  "limit": zod.coerce.number().optional()
+})
+
+export const ListSetupsResponseItem = zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "imageUrl": zod.string().nullish(),
+  "products": zod.array(zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "category": zod.enum(['women', 'men', 'electronics', 'home']),
+  "subcategory": zod.string().nullish(),
+  "price": zod.string().nullish(),
+  "originalPrice": zod.string().nullish(),
+  "imageUrl": zod.string().nullish(),
+  "images": zod.array(zod.string()).optional(),
+  "affiliateUrl": zod.string(),
+  "brand": zod.string().nullish(),
+  "colors": zod.array(zod.string()).optional(),
+  "sizes": zod.array(zod.string()).optional(),
+  "featured": zod.boolean().optional(),
+  "trending": zod.boolean().optional(),
+  "createdAt": zod.string()
+})).optional(),
+  "createdAt": zod.string()
+})
+export const ListSetupsResponse = zod.array(ListSetupsResponseItem)
+
+
+/**
+ * @summary Create a setup
+ */
+export const CreateSetupBody = zod.object({
+  "title": zod.string(),
+  "description": zod.string().optional(),
+  "imageUrl": zod.string().optional(),
+  "productIds": zod.array(zod.number()).optional()
+})
+
+
+/**
+ * @summary Get a setup
+ */
+export const GetSetupParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const GetSetupResponse = zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "imageUrl": zod.string().nullish(),
+  "products": zod.array(zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "category": zod.enum(['women', 'men', 'electronics', 'home']),
+  "subcategory": zod.string().nullish(),
+  "price": zod.string().nullish(),
+  "originalPrice": zod.string().nullish(),
+  "imageUrl": zod.string().nullish(),
+  "images": zod.array(zod.string()).optional(),
+  "affiliateUrl": zod.string(),
+  "brand": zod.string().nullish(),
+  "colors": zod.array(zod.string()).optional(),
+  "sizes": zod.array(zod.string()).optional(),
+  "featured": zod.boolean().optional(),
+  "trending": zod.boolean().optional(),
+  "createdAt": zod.string()
+})).optional(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Update a setup
+ */
+export const UpdateSetupParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UpdateSetupBody = zod.object({
+  "title": zod.string().optional(),
+  "description": zod.string().optional(),
+  "imageUrl": zod.string().optional(),
+  "productIds": zod.array(zod.number()).optional()
+})
+
+export const UpdateSetupResponse = zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "imageUrl": zod.string().nullish(),
+  "products": zod.array(zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "category": zod.enum(['women', 'men', 'electronics', 'home']),
+  "subcategory": zod.string().nullish(),
+  "price": zod.string().nullish(),
+  "originalPrice": zod.string().nullish(),
+  "imageUrl": zod.string().nullish(),
+  "images": zod.array(zod.string()).optional(),
+  "affiliateUrl": zod.string(),
+  "brand": zod.string().nullish(),
+  "colors": zod.array(zod.string()).optional(),
+  "sizes": zod.array(zod.string()).optional(),
+  "featured": zod.boolean().optional(),
+  "trending": zod.boolean().optional(),
+  "createdAt": zod.string()
+})).optional(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Delete a setup
+ */
+export const DeleteSetupParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+
+/**
  * @summary Subscribe to newsletter
  */
 export const SubscribeNewsletterBody = zod.object({
