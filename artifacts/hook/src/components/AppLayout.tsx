@@ -183,7 +183,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
       {/* ── Footer ── */}
       <footer className="border-t border-border mt-20">
-        <div className="container mx-auto px-4 sm:px-6 py-14 grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-16">
+        <div className="container mx-auto px-4 sm:px-6 py-14 grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 max-w-2xl">
           <div>
             <Link href="/" className="font-serif text-2xl tracking-widest font-semibold inline-block mb-4">
               HOOK
@@ -191,17 +191,6 @@ export function AppLayout({ children }: { children: ReactNode }) {
             <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
               Curated essentials for the modern lifestyle. Quality over algorithmic noise.
             </p>
-          </div>
-
-          <div>
-            <h4 className="text-[10px] font-semibold tracking-widest uppercase mb-5">Collections</h4>
-            <ul className="space-y-3 text-sm text-muted-foreground">
-              <li><Link href="/women" className="hover:text-foreground transition-colors">Women</Link></li>
-              <li><Link href="/men" className="hover:text-foreground transition-colors">Men</Link></li>
-              <li><Link href="/electronics" className="hover:text-foreground transition-colors">Electronics</Link></li>
-              <li><Link href="/home-essentials" className="hover:text-foreground transition-colors">Home Essentials</Link></li>
-              <li><Link href="/shop-the-look" className="hover:text-foreground transition-colors">Shop The Look</Link></li>
-            </ul>
           </div>
 
           <div>

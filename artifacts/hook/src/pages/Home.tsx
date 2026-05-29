@@ -12,16 +12,18 @@ const BENEFITS = [
 
 const ELECTRONICS_PLACEHOLDERS = [
   { label: "Headphones", abbr: "HP" },
-  { label: "Smart Watch", abbr: "SW" },
-  { label: "Speakers", abbr: "SP" },
-  { label: "Accessories", abbr: "AC" },
+  { label: "Smartwatches", abbr: "SW" },
+  { label: "Phone Accessories", abbr: "PA" },
+  { label: "Desk Setup", abbr: "DS" },
 ];
 
 const HOME_PLACEHOLDERS = [
-  { label: "Candles", abbr: "CA" },
-  { label: "Throws", abbr: "TH" },
-  { label: "Ceramics", abbr: "CE" },
-  { label: "Lighting", abbr: "LT" },
+  { label: "Decor", abbr: "DC" },
+  { label: "Furniture", abbr: "FN" },
+  { label: "Kitchen", abbr: "KT" },
+  { label: "Bedroom", abbr: "BD" },
+  { label: "Organization", abbr: "OR" },
+  { label: "Home Tools", abbr: "HT" },
 ];
 
 export default function Home() {
