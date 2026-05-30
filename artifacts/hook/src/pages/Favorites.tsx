@@ -4,7 +4,7 @@ import { useFavorites, type FavoriteProduct, type FavoriteLook } from "@/context
 import { HeartButton } from "@/components/HeartButton";
 
 function FavoriteProductCard({ item }: { item: FavoriteProduct }) {
-  const deliveryLabel = item.category === "electronics" ? "Delivered by Amazon" : "Delivered by SHEIN";
+  const deliveryLabel = item.source === "Amazon" || item.category === "electronics" ? "Delivered by Amazon" : "Delivered by SHEIN";
   return (
     <div className="flex flex-col group">
       <div className="relative overflow-hidden aspect-[3/4] bg-[#ddd5c8] mb-3">

@@ -14,4 +14,5 @@ export const ProductUpdateCategory = {
   men: 'men',
   electronics: 'electronics',
   home: 'home',
+  accessories: 'accessories',
 } as const;

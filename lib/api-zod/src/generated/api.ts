@@ -82,7 +82,8 @@ export const ListProductsResponseItem = zod.object({
   "id": zod.number(),
   "title": zod.string(),
   "description": zod.string().nullish(),
-  "category": zod.enum(['women', 'men', 'electronics', 'home']),
+  "source": zod.enum(['SHEIN', 'Amazon']),
+  "category": zod.enum(['women', 'men', 'electronics', 'home', 'accessories']),
   "subcategory": zod.string().nullish(),
   "price": zod.string().nullish(),
   "originalPrice": zod.string().nullish(),
@@ -90,10 +91,12 @@ export const ListProductsResponseItem = zod.object({
   "images": zod.array(zod.string()).optional(),
   "affiliateUrl": zod.string(),
   "brand": zod.string().nullish(),
+  "externalId": zod.string().nullish(),
   "colors": zod.array(zod.string()).optional(),
   "sizes": zod.array(zod.string()).optional(),
   "featured": zod.boolean().optional(),
   "trending": zod.boolean().optional(),
+  "status": zod.enum(['active', 'hidden']),
   "createdAt": zod.string()
 })
 export const ListProductsResponse = zod.array(ListProductsResponseItem)
@@ -105,7 +108,8 @@ export const ListProductsResponse = zod.array(ListProductsResponseItem)
 export const CreateProductBody = zod.object({
   "title": zod.string(),
   "description": zod.string().optional(),
-  "category": zod.enum(['women', 'men', 'electronics', 'home']),
+  "source": zod.enum(['SHEIN', 'Amazon']),
+  "category": zod.enum(['women', 'men', 'electronics', 'home', 'accessories']),
   "subcategory": zod.string().optional(),
   "price": zod.string().optional(),
   "originalPrice": zod.string().optional(),
@@ -113,10 +117,12 @@ export const CreateProductBody = zod.object({
   "images": zod.array(zod.string()).optional(),
   "affiliateUrl": zod.string(),
   "brand": zod.string().optional(),
+  "externalId": zod.string().optional(),
   "colors": zod.array(zod.string()).optional(),
   "sizes": zod.array(zod.string()).optional(),
   "featured": zod.boolean().optional(),
-  "trending": zod.boolean().optional()
+  "trending": zod.boolean().optional(),
+  "status": zod.enum(['active', 'hidden']).optional()
 })
 
 
@@ -131,7 +137,8 @@ export const GetProductResponse = zod.object({
   "id": zod.number(),
   "title": zod.string(),
   "description": zod.string().nullish(),
-  "category": zod.enum(['women', 'men', 'electronics', 'home']),
+  "source": zod.enum(['SHEIN', 'Amazon']),
+  "category": zod.enum(['women', 'men', 'electronics', 'home', 'accessories']),
   "subcategory": zod.string().nullish(),
   "price": zod.string().nullish(),
   "originalPrice": zod.string().nullish(),
@@ -139,10 +146,12 @@ export const GetProductResponse = zod.object({
   "images": zod.array(zod.string()).optional(),
   "affiliateUrl": zod.string(),
   "brand": zod.string().nullish(),
+  "externalId": zod.string().nullish(),
   "colors": zod.array(zod.string()).optional(),
   "sizes": zod.array(zod.string()).optional(),
   "featured": zod.boolean().optional(),
   "trending": zod.boolean().optional(),
+  "status": zod.enum(['active', 'hidden']),
   "createdAt": zod.string()
 })
 
@@ -157,7 +166,8 @@ export const UpdateProductParams = zod.object({
 export const UpdateProductBody = zod.object({
   "title": zod.string().optional(),
   "description": zod.string().optional(),
-  "category": zod.enum(['women', 'men', 'electronics', 'home']).optional(),
+  "source": zod.enum(['SHEIN', 'Amazon']).optional(),
+  "category": zod.enum(['women', 'men', 'electronics', 'home', 'accessories']).optional(),
   "subcategory": zod.string().optional(),
   "price": zod.string().optional(),
   "originalPrice": zod.string().optional(),
@@ -165,17 +175,20 @@ export const UpdateProductBody = zod.object({
   "images": zod.array(zod.string()).optional(),
   "affiliateUrl": zod.string().optional(),
   "brand": zod.string().optional(),
+  "externalId": zod.string().optional(),
   "colors": zod.array(zod.string()).optional(),
   "sizes": zod.array(zod.string()).optional(),
   "featured": zod.boolean().optional(),
-  "trending": zod.boolean().optional()
+  "trending": zod.boolean().optional(),
+  "status": zod.enum(['active', 'hidden']).optional()
 })
 
 export const UpdateProductResponse = zod.object({
   "id": zod.number(),
   "title": zod.string(),
   "description": zod.string().nullish(),
-  "category": zod.enum(['women', 'men', 'electronics', 'home']),
+  "source": zod.enum(['SHEIN', 'Amazon']),
+  "category": zod.enum(['women', 'men', 'electronics', 'home', 'accessories']),
   "subcategory": zod.string().nullish(),
   "price": zod.string().nullish(),
   "originalPrice": zod.string().nullish(),
@@ -183,10 +196,12 @@ export const UpdateProductResponse = zod.object({
   "images": zod.array(zod.string()).optional(),
   "affiliateUrl": zod.string(),
   "brand": zod.string().nullish(),
+  "externalId": zod.string().nullish(),
   "colors": zod.array(zod.string()).optional(),
   "sizes": zod.array(zod.string()).optional(),
   "featured": zod.boolean().optional(),
   "trending": zod.boolean().optional(),
+  "status": zod.enum(['active', 'hidden']),
   "createdAt": zod.string()
 })
 
@@ -215,7 +230,8 @@ export const ListLooksResponseItem = zod.object({
   "id": zod.number(),
   "title": zod.string(),
   "description": zod.string().nullish(),
-  "category": zod.enum(['women', 'men', 'electronics', 'home']),
+  "source": zod.enum(['SHEIN', 'Amazon']),
+  "category": zod.enum(['women', 'men', 'electronics', 'home', 'accessories']),
   "subcategory": zod.string().nullish(),
   "price": zod.string().nullish(),
   "originalPrice": zod.string().nullish(),
@@ -223,10 +239,12 @@ export const ListLooksResponseItem = zod.object({
   "images": zod.array(zod.string()).optional(),
   "affiliateUrl": zod.string(),
   "brand": zod.string().nullish(),
+  "externalId": zod.string().nullish(),
   "colors": zod.array(zod.string()).optional(),
   "sizes": zod.array(zod.string()).optional(),
   "featured": zod.boolean().optional(),
   "trending": zod.boolean().optional(),
+  "status": zod.enum(['active', 'hidden']),
   "createdAt": zod.string()
 })).optional(),
   "createdAt": zod.string()
@@ -261,7 +279,8 @@ export const GetLookResponse = zod.object({
   "id": zod.number(),
   "title": zod.string(),
   "description": zod.string().nullish(),
-  "category": zod.enum(['women', 'men', 'electronics', 'home']),
+  "source": zod.enum(['SHEIN', 'Amazon']),
+  "category": zod.enum(['women', 'men', 'electronics', 'home', 'accessories']),
   "subcategory": zod.string().nullish(),
   "price": zod.string().nullish(),
   "originalPrice": zod.string().nullish(),
@@ -269,10 +288,12 @@ export const GetLookResponse = zod.object({
   "images": zod.array(zod.string()).optional(),
   "affiliateUrl": zod.string(),
   "brand": zod.string().nullish(),
+  "externalId": zod.string().nullish(),
   "colors": zod.array(zod.string()).optional(),
   "sizes": zod.array(zod.string()).optional(),
   "featured": zod.boolean().optional(),
   "trending": zod.boolean().optional(),
+  "status": zod.enum(['active', 'hidden']),
   "createdAt": zod.string()
 })).optional(),
   "createdAt": zod.string()
@@ -302,7 +323,8 @@ export const UpdateLookResponse = zod.object({
   "id": zod.number(),
   "title": zod.string(),
   "description": zod.string().nullish(),
-  "category": zod.enum(['women', 'men', 'electronics', 'home']),
+  "source": zod.enum(['SHEIN', 'Amazon']),
+  "category": zod.enum(['women', 'men', 'electronics', 'home', 'accessories']),
   "subcategory": zod.string().nullish(),
   "price": zod.string().nullish(),
   "originalPrice": zod.string().nullish(),
@@ -310,10 +332,12 @@ export const UpdateLookResponse = zod.object({
   "images": zod.array(zod.string()).optional(),
   "affiliateUrl": zod.string(),
   "brand": zod.string().nullish(),
+  "externalId": zod.string().nullish(),
   "colors": zod.array(zod.string()).optional(),
   "sizes": zod.array(zod.string()).optional(),
   "featured": zod.boolean().optional(),
   "trending": zod.boolean().optional(),
+  "status": zod.enum(['active', 'hidden']),
   "createdAt": zod.string()
 })).optional(),
   "createdAt": zod.string()
@@ -344,7 +368,8 @@ export const ListSetupsResponseItem = zod.object({
   "id": zod.number(),
   "title": zod.string(),
   "description": zod.string().nullish(),
-  "category": zod.enum(['women', 'men', 'electronics', 'home']),
+  "source": zod.enum(['SHEIN', 'Amazon']),
+  "category": zod.enum(['women', 'men', 'electronics', 'home', 'accessories']),
   "subcategory": zod.string().nullish(),
   "price": zod.string().nullish(),
   "originalPrice": zod.string().nullish(),
@@ -352,10 +377,12 @@ export const ListSetupsResponseItem = zod.object({
   "images": zod.array(zod.string()).optional(),
   "affiliateUrl": zod.string(),
   "brand": zod.string().nullish(),
+  "externalId": zod.string().nullish(),
   "colors": zod.array(zod.string()).optional(),
   "sizes": zod.array(zod.string()).optional(),
   "featured": zod.boolean().optional(),
   "trending": zod.boolean().optional(),
+  "status": zod.enum(['active', 'hidden']),
   "createdAt": zod.string()
 })).optional(),
   "createdAt": zod.string()
@@ -390,7 +417,8 @@ export const GetSetupResponse = zod.object({
   "id": zod.number(),
   "title": zod.string(),
   "description": zod.string().nullish(),
-  "category": zod.enum(['women', 'men', 'electronics', 'home']),
+  "source": zod.enum(['SHEIN', 'Amazon']),
+  "category": zod.enum(['women', 'men', 'electronics', 'home', 'accessories']),
   "subcategory": zod.string().nullish(),
   "price": zod.string().nullish(),
   "originalPrice": zod.string().nullish(),
@@ -398,10 +426,12 @@ export const GetSetupResponse = zod.object({
   "images": zod.array(zod.string()).optional(),
   "affiliateUrl": zod.string(),
   "brand": zod.string().nullish(),
+  "externalId": zod.string().nullish(),
   "colors": zod.array(zod.string()).optional(),
   "sizes": zod.array(zod.string()).optional(),
   "featured": zod.boolean().optional(),
   "trending": zod.boolean().optional(),
+  "status": zod.enum(['active', 'hidden']),
   "createdAt": zod.string()
 })).optional(),
   "createdAt": zod.string()
@@ -431,7 +461,8 @@ export const UpdateSetupResponse = zod.object({
   "id": zod.number(),
   "title": zod.string(),
   "description": zod.string().nullish(),
-  "category": zod.enum(['women', 'men', 'electronics', 'home']),
+  "source": zod.enum(['SHEIN', 'Amazon']),
+  "category": zod.enum(['women', 'men', 'electronics', 'home', 'accessories']),
   "subcategory": zod.string().nullish(),
   "price": zod.string().nullish(),
   "originalPrice": zod.string().nullish(),
@@ -439,10 +470,12 @@ export const UpdateSetupResponse = zod.object({
   "images": zod.array(zod.string()).optional(),
   "affiliateUrl": zod.string(),
   "brand": zod.string().nullish(),
+  "externalId": zod.string().nullish(),
   "colors": zod.array(zod.string()).optional(),
   "sizes": zod.array(zod.string()).optional(),
   "featured": zod.boolean().optional(),
   "trending": zod.boolean().optional(),
+  "status": zod.enum(['active', 'hidden']),
   "createdAt": zod.string()
 })).optional(),
   "createdAt": zod.string()
@@ -490,7 +523,8 @@ export const ListAdminProductsResponseItem = zod.object({
   "id": zod.number(),
   "title": zod.string(),
   "description": zod.string().nullish(),
-  "category": zod.enum(['women', 'men', 'electronics', 'home']),
+  "source": zod.enum(['SHEIN', 'Amazon']),
+  "category": zod.enum(['women', 'men', 'electronics', 'home', 'accessories']),
   "subcategory": zod.string().nullish(),
   "price": zod.string().nullish(),
   "originalPrice": zod.string().nullish(),
@@ -498,10 +532,12 @@ export const ListAdminProductsResponseItem = zod.object({
   "images": zod.array(zod.string()).optional(),
   "affiliateUrl": zod.string(),
   "brand": zod.string().nullish(),
+  "externalId": zod.string().nullish(),
   "colors": zod.array(zod.string()).optional(),
   "sizes": zod.array(zod.string()).optional(),
   "featured": zod.boolean().optional(),
   "trending": zod.boolean().optional(),
+  "status": zod.enum(['active', 'hidden']),
   "createdAt": zod.string()
 })
 export const ListAdminProductsResponse = zod.array(ListAdminProductsResponseItem)

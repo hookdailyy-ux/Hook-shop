@@ -40,6 +40,14 @@ export interface SubcategoryInput {
   name: string;
 }
 
+export type ProductSource = typeof ProductSource[keyof typeof ProductSource];
+
+
+export const ProductSource = {
+  SHEIN: 'SHEIN',
+  Amazon: 'Amazon',
+} as const;
+
 export type ProductCategory = typeof ProductCategory[keyof typeof ProductCategory];
 
 
@@ -48,6 +56,15 @@ export const ProductCategory = {
   men: 'men',
   electronics: 'electronics',
   home: 'home',
+  accessories: 'accessories',
+} as const;
+
+export type ProductStatus = typeof ProductStatus[keyof typeof ProductStatus];
+
+
+export const ProductStatus = {
+  active: 'active',
+  hidden: 'hidden',
 } as const;
 
 export interface Product {
@@ -55,6 +72,7 @@ export interface Product {
   title: string;
   /** @nullable */
   description?: string | null;
+  source: ProductSource;
   category: ProductCategory;
   /** @nullable */
   subcategory?: string | null;
@@ -68,12 +86,23 @@ export interface Product {
   affiliateUrl: string;
   /** @nullable */
   brand?: string | null;
+  /** @nullable */
+  externalId?: string | null;
   colors?: string[];
   sizes?: string[];
   featured?: boolean;
   trending?: boolean;
+  status: ProductStatus;
   createdAt: string;
 }
+
+export type ProductInputSource = typeof ProductInputSource[keyof typeof ProductInputSource];
+
+
+export const ProductInputSource = {
+  SHEIN: 'SHEIN',
+  Amazon: 'Amazon',
+} as const;
 
 export type ProductInputCategory = typeof ProductInputCategory[keyof typeof ProductInputCategory];
 
@@ -83,11 +112,21 @@ export const ProductInputCategory = {
   men: 'men',
   electronics: 'electronics',
   home: 'home',
+  accessories: 'accessories',
+} as const;
+
+export type ProductInputStatus = typeof ProductInputStatus[keyof typeof ProductInputStatus];
+
+
+export const ProductInputStatus = {
+  active: 'active',
+  hidden: 'hidden',
 } as const;
 
 export interface ProductInput {
   title: string;
   description?: string;
+  source: ProductInputSource;
   category: ProductInputCategory;
   subcategory?: string;
   price?: string;
@@ -96,11 +135,21 @@ export interface ProductInput {
   images?: string[];
   affiliateUrl: string;
   brand?: string;
+  externalId?: string;
   colors?: string[];
   sizes?: string[];
   featured?: boolean;
   trending?: boolean;
+  status?: ProductInputStatus;
 }
+
+export type ProductUpdateSource = typeof ProductUpdateSource[keyof typeof ProductUpdateSource];
+
+
+export const ProductUpdateSource = {
+  SHEIN: 'SHEIN',
+  Amazon: 'Amazon',
+} as const;
 
 export type ProductUpdateCategory = typeof ProductUpdateCategory[keyof typeof ProductUpdateCategory];
 
@@ -110,11 +159,21 @@ export const ProductUpdateCategory = {
   men: 'men',
   electronics: 'electronics',
   home: 'home',
+  accessories: 'accessories',
+} as const;
+
+export type ProductUpdateStatus = typeof ProductUpdateStatus[keyof typeof ProductUpdateStatus];
+
+
+export const ProductUpdateStatus = {
+  active: 'active',
+  hidden: 'hidden',
 } as const;
 
 export interface ProductUpdate {
   title?: string;
   description?: string;
+  source?: ProductUpdateSource;
   category?: ProductUpdateCategory;
   subcategory?: string;
   price?: string;
@@ -123,10 +182,12 @@ export interface ProductUpdate {
   images?: string[];
   affiliateUrl?: string;
   brand?: string;
+  externalId?: string;
   colors?: string[];
   sizes?: string[];
   featured?: boolean;
   trending?: boolean;
+  status?: ProductUpdateStatus;
 }
 
 export interface Look {

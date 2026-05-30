@@ -36,7 +36,8 @@ function getColorHex(name: string): string {
   return COLOR_MAP[name.toLowerCase()] ?? "#d4b896";
 }
 
-function getDeliveryLabel(category: string): string {
+function getDeliveryLabel(source?: string | null, category?: string): string {
+  if (source === "Amazon") return "Delivered by Amazon";
   if (category === "electronics") return "Delivered by Amazon";
   return "Delivered by SHEIN";
 }
@@ -99,7 +100,7 @@ export default function ProductDetail() {
       ? "Electronics"
       : product.category.charAt(0).toUpperCase() + product.category.slice(1);
 
-  const deliveryLabel = getDeliveryLabel(product.category);
+  const deliveryLabel = getDeliveryLabel(product.source, product.category);
 
   return (
     <div className="pb-32">

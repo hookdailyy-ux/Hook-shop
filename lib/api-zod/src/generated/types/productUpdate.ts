@@ -6,10 +6,13 @@
  * OpenAPI spec version: 0.2.0
  */
 import type { ProductUpdateCategory } from './productUpdateCategory';
+import type { ProductUpdateSource } from './productUpdateSource';
+import type { ProductUpdateStatus } from './productUpdateStatus';
 
 export interface ProductUpdate {
   title?: string;
   description?: string;
+  source?: ProductUpdateSource;
   category?: ProductUpdateCategory;
   subcategory?: string;
   price?: string;
@@ -18,8 +21,10 @@ export interface ProductUpdate {
   images?: string[];
   affiliateUrl?: string;
   brand?: string;
+  externalId?: string;
   colors?: string[];
   sizes?: string[];
   featured?: boolean;
   trending?: boolean;
+  status?: ProductUpdateStatus;
 }

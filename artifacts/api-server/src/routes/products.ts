@@ -1,9 +1,14 @@
 import { Router, type IRouter } from "express";
 import { db, productsTable } from "@workspace/db";
-import { eq, and } from "drizzle-orm";
+import { eq, and, ne } from "drizzle-orm";
 import { z } from "zod";
 
 const router: IRouter = Router();
+
+const categoryEnum = ["women", "men", "electronics", "home", "accessories"] as const;
+const sourceEnum = ["SHEIN", "Amazon"] as const;
+const statusEnum = ["active", "hidden"] as const;
+
 function serializeProduct(p: typeof productsTable.$inferSelect) {
   return {
     ...p,
@@ -17,16 +22,15 @@ function serializeProduct(p: typeof productsTable.$inferSelect) {
 router.get("/products", async (req, res) => {
   try {
     const { category, subcategory, featured, trending, limit } = req.query;
-    const conditions = [];
+    const conditions: ReturnType<typeof eq>[] = [];
+    // Always exclude hidden products on the public endpoint
+    conditions.push(ne(productsTable.status, "hidden"));
     if (category && typeof category === "string") conditions.push(eq(productsTable.category, category));
     if (subcategory && typeof subcategory === "string") conditions.push(eq(productsTable.subcategory, subcategory));
     if (featured === "true") conditions.push(eq(productsTable.featured, true));
     if (trending === "true") conditions.push(eq(productsTable.trending, true));
 
-    let results = conditions.length > 0
-      ? await db.select().from(productsTable).where(and(...conditions))
-      : await db.select().from(productsTable);
-
+    let results = await db.select().from(productsTable).where(and(...conditions));
     if (limit) results = results.slice(0, parseInt(limit as string));
     res.json(results.map(serializeProduct));
   } catch (err) {
@@ -40,6 +44,7 @@ router.post("/products", async (req, res) => {
     const schema = z.object({
       title: z.string().min(1),
       description: z.string().optional(),
+      source: z.enum(sourceEnum).default("SHEIN"),
       category: z.enum(categoryEnum),
       subcategory: z.string().optional(),
       price: z.string().optional(),
@@ -49,15 +54,18 @@ router.post("/products", async (req, res) => {
       affiliateUrl: z.string().min(1),
       brand: z.string().optional(),
       material: z.string().optional(),
+      externalId: z.string().optional(),
       colors: z.array(z.string()).optional(),
       sizes: z.array(z.string()).optional(),
       featured: z.boolean().optional(),
       trending: z.boolean().optional(),
+      status: z.enum(statusEnum).default("active"),
     });
     const data = schema.parse(req.body);
     const [product] = await db.insert(productsTable).values({
       title: data.title,
       description: data.description ?? null,
+      source: data.source,
       category: data.category,
       subcategory: data.subcategory ?? null,
       price: data.price ?? null,
@@ -67,10 +75,12 @@ router.post("/products", async (req, res) => {
       affiliateUrl: data.affiliateUrl,
       brand: data.brand ?? null,
       material: data.material ?? null,
+      externalId: data.externalId ?? null,
       colors: data.colors ?? [],
       sizes: data.sizes ?? [],
       featured: data.featured ?? false,
       trending: data.trending ?? false,
+      status: data.status,
     }).returning();
     res.status(201).json(serializeProduct(product));
   } catch (err) {
@@ -97,6 +107,7 @@ router.patch("/products/:id", async (req, res) => {
     const schema = z.object({
       title: z.string().optional(),
       description: z.string().optional(),
+      source: z.enum(sourceEnum).optional(),
       category: z.enum(categoryEnum).optional(),
       subcategory: z.string().optional(),
       price: z.string().optional(),
@@ -106,10 +117,12 @@ router.patch("/products/:id", async (req, res) => {
       affiliateUrl: z.string().optional(),
       brand: z.string().optional(),
       material: z.string().optional(),
+      externalId: z.string().optional(),
       colors: z.array(z.string()).optional(),
       sizes: z.array(z.string()).optional(),
       featured: z.boolean().optional(),
       trending: z.boolean().optional(),
+      status: z.enum(statusEnum).optional(),
     });
     const data = schema.parse(req.body);
     const [product] = await db.update(productsTable).set(data).where(eq(productsTable.id, id)).returning();

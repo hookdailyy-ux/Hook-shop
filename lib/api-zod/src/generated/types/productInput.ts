@@ -6,10 +6,13 @@
  * OpenAPI spec version: 0.2.0
  */
 import type { ProductInputCategory } from './productInputCategory';
+import type { ProductInputSource } from './productInputSource';
+import type { ProductInputStatus } from './productInputStatus';
 
 export interface ProductInput {
   title: string;
   description?: string;
+  source: ProductInputSource;
   category: ProductInputCategory;
   subcategory?: string;
   price?: string;
@@ -18,8 +21,10 @@ export interface ProductInput {
   images?: string[];
   affiliateUrl: string;
   brand?: string;
+  externalId?: string;
   colors?: string[];
   sizes?: string[];
   featured?: boolean;
   trending?: boolean;
+  status?: ProductInputStatus;
 }

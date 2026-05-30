@@ -51,6 +51,7 @@ const CATEGORIES = [
   { value: "men", label: "Men" },
   { value: "electronics", label: "Electronics" },
   { value: "home", label: "Home Essentials" },
+  { value: "accessories", label: "Accessories" },
 ];
 
 export default function AdminDashboard() {
@@ -314,19 +315,149 @@ function TagInput({
   );
 }
 
+const PRESET_COLORS = [
+  { name: "Black",  hex: "#1a1a1a" },
+  { name: "White",  hex: "#f5f5f0" },
+  { name: "Beige",  hex: "#d4b896" },
+  { name: "Brown",  hex: "#8b5e3c" },
+  { name: "Grey",   hex: "#888888" },
+  { name: "Green",  hex: "#4a7c59" },
+  { name: "Blue",   hex: "#3a6a9a" },
+  { name: "Navy",   hex: "#1b2a4a" },
+  { name: "Pink",   hex: "#e8a0a0" },
+  { name: "Purple", hex: "#7a5a9a" },
+  { name: "Red",    hex: "#cc4a4a" },
+  { name: "Yellow", hex: "#d4c44a" },
+  { name: "Orange", hex: "#d47a3a" },
+  { name: "Gold",   hex: "#c9a84c" },
+  { name: "Silver", hex: "#c0c0c0" },
+] as const;
+
+function ColorSwatchPicker({ values, onChange }: { values: string[]; onChange: (v: string[]) => void }) {
+  const toggle = (name: string) =>
+    onChange(values.includes(name) ? values.filter((c) => c !== name) : [...values, name]);
+
+  return (
+    <div className="space-y-3">
+      <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Colors</label>
+      <div className="flex flex-wrap gap-3 pt-0.5">
+        {PRESET_COLORS.map(({ name, hex }) => {
+          const selected = values.includes(name);
+          const isLight = name === "White" || name === "Silver" || name === "Yellow" || name === "Gold";
+          return (
+            <button
+              key={name}
+              type="button"
+              onClick={() => toggle(name)}
+              title={name}
+              style={{ backgroundColor: hex }}
+              className={`w-8 h-8 rounded-full flex items-center justify-center transition-all shrink-0 ${
+                isLight ? "border border-border/60" : ""
+              } ${selected ? "ring-2 ring-offset-2 ring-foreground" : "hover:ring-1 hover:ring-offset-1 hover:ring-foreground/40"}`}
+            >
+              {selected && (
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <path d="M2 6l3 3 5-5" stroke={isLight ? "#2a2318" : "#fff"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              )}
+            </button>
+          );
+        })}
+      </div>
+      {values.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {values.map((name) => {
+            const color = PRESET_COLORS.find((c) => c.name === name);
+            return (
+              <span key={name} className="flex items-center gap-1.5 bg-accent text-xs px-2 py-1">
+                {color && <span className="w-2.5 h-2.5 rounded-full border border-border/30 shrink-0" style={{ backgroundColor: color.hex }} />}
+                {name}
+                <button type="button" onClick={() => toggle(name)}><X className="h-3 w-3" /></button>
+              </span>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+const PRESET_SIZES = ["XS", "S", "M", "L", "XL", "XXL", "One Size"] as const;
+
+function SizePicker({ values, onChange }: { values: string[]; onChange: (v: string[]) => void }) {
+  const [customInput, setCustomInput] = useState("");
+
+  const togglePreset = (size: string) =>
+    onChange(values.includes(size) ? values.filter((s) => s !== size) : [...values, size]);
+
+  const addCustom = () => {
+    const trimmed = customInput.trim();
+    if (trimmed && !values.includes(trimmed)) onChange([...values, trimmed]);
+    setCustomInput("");
+  };
+
+  const customValues = values.filter((v) => !(PRESET_SIZES as readonly string[]).includes(v));
+
+  return (
+    <div className="space-y-3">
+      <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Sizes</label>
+      <div className="flex flex-wrap gap-2">
+        {PRESET_SIZES.map((size) => (
+          <button
+            key={size}
+            type="button"
+            onClick={() => togglePreset(size)}
+            className={`px-3 py-1.5 text-[11px] tracking-widest uppercase border transition-colors ${
+              values.includes(size)
+                ? "bg-foreground text-background border-foreground"
+                : "bg-transparent text-foreground border-border hover:border-foreground/50"
+            }`}
+          >
+            {size}
+          </button>
+        ))}
+      </div>
+      <div className="flex gap-2">
+        <input
+          type="text"
+          value={customInput}
+          onChange={(e) => setCustomInput(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === ",") { e.preventDefault(); addCustom(); }}}
+          placeholder="Custom size (e.g. 38, 40) — press Enter"
+          className="flex-1 border border-border px-3 py-2 text-sm outline-none bg-transparent focus:ring-1 focus:ring-foreground"
+        />
+        <Button type="button" variant="outline" onClick={addCustom} className="shrink-0 text-xs">Add</Button>
+      </div>
+      {customValues.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {customValues.map((v) => (
+            <span key={v} className="flex items-center gap-1 bg-accent text-xs px-2 py-1">
+              {v}
+              <button type="button" onClick={() => onChange(values.filter((x) => x !== v))}><X className="h-3 w-3" /></button>
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 type ProductFormData = {
   title: string;
   brand: string;
   description: string;
+  source: string;
   category: string;
   subcategory: string;
   price: string;
   originalPrice: string;
   affiliateUrl: string;
+  externalId: string;
   imageUrl: string;
   images: string[];
   colors: string[];
   sizes: string[];
+  status: string;
   featured: boolean;
   trending: boolean;
 };
@@ -342,15 +473,18 @@ function ProductDialog({ product }: { product?: Product }) {
     title: product?.title ?? "",
     brand: product?.brand ?? "",
     description: product?.description ?? "",
+    source: (product as any)?.source ?? "SHEIN",
     category: product?.category ?? "women",
     subcategory: product?.subcategory ?? "",
     price: product?.price ?? "",
     originalPrice: product?.originalPrice ?? "",
     affiliateUrl: product?.affiliateUrl ?? "",
+    externalId: (product as any)?.externalId ?? "",
     imageUrl: product?.imageUrl ?? "",
     images: Array.isArray(product?.images) ? (product.images as string[]) : [],
     colors: Array.isArray(product?.colors) ? (product.colors as string[]) : [],
     sizes: Array.isArray(product?.sizes) ? (product.sizes as string[]) : [],
+    status: (product as any)?.status ?? "active",
     featured: product?.featured ?? false,
     trending: product?.trending ?? false,
   });
@@ -382,12 +516,15 @@ function ProductDialog({ product }: { product?: Product }) {
     e.preventDefault();
     const payload = {
       ...form,
+      source: form.source as "SHEIN" | "Amazon",
+      status: form.status as "active" | "hidden",
       subcategory: form.subcategory || undefined,
       brand: form.brand || undefined,
       description: form.description || undefined,
       price: form.price || undefined,
       originalPrice: form.originalPrice || undefined,
       imageUrl: form.imageUrl || undefined,
+      externalId: form.externalId || undefined,
     };
     if (product) {
       updateMutation.mutate(
@@ -446,10 +583,12 @@ function ProductDialog({ product }: { product?: Product }) {
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-5 mt-4">
+
+          {/* Title + Brand */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2 col-span-2 md:col-span-1">
               <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Title *</label>
-              <Input required value={form.title} onChange={(e) => set("title")(e.target.value)} className="border-border" />
+              <Input required value={form.title} onChange={(e) => set("title")(e.target.value)} className="border-border" data-testid="input-product-title" />
             </div>
             <div className="space-y-2 col-span-2 md:col-span-1">
               <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Brand</label>
@@ -457,6 +596,35 @@ function ProductDialog({ product }: { product?: Product }) {
             </div>
           </div>
 
+          {/* Source + Status */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Product Source *</label>
+              <Select value={form.source} onValueChange={set("source")}>
+                <SelectTrigger className="border-border" data-testid="select-product-source">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="SHEIN">SHEIN</SelectItem>
+                  <SelectItem value="Amazon">Amazon</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Status</label>
+              <Select value={form.status} onValueChange={set("status")}>
+                <SelectTrigger className="border-border" data-testid="select-product-status">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="hidden">Hidden</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Category + Subcategory */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Category *</label>
@@ -487,6 +655,7 @@ function ProductDialog({ product }: { product?: Product }) {
             </div>
           </div>
 
+          {/* Price */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Price</label>
@@ -498,24 +667,53 @@ function ProductDialog({ product }: { product?: Product }) {
             </div>
           </div>
 
+          {/* Product Link */}
           <div className="space-y-2">
-            <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Amazon Affiliate Link *</label>
-            <Input required value={form.affiliateUrl} onChange={(e) => set("affiliateUrl")(e.target.value)} placeholder="https://amzn.to/..." className="border-border" />
+            <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Product Link *</label>
+            <Input
+              required
+              value={form.affiliateUrl}
+              onChange={(e) => set("affiliateUrl")(e.target.value)}
+              placeholder={form.source === "Amazon" ? "https://amzn.to/..." : "https://shein.com/..."}
+              className="border-border"
+              data-testid="input-affiliate-url"
+            />
           </div>
 
+          {/* External Product ID */}
+          <div className="space-y-2">
+            <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+              {form.source === "Amazon" ? "Amazon ASIN" : "SHEIN SKU"}{" "}
+              <span className="normal-case tracking-normal font-normal opacity-60">(optional)</span>
+            </label>
+            <Input
+              value={form.externalId}
+              onChange={(e) => set("externalId")(e.target.value)}
+              placeholder={form.source === "Amazon" ? "e.g. B08N5WRWNW" : "e.g. sw2205185848"}
+              className="border-border"
+              data-testid="input-external-id"
+            />
+          </div>
+
+          {/* Description */}
           <div className="space-y-2">
             <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Description</label>
             <Textarea value={form.description} onChange={(e) => set("description")(e.target.value)} rows={3} className="border-border resize-none" />
           </div>
 
-          <TagInput label="Colors" values={form.colors} onChange={set("colors")} placeholder="Beige, Black, Cream..." />
-          <TagInput label="Sizes" values={form.sizes} onChange={set("sizes")} placeholder="XS, S, M, L, XL..." />
+          {/* Colors — visual swatches */}
+          <ColorSwatchPicker values={form.colors} onChange={set("colors")} />
 
+          {/* Sizes — preset chips + custom */}
+          <SizePicker values={form.sizes} onChange={set("sizes")} />
+
+          {/* Main Image */}
           <div className="space-y-2">
             <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Main Image URL</label>
             <Input value={form.imageUrl} onChange={(e) => set("imageUrl")(e.target.value)} placeholder="https://..." className="border-border" />
           </div>
 
+          {/* Additional Images */}
           <div className="space-y-2">
             <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Additional Image URLs</label>
             <div className="flex gap-2">
@@ -542,6 +740,7 @@ function ProductDialog({ product }: { product?: Product }) {
             )}
           </div>
 
+          {/* Featured + Trending */}
           <div className="grid grid-cols-2 gap-4 pt-2">
             <div className="flex items-center justify-between border border-border px-4 py-3">
               <label className="text-xs tracking-widest uppercase">Featured</label>

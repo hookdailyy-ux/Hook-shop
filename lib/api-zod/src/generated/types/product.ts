@@ -6,12 +6,15 @@
  * OpenAPI spec version: 0.2.0
  */
 import type { ProductCategory } from './productCategory';
+import type { ProductSource } from './productSource';
+import type { ProductStatus } from './productStatus';
 
 export interface Product {
   id: number;
   title: string;
   /** @nullable */
   description?: string | null;
+  source: ProductSource;
   category: ProductCategory;
   /** @nullable */
   subcategory?: string | null;
@@ -25,9 +28,12 @@ export interface Product {
   affiliateUrl: string;
   /** @nullable */
   brand?: string | null;
+  /** @nullable */
+  externalId?: string | null;
   colors?: string[];
   sizes?: string[];
   featured?: boolean;
   trending?: boolean;
+  status: ProductStatus;
   createdAt: string;
 }

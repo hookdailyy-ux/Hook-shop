@@ -46,6 +46,7 @@ export function ProductCard({ product }: ProductCardProps) {
               imageUrl: product.imageUrl,
               affiliateUrl: product.affiliateUrl,
               category: product.category,
+              source: product.source,
             }}
           />
         </div>

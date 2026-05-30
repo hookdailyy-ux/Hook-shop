@@ -6,6 +6,7 @@ export const productsTable = pgTable("products", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
   description: text("description"),
+  source: text("source").notNull().default("SHEIN"),
   category: text("category").notNull(),
   subcategory: text("subcategory"),
   price: text("price"),
@@ -15,10 +16,12 @@ export const productsTable = pgTable("products", {
   affiliateUrl: text("affiliate_url").notNull(),
   brand: text("brand"),
   material: text("material"),
+  externalId: text("external_id"),
   colors: jsonb("colors").$type<string[]>().notNull().default([]),
   sizes: jsonb("sizes").$type<string[]>().notNull().default([]),
   featured: boolean("featured").notNull().default(false),
   trending: boolean("trending").notNull().default(false),
+  status: text("status").notNull().default("active"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

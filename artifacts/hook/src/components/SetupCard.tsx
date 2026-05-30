@@ -6,7 +6,8 @@ interface SetupCardProps {
   setup: Setup;
 }
 
-function getDeliveryLabel(category: string): string {
+function getDeliveryLabel(source?: string | null, category?: string): string {
+  if (source === "Amazon") return "Delivered by Amazon";
   if (category === "electronics") return "Delivered by Amazon";
   return "Delivered by SHEIN";
 }
@@ -44,7 +45,7 @@ function SetupProductCard({ product }: { product: Product }) {
           Order Now
         </a>
         <p className="text-[9px] text-center text-muted-foreground mt-1 tracking-wide">
-          {getDeliveryLabel(product.category)}
+          {getDeliveryLabel(product.source, product.category)}
         </p>
       </div>
     </div>

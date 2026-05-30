@@ -8,6 +8,7 @@ export type FavoriteProduct = {
   imageUrl?: string | null;
   affiliateUrl: string;
   category: string;
+  source?: string | null;
 };
 
 export type FavoriteLook = {

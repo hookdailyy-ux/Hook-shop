@@ -481,7 +481,7 @@ components:
 
     Product:
       type: object
-      required: [id, title, category, affiliateUrl, createdAt]
+      required: [id, title, source, category, affiliateUrl, status, createdAt]
       properties:
         id:
           type: integer
@@ -489,9 +489,12 @@ components:
           type: string
         description:
           type: ["string", "null"]
+        source:
+          type: string
+          enum: [SHEIN, Amazon]
         category:
           type: string
-          enum: [women, men, electronics, home]
+          enum: [women, men, electronics, home, accessories]
         subcategory:
           type: ["string", "null"]
         price:
@@ -508,6 +511,8 @@ components:
           type: string
         brand:
           type: ["string", "null"]
+        externalId:
+          type: ["string", "null"]
         colors:
           type: array
           items:
@@ -520,20 +525,26 @@ components:
           type: boolean
         trending:
           type: boolean
+        status:
+          type: string
+          enum: [active, hidden]
         createdAt:
           type: string
 
     ProductInput:
       type: object
-      required: [title, category, affiliateUrl]
+      required: [title, source, category, affiliateUrl]
       properties:
         title:
           type: string
         description:
           type: string
+        source:
+          type: string
+          enum: [SHEIN, Amazon]
         category:
           type: string
-          enum: [women, men, electronics, home]
+          enum: [women, men, electronics, home, accessories]
         subcategory:
           type: string
         price:
@@ -550,6 +561,8 @@ components:
           type: string
         brand:
           type: string
+        externalId:
+          type: string
         colors:
           type: array
           items:
@@ -562,6 +575,9 @@ components:
           type: boolean
         trending:
           type: boolean
+        status:
+          type: string
+          enum: [active, hidden]
 
     ProductUpdate:
       type: object
@@ -570,9 +586,12 @@ components:
           type: string
         description:
           type: string
+        source:
+          type: string
+          enum: [SHEIN, Amazon]
         category:
           type: string
-          enum: [women, men, electronics, home]
+          enum: [women, men, electronics, home, accessories]
         subcategory:
           type: string
         price:
@@ -589,6 +608,8 @@ components:
           type: string
         brand:
           type: string
+        externalId:
+          type: string
         colors:
           type: array
           items:
@@ -601,6 +622,9 @@ components:
           type: boolean
         trending:
           type: boolean
+        status:
+          type: string
+          enum: [active, hidden]
 
     Look:
       type: object
