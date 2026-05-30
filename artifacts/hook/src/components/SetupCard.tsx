@@ -5,6 +5,11 @@ interface SetupCardProps {
   setup: Setup;
 }
 
+function getDeliveryLabel(category: string): string {
+  if (category === "electronics") return "Delivered by Amazon";
+  return "Delivered by SHEIN";
+}
+
 export function SetupCard({ setup }: SetupCardProps) {
   return (
     <section className="mb-24 last:mb-0" data-testid={`card-setup-${setup.id}`}>
@@ -49,7 +54,7 @@ export function SetupCard({ setup }: SetupCardProps) {
                   </div>
                   <div className="flex flex-col gap-1 flex-1 min-w-0">
                     {product.brand && (
-                      <p className="text-[10px] tracking-widest uppercase text-muted-foreground">{product.brand}</p>
+                      <p className="text-[10px] tracking-widests uppercase text-muted-foreground">{product.brand}</p>
                     )}
                     <p className="text-sm font-medium line-clamp-2 leading-snug">{product.title}</p>
                     <p className="text-sm">{product.price || "TBA"}</p>
@@ -58,10 +63,13 @@ export function SetupCard({ setup }: SetupCardProps) {
                       target="_blank"
                       rel="noopener noreferrer"
                       className="mt-2 inline-block text-[10px] tracking-widest uppercase border border-foreground px-4 py-2 hover:bg-foreground hover:text-background transition-colors"
-                      data-testid={`button-amazon-${product.id}`}
+                      data-testid={`button-order-${product.id}`}
                     >
-                      View on Amazon
+                      Order Now
                     </a>
+                    <p className="text-[9px] tracking-wide text-muted-foreground mt-0.5">
+                      {getDeliveryLabel(product.category)}
+                    </p>
                   </div>
                 </div>
               ))}

@@ -36,6 +36,11 @@ function getColorHex(name: string): string {
   return COLOR_MAP[name.toLowerCase()] ?? "#d4b896";
 }
 
+function getDeliveryLabel(category: string): string {
+  if (category === "electronics") return "Delivered by Amazon";
+  return "Delivered by SHEIN";
+}
+
 export default function ProductDetail() {
   const params = useParams();
   const id = Number(params.id);
@@ -94,6 +99,8 @@ export default function ProductDetail() {
       ? "Electronics"
       : product.category.charAt(0).toUpperCase() + product.category.slice(1);
 
+  const deliveryLabel = getDeliveryLabel(product.category);
+
   return (
     <div className="pb-32">
       {/* Breadcrumb */}
@@ -123,7 +130,6 @@ export default function ProductDetail() {
 
           {/* Image Gallery */}
           <div className="flex flex-col gap-3">
-            {/* Main image */}
             <div className="w-full aspect-[3/4] bg-accent overflow-hidden">
               {hasImages ? (
                 <img
@@ -136,7 +142,6 @@ export default function ProductDetail() {
               )}
             </div>
 
-            {/* Thumbnail strip */}
             {allImages.length > 1 && (
               <div className="flex gap-2 overflow-x-auto" style={{ scrollbarWidth: "none" }}>
                 {allImages.map((img, i) => (
@@ -236,19 +241,19 @@ export default function ProductDetail() {
               target="_blank"
               rel="noopener noreferrer"
               className="w-full text-center bg-foreground text-background text-xs tracking-widest uppercase py-5 hover:opacity-90 transition-opacity block"
-              data-testid="button-view-amazon"
+              data-testid="button-order-now"
             >
-              View on Amazon
+              Order Now
             </a>
 
             <p className="text-[10px] text-center text-muted-foreground mt-3 tracking-wide">
-              You will be redirected to Amazon to complete your purchase.
+              {deliveryLabel}
             </p>
 
             {product.subcategory && (
               <div className="mt-8 pt-6 border-t border-border">
                 <p className="text-[10px] tracking-widest uppercase text-muted-foreground">
-                  Category: {categoryLabel} — {product.subcategory}
+                  {categoryLabel} — {product.subcategory}
                 </p>
               </div>
             )}
