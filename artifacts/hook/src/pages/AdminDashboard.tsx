@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import {
   useGetAdminStats,
   useListAdminProducts,
@@ -40,12 +40,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { X, Plus, Trash2, Pencil, LogOut } from "lucide-react";
+import { X, Plus, Trash2, Pencil, LogOut, Loader2, Upload } from "lucide-react";
 import { SingleImageUpload, MultiImageUpload } from "@/components/ImageUploadField";
+import { useUpload } from "@workspace/object-storage-web";
+import { useSiteImages, useUpsertSiteImage, useDeleteSiteImage } from "@/hooks/useSiteImages";
+import type { SiteImage, SiteImageKey } from "@/hooks/useSiteImages";
 import { useAdminAuth } from "@/contexts/AdminAuthContext";
 import { useLocation } from "wouter";
 
-type Tab = "dashboard" | "products" | "looks" | "categories" | "settings";
+type Tab = "dashboard" | "products" | "looks" | "categories" | "settings" | "images";
 
 const CATEGORIES = [
   { value: "women", label: "Women" },
@@ -73,7 +76,7 @@ export default function AdminDashboard() {
             <h1 className="font-serif text-lg font-light tracking-wide shrink-0 pr-8 py-4 border-r border-border mr-4 hidden md:block">
               Admin
             </h1>
-            {(["dashboard", "products", "looks", "categories", "settings"] as Tab[]).map((tab) => (
+            {(["dashboard", "products", "looks", "categories", "settings", "images"] as Tab[]).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -107,6 +110,7 @@ export default function AdminDashboard() {
         {activeTab === "looks" && <LooksTab />}
         {activeTab === "categories" && <CategoriesTab />}
         {activeTab === "settings" && <SettingsTab />}
+        {activeTab === "images" && <SiteImagesTab />}
       </div>
     </div>
   );
@@ -1317,6 +1321,177 @@ function SettingsTab() {
           </div>
         </form>
       </div>
+    </div>
+  );
+}
+
+const SITE_IMAGE_SECTIONS: Array<{ key: SiteImageKey; label: string }> = [
+  { key: "hero", label: "Home Hero" },
+  { key: "women", label: "Women" },
+  { key: "men", label: "Men" },
+  { key: "accessories", label: "Accessories" },
+  { key: "home", label: "Home Essentials" },
+  { key: "electronics", label: "Electronics" },
+  { key: "look", label: "Shop The Look" },
+  { key: "setup", label: "Shop The Setup" },
+];
+
+function SiteImagesTab() {
+  const { data: images } = useSiteImages();
+  const upsertMutation = useUpsertSiteImage();
+  const deleteMutation = useDeleteSiteImage();
+  const { toast } = useToast();
+
+  const handlePositionChange = (key: SiteImageKey, field: keyof SiteImage, delta: number) => {
+    const current = images?.[key];
+    if (!current) return;
+    const min = field === "scale" ? 50 : 0;
+    const max = field === "scale" ? 200 : 100;
+    const updated: SiteImage = { ...current, [field]: Math.max(min, Math.min(max, (current[field] as number) + delta)) };
+    upsertMutation.mutate({ key, data: updated });
+  };
+
+  const handleDelete = (key: SiteImageKey, label: string) => {
+    if (!confirm(`Delete the ${label} image?`)) return;
+    deleteMutation.mutate(key, { onSuccess: () => toast({ title: "Image deleted" }) });
+  };
+
+  const handleUploaded = (key: SiteImageKey, imageUrl: string) => {
+    const current = images?.[key];
+    upsertMutation.mutate(
+      { key, data: { imageUrl, posX: current?.posX ?? 50, posY: current?.posY ?? 50, scale: current?.scale ?? 100 } },
+      { onSuccess: () => toast({ title: "Image saved" }) }
+    );
+  };
+
+  return (
+    <div>
+      <p className="text-xs tracking-widest uppercase text-muted-foreground mb-6">8 sections</p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        {SITE_IMAGE_SECTIONS.map(({ key, label }) => (
+          <SectionImageCard
+            key={key}
+            label={label}
+            image={images?.[key]}
+            onUploaded={(url) => handleUploaded(key, url)}
+            onDelete={() => handleDelete(key, label)}
+            onPositionChange={(field, delta) => handlePositionChange(key, field, delta)}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SectionImageCard({
+  label,
+  image,
+  onUploaded,
+  onDelete,
+  onPositionChange,
+}: {
+  label: string;
+  image?: SiteImage;
+  onUploaded: (url: string) => void;
+  onDelete: () => void;
+  onPositionChange: (field: keyof SiteImage, delta: number) => void;
+}) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cardBase = import.meta.env.BASE_URL.replace(/\/$/, "");
+  const { uploadFile, isUploading, progress } = useUpload({
+    basePath: `${cardBase}/api/storage`,
+    onSuccess: (res) => { onUploaded(`${cardBase}/api/storage${res.objectPath}`); },
+  });
+
+  const handleFile = (file: File) => {
+    if (!file.type.startsWith("image/")) return;
+    void uploadFile(file);
+  };
+
+  const btnClass = "w-8 h-8 border border-border flex items-center justify-center text-sm hover:bg-accent transition-colors select-none";
+
+  return (
+    <div className="border border-border p-4 flex flex-col gap-3">
+      <p className="text-[10px] tracking-widest uppercase font-medium">{label}</p>
+
+      <div className="aspect-video bg-accent overflow-hidden relative">
+        {image?.imageUrl ? (
+          <img
+            src={image.imageUrl}
+            alt=""
+            className="absolute w-full h-full object-cover"
+            style={{
+              objectPosition: `${image.posX}% ${image.posY}%`,
+              transform: `scale(${image.scale / 100})`,
+              transformOrigin: `${image.posX}% ${image.posY}%`,
+            }}
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <p className="text-[9px] tracking-widest uppercase text-muted-foreground/40">No Image</p>
+          </div>
+        )}
+        {isUploading && (
+          <div className="absolute inset-0 bg-background/80 flex flex-col items-center justify-center gap-2">
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            <p className="text-[9px] tracking-widest uppercase text-muted-foreground">{progress}%</p>
+          </div>
+        )}
+      </div>
+
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={isUploading}
+          className="flex-1 flex items-center justify-center gap-1.5 border border-dashed border-border py-2 text-[10px] tracking-widest uppercase text-muted-foreground hover:border-foreground/40 hover:text-foreground transition-colors disabled:opacity-40"
+        >
+          <Upload className="h-3 w-3" />
+          {image ? "Replace" : "Upload"}
+        </button>
+        {image && (
+          <button
+            type="button"
+            onClick={onDelete}
+            className="w-9 flex items-center justify-center border border-border text-muted-foreground hover:text-destructive hover:border-destructive/40 transition-colors"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </button>
+        )}
+      </div>
+
+      {image && (
+        <div className="flex flex-col gap-2 pt-2 border-t border-border">
+          <p className="text-[9px] tracking-widest uppercase text-muted-foreground">Position</p>
+          <div className="flex flex-col items-center gap-1">
+            <button onClick={() => onPositionChange("posY", -5)} className={btnClass} title="Move up">↑</button>
+            <div className="flex gap-1">
+              <button onClick={() => onPositionChange("posX", -5)} className={btnClass} title="Move left">←</button>
+              <div className="w-8 h-8 border border-border/40 bg-accent/30 flex items-center justify-center">
+                <span className="text-[10px] text-muted-foreground/50">·</span>
+              </div>
+              <button onClick={() => onPositionChange("posX", 5)} className={btnClass} title="Move right">→</button>
+            </div>
+            <button onClick={() => onPositionChange("posY", 5)} className={btnClass} title="Move down">↓</button>
+          </div>
+          <div className="flex items-center gap-2">
+            <button onClick={() => onPositionChange("scale", -10)} className={btnClass} title="Zoom out">−</button>
+            <span className="flex-1 text-center text-[9px] tracking-widest text-muted-foreground">{image.scale}%</span>
+            <button onClick={() => onPositionChange("scale", 10)} className={btnClass} title="Zoom in">+</button>
+          </div>
+          <p className="text-[9px] text-center text-muted-foreground/60">
+            x {image.posX}% · y {image.posY}%
+          </p>
+        </div>
+      )}
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp,image/gif"
+        className="hidden"
+        onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); e.target.value = ""; }}
+      />
     </div>
   );
 }

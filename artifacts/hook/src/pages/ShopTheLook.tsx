@@ -1,4 +1,5 @@
 import { useListLooks } from "@workspace/api-client-react";
+import { useSiteImages } from "@/hooks/useSiteImages";
 import { LookCard } from "@/components/LookCard";
 
 function LookSkeleton() {
@@ -34,9 +35,25 @@ function LookSkeleton() {
 
 export default function ShopTheLook() {
   const { data: looks, isLoading } = useListLooks();
+  const { data: siteImages } = useSiteImages();
+  const sectionImage = siteImages?.look;
 
   return (
     <div className="pb-24">
+      {sectionImage?.imageUrl && (
+        <div className="w-full h-52 md:h-80 overflow-hidden relative">
+          <img
+            src={sectionImage.imageUrl}
+            alt=""
+            className="absolute w-full h-full object-cover"
+            style={{
+              objectPosition: `${sectionImage.posX}% ${sectionImage.posY}%`,
+              transform: `scale(${sectionImage.scale / 100})`,
+              transformOrigin: `${sectionImage.posX}% ${sectionImage.posY}%`,
+            }}
+          />
+        </div>
+      )}
       {/* Page header */}
       <div className="container mx-auto px-4 sm:px-6 pt-10 pb-8 md:pt-14 md:pb-12 border-b border-border mb-12">
         <p className="text-[10px] tracking-[0.35em] uppercase text-muted-foreground mb-2">Editorial</p>

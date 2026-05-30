@@ -8,6 +8,7 @@ import adminRouter from "./admin";
 import subcategoriesRouter from "./subcategories";
 import authRouter from "./auth";
 import siteSettingsRouter from "./site-settings";
+import siteImagesRouter from "./site-images";
 import categoriesRouter from "./categories";
 import storageRouter from "./storage";
 
@@ -16,6 +17,7 @@ const router: IRouter = Router();
 router.use(healthRouter);
 router.use(authRouter);
 router.use(siteSettingsRouter);
+router.use(siteImagesRouter);
 router.use(categoriesRouter);
 router.use(productsRouter);
 router.use(looksRouter);

@@ -1,5 +1,6 @@
 import { Link } from "wouter";
 import { useListLooks, useListSetups } from "@workspace/api-client-react";
+import { useSiteImages } from "@/hooks/useSiteImages";
 import { NewsletterForm } from "@/components/NewsletterForm";
 import { HeartButton } from "@/components/HeartButton";
 import type { FavoriteItem } from "@/contexts/FavoritesContext";
@@ -28,34 +29,52 @@ const SETUP_PLACEHOLDERS = [
 export default function Home() {
   const { data: latestLooks } = useListLooks({ limit: 4 });
   const { data: latestSetups } = useListSetups({ limit: 4 });
+  const { data: siteImages } = useSiteImages();
+  const heroImage = siteImages?.hero;
 
   return (
     <div className="flex flex-col">
 
       {/* ── Hero ── */}
       <section className="relative w-full min-h-[88dvh] md:min-h-screen flex flex-col items-center justify-center overflow-hidden bg-[#e8e0d4]">
-        <div className="absolute inset-0 pointer-events-none select-none overflow-hidden">
-          <div className="absolute inset-0" style={{ background: "linear-gradient(160deg, #ddd5c8 0%, #e8e0d4 40%, #f0ebe3 100%)" }} />
-          <div className="absolute bottom-0 left-0 w-full h-1/2 opacity-10" style={{ background: "linear-gradient(to top, #8b7355, transparent)" }} />
-          <div className="hidden md:block absolute left-0 top-0 w-1/4 h-full bg-[#d4c9bb]/30" />
-          <div className="hidden md:block absolute right-0 top-0 w-1/4 h-full bg-[#d4c9bb]/30" />
-        </div>
-        <p className="absolute top-8 left-1/2 -translate-x-1/2 text-[10px] tracking-[0.35em] uppercase text-[#8b7355]/60 font-medium">
+        {heroImage ? (
+          <div className="absolute inset-0 overflow-hidden">
+            <img
+              src={heroImage.imageUrl}
+              alt=""
+              className="absolute w-full h-full object-cover"
+              style={{
+                objectPosition: `${heroImage.posX}% ${heroImage.posY}%`,
+                transform: `scale(${heroImage.scale / 100})`,
+                transformOrigin: `${heroImage.posX}% ${heroImage.posY}%`,
+              }}
+            />
+            <div className="absolute inset-0 bg-black/30" />
+          </div>
+        ) : (
+          <div className="absolute inset-0 pointer-events-none select-none overflow-hidden">
+            <div className="absolute inset-0" style={{ background: "linear-gradient(160deg, #ddd5c8 0%, #e8e0d4 40%, #f0ebe3 100%)" }} />
+            <div className="absolute bottom-0 left-0 w-full h-1/2 opacity-10" style={{ background: "linear-gradient(to top, #8b7355, transparent)" }} />
+            <div className="hidden md:block absolute left-0 top-0 w-1/4 h-full bg-[#d4c9bb]/30" />
+            <div className="hidden md:block absolute right-0 top-0 w-1/4 h-full bg-[#d4c9bb]/30" />
+          </div>
+        )}
+        <p className={`absolute top-8 left-1/2 -translate-x-1/2 text-[10px] tracking-[0.35em] uppercase font-medium ${heroImage ? "text-white/60" : "text-[#8b7355]/60"}`}>
           New Collection · 2025
         </p>
         <div className="relative z-10 text-center px-6 flex flex-col items-center gap-6 py-20">
           <h1
             className="font-serif font-light leading-none tracking-tight"
-            style={{ fontSize: "clamp(3.5rem, 13vw, 9rem)", color: "#2a2318" }}
+            style={{ fontSize: "clamp(3.5rem, 13vw, 9rem)", color: heroImage ? "#f5f0e8" : "#2a2318" }}
           >
             Timeless<br />Essentials
           </h1>
-          <p className="text-sm md:text-base tracking-widest uppercase text-[#6b5e4e] max-w-xs md:max-w-sm leading-relaxed">
+          <p className={`text-sm md:text-base tracking-widest uppercase max-w-xs md:max-w-sm leading-relaxed ${heroImage ? "text-white/80" : "text-[#6b5e4e]"}`}>
             Curated pieces for everyday life.
           </p>
           <Link
             href="/women"
-            className="mt-2 inline-block bg-[#2a2318] text-[#f0ebe3] text-xs tracking-[0.25em] uppercase px-10 py-4 hover:bg-[#3d3226] transition-colors"
+            className={`mt-2 inline-block text-xs tracking-[0.25em] uppercase px-10 py-4 transition-colors ${heroImage ? "bg-white/90 text-[#2a2318] hover:bg-white" : "bg-[#2a2318] text-[#f0ebe3] hover:bg-[#3d3226]"}`}
           >
             Shop Now
           </Link>

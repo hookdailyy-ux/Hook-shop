@@ -3,6 +3,8 @@ import { useLocation } from "wouter";
 import { useListProducts, useListSubcategories, getListSubcategoriesQueryKey } from "@workspace/api-client-react";
 import { ProductCard } from "@/components/ProductCard";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { useSiteImages } from "@/hooks/useSiteImages";
+import type { SiteImageKey } from "@/hooks/useSiteImages";
 
 const CATEGORY_DETAILS: Record<string, { title: string; description: string; showDiscoverMore?: boolean }> = {
   women: {
@@ -40,6 +42,8 @@ export default function CategoryPage({ category }: CategoryPageProps) {
   const [, location] = useLocation();
   const [activeSub, setActiveSub] = useState<string | null>(null);
   const { data: siteSettings } = useSiteSettings();
+  const { data: siteImages } = useSiteImages();
+  const categoryImage = siteImages?.[category as SiteImageKey];
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -68,6 +72,20 @@ export default function CategoryPage({ category }: CategoryPageProps) {
 
   return (
     <div className="pb-32">
+      {categoryImage?.imageUrl && (
+        <div className="w-full h-52 md:h-80 overflow-hidden relative">
+          <img
+            src={categoryImage.imageUrl}
+            alt=""
+            className="absolute w-full h-full object-cover"
+            style={{
+              objectPosition: `${categoryImage.posX}% ${categoryImage.posY}%`,
+              transform: `scale(${categoryImage.scale / 100})`,
+              transformOrigin: `${categoryImage.posX}% ${categoryImage.posY}%`,
+            }}
+          />
+        </div>
+      )}
       <div className="container mx-auto px-4 sm:px-6 pt-12 pb-10 md:pt-16 md:pb-14 border-b border-border">
         <h1 className="font-serif text-4xl md:text-6xl font-light mb-3">{details.title}</h1>
         {details.description && (
