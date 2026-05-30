@@ -3,6 +3,7 @@ import { useParams, Link } from "wouter";
 import { useGetProduct, useListProducts, getGetProductQueryKey, getListProductsQueryKey } from "@workspace/api-client-react";
 import { PlaceholderImage } from "@/components/PlaceholderImage";
 import { ProductCard } from "@/components/ProductCard";
+import { HeartButton } from "@/components/HeartButton";
 
 const COLOR_MAP: Record<string, string> = {
   black: "#1a1a1a",
@@ -131,28 +132,78 @@ export default function ProductDetail() {
 
           {/* Image Gallery */}
           <div className="flex flex-col gap-3">
-            <div className="w-full aspect-[3/4] bg-accent overflow-hidden">
-              {hasImages ? (
-                <img
-                  src={allImages[selectedImage]}
-                  alt={product.title}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <PlaceholderImage aspectRatio="portrait" />
+
+            {/* Desktop: thumbs left + main image right / Mobile: main image only */}
+            <div className="flex gap-3">
+
+              {/* Vertical thumbnail strip — desktop only */}
+              {allImages.length > 1 && (
+                <div className="hidden md:flex flex-col gap-2 w-[72px] shrink-0 max-h-[600px] overflow-y-auto"
+                  style={{ scrollbarWidth: "thin" }}>
+                  {allImages.map((img, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setSelectedImage(i)}
+                      className={`w-full shrink-0 overflow-hidden border-2 transition-colors ${
+                        selectedImage === i
+                          ? "border-foreground"
+                          : "border-transparent hover:border-foreground/30"
+                      }`}
+                      style={{ aspectRatio: "3/4" }}
+                      data-testid={`thumb-${i}`}
+                    >
+                      <img src={img} alt="" className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
               )}
+
+              {/* Main image */}
+              <div className="relative flex-1 aspect-[3/4] bg-accent overflow-hidden">
+                {hasImages ? (
+                  <img
+                    src={allImages[selectedImage]}
+                    alt={product.title}
+                    className="w-full h-full object-cover transition-opacity duration-200"
+                  />
+                ) : (
+                  <PlaceholderImage aspectRatio="portrait" />
+                )}
+                {/* Heart button */}
+                <div className="absolute top-3 right-3 z-10">
+                  <HeartButton
+                    item={{
+                      id: product.id,
+                      type: "product",
+                      title: product.title,
+                      price: product.price,
+                      imageUrl: product.imageUrl,
+                      affiliateUrl: product.affiliateUrl,
+                      category: product.category,
+                      source: product.source,
+                    }}
+                  />
+                </div>
+              </div>
             </div>
 
+            {/* Mobile thumbnail row — below main image */}
             {allImages.length > 1 && (
-              <div className="flex gap-2 overflow-x-auto" style={{ scrollbarWidth: "none" }}>
+              <div
+                className="flex md:hidden gap-2 overflow-x-auto pb-1"
+                style={{ scrollbarWidth: "none" }}
+              >
                 {allImages.map((img, i) => (
                   <button
                     key={i}
                     onClick={() => setSelectedImage(i)}
-                    className={`shrink-0 w-16 h-20 overflow-hidden border-2 transition-colors ${
-                      selectedImage === i ? "border-foreground" : "border-transparent"
+                    className={`shrink-0 overflow-hidden border-2 transition-colors ${
+                      selectedImage === i
+                        ? "border-foreground"
+                        : "border-transparent"
                     }`}
-                    data-testid={`thumb-${i}`}
+                    style={{ width: 72, aspectRatio: "3/4" }}
+                    data-testid={`thumb-mobile-${i}`}
                   >
                     <img src={img} alt="" className="w-full h-full object-cover" />
                   </button>

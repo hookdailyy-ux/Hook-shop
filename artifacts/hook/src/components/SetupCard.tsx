@@ -85,7 +85,7 @@ export function SetupCard({ setup }: SetupCardProps) {
             <HeartButton
               item={{
                 id: setup.id,
-                type: "look",
+                type: "setup",
                 title: setup.title,
                 imageUrl: setup.imageUrl,
               }}

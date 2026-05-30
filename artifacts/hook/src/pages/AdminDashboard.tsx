@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   useGetAdminStats,
   useListAdminProducts,
@@ -164,6 +164,20 @@ function ProductsTab() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const deleteMutation = useDeleteProduct();
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredProducts = useMemo(() => {
+    if (!products) return [];
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return products;
+    return products.filter(
+      (p) =>
+        p.title.toLowerCase().includes(q) ||
+        (p.brand?.toLowerCase().includes(q) ?? false) ||
+        p.category.toLowerCase().includes(q) ||
+        (p.subcategory?.toLowerCase().includes(q) ?? false)
+    );
+  }, [products, searchQuery]);
 
   const handleDelete = (id: number, title: string) => {
     if (!confirm(`Delete "${title}"?`)) return;
@@ -182,11 +196,39 @@ function ProductsTab() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4">
         <p className="text-xs tracking-widest uppercase text-muted-foreground">
-          {products?.length ?? 0} products
+          {searchQuery.trim()
+            ? `${filteredProducts.length} of ${products?.length ?? 0} products`
+            : `${products?.length ?? 0} products`}
         </p>
         <ProductDialog />
+      </div>
+
+      {/* Search bar */}
+      <div className="relative mb-4">
+        <svg
+          className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none"
+          fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1 0 6.5 6.5a7.5 7.5 0 0 0 10.15 10.15z" />
+        </svg>
+        <input
+          type="text"
+          placeholder="Search by title, brand, category, subcategory…"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full pl-9 pr-9 py-2.5 text-sm border border-border bg-background focus:outline-none focus:ring-1 focus:ring-foreground/30 placeholder:text-muted-foreground placeholder:text-xs placeholder:tracking-wide"
+        />
+        {searchQuery && (
+          <button
+            onClick={() => setSearchQuery("")}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+            aria-label="Clear search"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        )}
       </div>
 
       <div className="border border-border overflow-x-auto">
@@ -208,7 +250,13 @@ function ProductsTab() {
                   Loading...
                 </td>
               </tr>
-            ) : products?.map((product) => (
+            ) : filteredProducts.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="px-4 py-12 text-center text-xs tracking-widest uppercase text-muted-foreground">
+                  {searchQuery.trim() ? "No products match your search" : "No products yet"}
+                </td>
+              </tr>
+            ) : filteredProducts.map((product) => (
               <tr key={product.id} className="hover:bg-accent/10 transition-colors" data-testid={`row-product-${product.id}`}>
                 <td className="px-4 py-4">
                   <div className="flex items-center gap-3">
