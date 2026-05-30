@@ -12,8 +12,18 @@ const BENEFITS = [
   { icon: Globe, label: "Worldwide" },
 ];
 
-const LOOK_PLACEHOLDERS = ["Weekend Casual", "Office Ready", "Evening Edit", "Street Style"];
-const SETUP_PLACEHOLDERS = ["Kitchen Setup", "Desk Setup", "Bedroom Setup", "Living Room"];
+const LOOK_PLACEHOLDERS = [
+  { id: -1, title: "Weekend Casual" },
+  { id: -2, title: "Office Ready" },
+  { id: -3, title: "Evening Edit" },
+  { id: -4, title: "Street Style" },
+];
+const SETUP_PLACEHOLDERS = [
+  { id: -1, title: "Kitchen Setup" },
+  { id: -2, title: "Desk Setup" },
+  { id: -3, title: "Bedroom Setup" },
+  { id: -4, title: "Living Room" },
+];
 
 export default function Home() {
   const { data: latestLooks } = useListLooks({ limit: 4 });
@@ -92,8 +102,15 @@ export default function Home() {
                     favoriteItem={{ id: look.id, type: "look", title: look.title, imageUrl: look.imageUrl }}
                   />
                 ))
-              : LOOK_PLACEHOLDERS.map((title) => (
-                  <HomeEditorialCard key={title} title={title} href="/shop-the-look" label="Look" cta="Shop Now" />
+              : LOOK_PLACEHOLDERS.map((p) => (
+                  <HomeEditorialCard
+                    key={p.id}
+                    title={p.title}
+                    href="/shop-the-look"
+                    label="Look"
+                    cta="Shop Now"
+                    favoriteItem={{ id: p.id, type: "look", title: p.title }}
+                  />
                 ))}
           </div>
         </div>
@@ -124,8 +141,15 @@ export default function Home() {
                     favoriteItem={{ id: setup.id, type: "setup", title: setup.title, imageUrl: setup.imageUrl }}
                   />
                 ))
-              : SETUP_PLACEHOLDERS.map((title) => (
-                  <HomeEditorialCard key={title} title={title} href="/shop-the-setup" label="Setup" cta="Shop Setup" />
+              : SETUP_PLACEHOLDERS.map((p) => (
+                  <HomeEditorialCard
+                    key={p.id}
+                    title={p.title}
+                    href="/shop-the-setup"
+                    label="Setup"
+                    cta="Shop Setup"
+                    favoriteItem={{ id: p.id, type: "setup", title: p.title }}
+                  />
                 ))}
           </div>
         </div>
@@ -190,9 +214,9 @@ function HomeEditorialCard({
           </div>
         </Link>
 
-        {/* Heart button — on top of image, stops click from reaching the Link */}
+        {/* Heart button — always visible, top-right, above the image */}
         {favoriteItem && (
-          <div className="absolute top-2 right-2 z-10">
+          <div className="absolute top-2 right-2 z-20 opacity-100">
             <HeartButton item={favoriteItem} />
           </div>
         )}
