@@ -1,0 +1,90 @@
+Please redesign the Shop The Look / Outfits pages to be fully mobile-first and optimized for phone users.
+
+Reference:
+Use the attached image as the main layout inspiration, but improve it for mobile.
+
+Main goal:
+Most HOOK users will open the website from Instagram, TikTok, Snapchat, and mobile browsers, so the Shop The Look experience must look beautiful and clear on mobile screens.
+
+Required layout:
+
+1. Mobile-first Outfit Page
+
+* The main outfit image should appear at the top of the page.
+* On mobile, the outfit image must be large, clear, and visually dominant.
+* The image should take around 70–80% of the first screen height.
+* Avoid placing too much text beside the image on mobile.
+* Stack everything vertically on mobile.
+
+2. Outfit Details
+   Under the main image, show:
+
+* Outfit name
+* Short description
+* Minimal styling text
+* Main CTA button: SHOP THE LOOK
+
+3. Items Included
+   Under the outfit details, show a section called:
+   THIS LOOK INCLUDES
+
+Display every item included in the outfit:
+
+* Product image
+* Product name
+* Color
+* Price
+* ORDER NOW button
+* Small label: Delivered by SHEIN
+
+Important:
+On mobile, product cards should be large and easy to tap.
+Do not show 4 tiny product cards in one row on mobile.
+Use either:
+
+* 1 product per row
+  or
+* 2 product cards per row maximum
+
+4. Desktop Layout
+   On desktop, it can look more like the reference:
+
+* Large outfit image on the left
+* Outfit details on the right
+* Included products below in a clean grid
+
+5. Buttons & Labels
+   Replace any "View Product" text with:
+   ORDER NOW
+
+For SHEIN products, show:
+Delivered by SHEIN
+
+For Amazon products, show:
+Delivered by Amazon
+
+6. Complete Outfit CTA
+   Add a clear button near the bottom:
+   SHOP COMPLETE OUTFIT
+
+This button should allow users to explore all items in the look.
+
+7. Design Style
+   Keep the HOOK identity:
+
+* Clean
+* Minimal
+* Premium
+* Editorial
+* Beige / off-white background
+* Elegant typography
+* Soft spacing
+* Luxury marketplace feeling
+
+8. Performance
+   The page must load fast on mobile.
+   Compress images properly.
+   Use responsive images.
+   Avoid heavy animations that slow down mobile loading.
+
+Please update all Shop The Look / Outfit pages according to this mobile-first structure.
