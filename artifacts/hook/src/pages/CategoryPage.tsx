@@ -20,10 +20,14 @@ const CATEGORY_DETAILS: Record<string, { title: string; description: string }> =
     title: "Home Essentials",
     description: "Objects for living. Crafted for the modern interior.",
   },
+  accessories: {
+    title: "Accessories",
+    description: "The finishing touch. Pieces that complete every look.",
+  },
 };
 
 interface CategoryPageProps {
-  category: "women" | "men" | "electronics" | "home";
+  category: string;
 }
 
 export default function CategoryPage({ category }: CategoryPageProps) {
@@ -46,22 +50,27 @@ export default function CategoryPage({ category }: CategoryPageProps) {
     ...(activeSub ? { subcategory: activeSub } : {}),
   });
 
-  const details = CATEGORY_DETAILS[category];
+  const details = CATEGORY_DETAILS[category] ?? {
+    title: category.charAt(0).toUpperCase() + category.slice(1),
+    description: "",
+  };
 
   return (
     <div className="pb-32">
       <div className="container mx-auto px-4 sm:px-6 pt-12 pb-10 md:pt-16 md:pb-14 border-b border-border">
         <h1 className="font-serif text-4xl md:text-6xl font-light mb-3">{details.title}</h1>
-        <p className="text-xs tracking-widest uppercase text-muted-foreground max-w-md leading-relaxed">
-          {details.description}
-        </p>
+        {details.description && (
+          <p className="text-xs tracking-widest uppercase text-muted-foreground max-w-md leading-relaxed">
+            {details.description}
+          </p>
+        )}
       </div>
 
       {subcategories && subcategories.length > 0 && (
         <div className="border-b border-border sticky top-14 md:top-16 z-30 bg-background/95 backdrop-blur-sm">
           <div className="container mx-auto px-4 sm:px-6">
             <div
-              className="flex gap-0 overflow-x-auto scrollbar-none -mx-4 sm:mx-0 px-4 sm:px-0"
+              className="flex gap-0 overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0"
               style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
             >
               <button
@@ -84,7 +93,7 @@ export default function CategoryPage({ category }: CategoryPageProps) {
                       ? "border-foreground text-foreground"
                       : "border-transparent text-muted-foreground hover:text-foreground"
                   }`}
-                  data-testid={`filter-${sub.name.toLowerCase()}`}
+                  data-testid={`filter-${sub.name.toLowerCase().replace(/\s+/g, "-")}`}
                 >
                   {sub.name}
                 </button>

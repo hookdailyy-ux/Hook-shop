@@ -1,4 +1,5 @@
 import { PlaceholderImage } from "./PlaceholderImage";
+import { HeartButton } from "./HeartButton";
 import type { Look, Product } from "@workspace/api-client-react";
 
 interface LookCardProps {
@@ -60,8 +61,8 @@ export function LookCard({ look }: LookCardProps) {
       {/* ── Hero Image + Details ── */}
       <div className="flex flex-col md:flex-row md:gap-12 md:items-start">
 
-        {/* Outfit image — fills most of the first screen on mobile */}
-        <div className="w-full md:w-[42%] shrink-0">
+        {/* Outfit image */}
+        <div className="w-full md:w-[42%] shrink-0 relative group">
           {look.imageUrl ? (
             <img
               src={look.imageUrl}
@@ -78,9 +79,20 @@ export function LookCard({ look }: LookCardProps) {
               <PlaceholderImage aspectRatio="tall" className="w-full h-full" />
             </div>
           )}
+          {/* Heart button on look image */}
+          <div className="absolute top-3 right-3">
+            <HeartButton
+              item={{
+                id: look.id,
+                type: "look",
+                title: look.title,
+                imageUrl: look.imageUrl,
+              }}
+            />
+          </div>
         </div>
 
-        {/* Outfit details — below image on mobile, beside on desktop */}
+        {/* Outfit details */}
         <div className="flex-1 min-w-0 pt-7 md:pt-2 md:sticky md:top-24 md:self-start">
           <p className="text-[10px] tracking-[0.35em] uppercase text-muted-foreground mb-3">Outfit</p>
           <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl font-light leading-tight mb-4">
@@ -92,7 +104,6 @@ export function LookCard({ look }: LookCardProps) {
             </p>
           )}
 
-          {/* Primary CTA — scrolls to items */}
           <a
             href={`#${itemsId}`}
             className="block w-full md:inline-block md:w-auto text-center bg-[#2a2318] text-[#f0ebe3] text-xs tracking-[0.25em] uppercase px-10 py-4 hover:opacity-90 transition-opacity"
@@ -119,14 +130,12 @@ export function LookCard({ look }: LookCardProps) {
 
         {hasProducts ? (
           <>
-            {/* 2 columns on mobile, 4 on desktop */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
               {look.products!.map((product) => (
                 <LookProductCard key={product.id} product={product} />
               ))}
             </div>
 
-            {/* Shop Complete Outfit footer */}
             <div className="mt-10 pt-8 border-t border-border flex flex-col items-center gap-3">
               <p className="text-[10px] tracking-[0.35em] uppercase text-muted-foreground">
                 Complete the outfit

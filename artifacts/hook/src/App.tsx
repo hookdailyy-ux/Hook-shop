@@ -11,7 +11,9 @@ import CategoryPage from "@/pages/CategoryPage";
 import ProductDetail from "@/pages/ProductDetail";
 import AdminDashboard from "@/pages/AdminDashboard";
 import AdminLogin from "@/pages/AdminLogin";
+import Favorites from "@/pages/Favorites";
 import { AdminAuthProvider, useAdminAuth } from "@/contexts/AdminAuthContext";
+import { FavoritesProvider } from "@/contexts/FavoritesContext";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -57,8 +59,10 @@ function Router() {
             <Route path="/shop-the-setup" component={ShopTheSetup} />
             <Route path="/women" component={() => <CategoryPage category="women" />} />
             <Route path="/men" component={() => <CategoryPage category="men" />} />
+            <Route path="/accessories" component={() => <CategoryPage category="accessories" />} />
             <Route path="/electronics" component={() => <CategoryPage category="electronics" />} />
             <Route path="/home-essentials" component={() => <CategoryPage category="home" />} />
+            <Route path="/favorites" component={Favorites} />
             <Route path="/product/:id" component={ProductDetail} />
             <Route component={NotFound} />
           </Switch>
@@ -72,12 +76,14 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AdminAuthProvider>
-        <TooltipProvider>
-          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-            <Router />
-          </WouterRouter>
-          <Toaster />
-        </TooltipProvider>
+        <FavoritesProvider>
+          <TooltipProvider>
+            <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+              <Router />
+            </WouterRouter>
+            <Toaster />
+          </TooltipProvider>
+        </FavoritesProvider>
       </AdminAuthProvider>
     </QueryClientProvider>
   );

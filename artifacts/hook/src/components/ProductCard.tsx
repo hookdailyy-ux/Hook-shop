@@ -1,5 +1,6 @@
 import { Link } from "wouter";
 import { PlaceholderImage } from "./PlaceholderImage";
+import { HeartButton } from "./HeartButton";
 import type { Product } from "@workspace/api-client-react";
 
 interface ProductCardProps {
@@ -9,28 +10,46 @@ interface ProductCardProps {
 export function ProductCard({ product }: ProductCardProps) {
   return (
     <div className="group flex flex-col gap-3" data-testid={`card-product-${product.id}`}>
-      <Link href={`/product/${product.id}`} className="block overflow-hidden bg-accent relative">
-        {product.imageUrl ? (
-          <img
-            src={product.imageUrl}
-            alt={product.title}
-            className="w-full aspect-[3/4] object-cover transition-transform duration-700 group-hover:scale-105"
-          />
-        ) : (
-          <PlaceholderImage aspectRatio="portrait" />
-        )}
-        <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 md:block hidden">
-          <button
-            className="w-full bg-background/90 text-foreground text-xs tracking-widest uppercase py-3 backdrop-blur-sm border border-border/50"
-            onClick={(e) => {
-              e.preventDefault();
-              window.open(product.affiliateUrl, "_blank", "noopener,noreferrer");
+      <div className="relative overflow-hidden bg-accent">
+        <Link href={`/product/${product.id}`} className="block">
+          {product.imageUrl ? (
+            <img
+              src={product.imageUrl}
+              alt={product.title}
+              className="w-full aspect-[3/4] object-cover transition-transform duration-700 group-hover:scale-105"
+              loading="lazy"
+            />
+          ) : (
+            <PlaceholderImage aspectRatio="portrait" />
+          )}
+          <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 md:block hidden">
+            <button
+              className="w-full bg-background/90 text-foreground text-xs tracking-widest uppercase py-3 backdrop-blur-sm border border-border/50"
+              onClick={(e) => {
+                e.preventDefault();
+                window.open(product.affiliateUrl, "_blank", "noopener,noreferrer");
+              }}
+            >
+              Order Now
+            </button>
+          </div>
+        </Link>
+
+        {/* Heart button — top right, always visible on mobile, visible on hover on desktop */}
+        <div className="absolute top-2 right-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200">
+          <HeartButton
+            item={{
+              id: product.id,
+              type: "product",
+              title: product.title,
+              price: product.price,
+              imageUrl: product.imageUrl,
+              affiliateUrl: product.affiliateUrl,
+              category: product.category,
             }}
-          >
-            Shop Now
-          </button>
+          />
         </div>
-      </Link>
+      </div>
 
       <div className="flex flex-col gap-1 px-0.5">
         {product.brand && (
@@ -55,7 +74,7 @@ export function ProductCard({ product }: ProductCardProps) {
           onClick={() => window.open(product.affiliateUrl, "_blank", "noopener,noreferrer")}
           data-testid={`button-shop-${product.id}`}
         >
-          Shop Now
+          Order Now
         </button>
       </div>
     </div>
