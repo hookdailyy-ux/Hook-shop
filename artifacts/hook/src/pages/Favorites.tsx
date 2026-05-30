@@ -1,6 +1,6 @@
 import { Heart } from "lucide-react";
 import { Link } from "wouter";
-import { useFavorites, type FavoriteProduct, type FavoriteLook } from "@/contexts/FavoritesContext";
+import { useFavorites, type FavoriteProduct, type FavoriteLook, type FavoriteSetup } from "@/contexts/FavoritesContext";
 import { HeartButton } from "@/components/HeartButton";
 
 function FavoriteProductCard({ item }: { item: FavoriteProduct }) {
@@ -73,10 +73,43 @@ function FavoriteLookCard({ item }: { item: FavoriteLook }) {
   );
 }
 
+function FavoriteSetupCard({ item }: { item: FavoriteSetup }) {
+  return (
+    <div className="flex flex-col group">
+      <div className="relative overflow-hidden aspect-[3/4] bg-[#ddd5c8] mb-3">
+        {item.imageUrl ? (
+          <img
+            src={item.imageUrl}
+            alt={item.title}
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            loading="lazy"
+          />
+        ) : (
+          <div className="w-full h-full bg-[#ddd5c8] flex items-center justify-center">
+            <span className="text-[9px] tracking-widest uppercase text-[#8b7355]/50">Setup</span>
+          </div>
+        )}
+        <div className="absolute top-2 right-2">
+          <HeartButton item={item} />
+        </div>
+      </div>
+      <p className="text-[9px] tracking-[0.3em] uppercase text-muted-foreground mb-1">Setup</p>
+      <p className="text-sm font-medium leading-snug line-clamp-2 mb-3">{item.title}</p>
+      <Link
+        href="/shop-the-setup"
+        className="block w-full text-center border border-[#2a2318] text-[#2a2318] text-[10px] tracking-widest uppercase py-3 hover:bg-[#2a2318] hover:text-[#f0ebe3] transition-colors"
+      >
+        View Setup
+      </Link>
+    </div>
+  );
+}
+
 export default function Favorites() {
   const { favorites } = useFavorites();
   const products = favorites.filter((f) => f.type === "product") as FavoriteProduct[];
   const looks = favorites.filter((f) => f.type === "look") as FavoriteLook[];
+  const setups = favorites.filter((f) => f.type === "setup") as FavoriteSetup[];
 
   return (
     <div className="pb-32">
@@ -95,7 +128,7 @@ export default function Favorites() {
             <Heart className="h-10 w-10 mx-auto text-muted-foreground/25 mb-5" strokeWidth={1} />
             <p className="text-xs tracking-widest uppercase text-muted-foreground mb-3">No favorites yet</p>
             <p className="text-sm text-muted-foreground max-w-xs mx-auto leading-relaxed mb-8">
-              Tap the heart icon on any product or outfit to save it here.
+              Tap the heart icon on any product, outfit, or setup to save it here.
             </p>
             <Link
               href="/"
@@ -133,6 +166,22 @@ export default function Favorites() {
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
                   {looks.map((item) => (
                     <FavoriteLookCard key={item.id} item={item} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {setups.length > 0 && (
+              <div>
+                <div className="flex items-center gap-4 mb-8">
+                  <p className="text-[10px] tracking-[0.35em] uppercase text-muted-foreground shrink-0">
+                    Setups — {setups.length}
+                  </p>
+                  <div className="flex-1 h-px bg-border" />
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                  {setups.map((item) => (
+                    <FavoriteSetupCard key={item.id} item={item} />
                   ))}
                 </div>
               </div>

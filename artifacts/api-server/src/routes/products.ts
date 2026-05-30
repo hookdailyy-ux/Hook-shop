@@ -93,7 +93,7 @@ router.get("/products/:id", async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const [product] = await db.select().from(productsTable).where(eq(productsTable.id, id));
-    if (!product) return res.status(404).json({ error: "Not found" });
+    if (!product) { res.status(404).json({ error: "Not found" }); return; }
     res.json(serializeProduct(product));
   } catch (err) {
     req.log.error({ err }, "Failed to get product");
@@ -126,7 +126,7 @@ router.patch("/products/:id", async (req, res) => {
     });
     const data = schema.parse(req.body);
     const [product] = await db.update(productsTable).set(data).where(eq(productsTable.id, id)).returning();
-    if (!product) return res.status(404).json({ error: "Not found" });
+    if (!product) { res.status(404).json({ error: "Not found" }); return; }
     res.json(serializeProduct(product));
   } catch (err) {
     req.log.error({ err }, "Failed to update product");

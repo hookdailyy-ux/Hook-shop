@@ -18,7 +18,8 @@ router.post("/newsletter", async (req, res) => {
       .where(eq(newsletterTable.email, data.email));
 
     if (existing) {
-      return res.status(201).json({ ...existing, createdAt: existing.createdAt.toISOString() });
+      res.status(201).json({ ...existing, createdAt: existing.createdAt.toISOString() });
+      return;
     }
 
     const [subscriber] = await db

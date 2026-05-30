@@ -121,7 +121,7 @@ export default function Home() {
                     imageUrl={setup.imageUrl ?? undefined}
                     label="Setup"
                     cta="Shop Setup"
-                    favoriteItem={{ id: setup.id, type: "look", title: setup.title, imageUrl: setup.imageUrl }}
+                    favoriteItem={{ id: setup.id, type: "setup", title: setup.title, imageUrl: setup.imageUrl }}
                   />
                 ))
               : SETUP_PLACEHOLDERS.map((title) => (

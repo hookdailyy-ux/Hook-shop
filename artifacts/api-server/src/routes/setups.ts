@@ -66,7 +66,7 @@ router.get("/setups/:id", async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const result = await getSetupWithProducts(id);
-    if (!result) return res.status(404).json({ error: "Not found" });
+    if (!result) { res.status(404).json({ error: "Not found" }); return; }
     res.json(result);
   } catch (err) {
     req.log.error({ err }, "Failed to get setup");
@@ -100,7 +100,7 @@ router.patch("/setups/:id", async (req, res) => {
       }
     }
     const result = await getSetupWithProducts(id);
-    if (!result) return res.status(404).json({ error: "Not found" });
+    if (!result) { res.status(404).json({ error: "Not found" }); return; }
     res.json(result);
   } catch (err) {
     req.log.error({ err }, "Failed to update setup");

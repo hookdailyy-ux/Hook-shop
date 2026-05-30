@@ -37,3 +37,5 @@ export * from './subcategory';
 export * from './subcategoryCategory';
 export * from './subcategoryInput';
 export * from './subcategoryInputCategory';
+export * from './uploadUrlRequest';
+export * from './uploadUrlResponse';

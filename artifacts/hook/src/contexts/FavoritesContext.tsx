@@ -18,17 +18,24 @@ export type FavoriteLook = {
   imageUrl?: string | null;
 };
 
-export type FavoriteItem = FavoriteProduct | FavoriteLook;
+export type FavoriteSetup = {
+  id: number;
+  type: "setup";
+  title: string;
+  imageUrl?: string | null;
+};
+
+export type FavoriteItem = FavoriteProduct | FavoriteLook | FavoriteSetup;
 
 interface FavoritesContextType {
   favorites: FavoriteItem[];
   count: number;
-  isFavorited: (id: number, type: "product" | "look") => boolean;
+  isFavorited: (id: number, type: "product" | "look" | "setup") => boolean;
   toggleFavorite: (item: FavoriteItem) => void;
 }
 
 const FavoritesContext = createContext<FavoritesContextType | null>(null);
-const STORAGE_KEY = "hook_favorites_v1";
+const STORAGE_KEY = "hook_favorites_v2";
 
 export function FavoritesProvider({ children }: { children: ReactNode }) {
   const [favorites, setFavorites] = useState<FavoriteItem[]>(() => {
@@ -48,7 +55,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
     }
   }, [favorites]);
 
-  const isFavorited = (id: number, type: "product" | "look") =>
+  const isFavorited = (id: number, type: "product" | "look" | "setup") =>
     favorites.some((f) => f.id === id && f.type === type);
 
   const toggleFavorite = (item: FavoriteItem) => {

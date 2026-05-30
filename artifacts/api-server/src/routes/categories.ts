@@ -55,7 +55,7 @@ router.post("/categories", requireAdmin, async (req, res) => {
 
 router.patch("/categories/:id", requireAdmin, async (req, res) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const schema = z.object({
       name: z.string().optional(),
       imageUrl: z.string().optional().nullable(),
@@ -63,7 +63,7 @@ router.patch("/categories/:id", requireAdmin, async (req, res) => {
     });
     const data = schema.parse(req.body);
     const [cat] = await db.update(categoriesTable).set(data).where(eq(categoriesTable.id, id)).returning();
-    if (!cat) return res.status(404).json({ error: "Not found" });
+    if (!cat) { res.status(404).json({ error: "Not found" }); return; }
     res.json(cat);
   } catch (err) {
     req.log.error({ err }, "Failed to update category");
@@ -73,7 +73,7 @@ router.patch("/categories/:id", requireAdmin, async (req, res) => {
 
 router.delete("/categories/:id", requireAdmin, async (req, res) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     await db.delete(categoriesTable).where(eq(categoriesTable.id, id));
     res.status(204).send();
   } catch (err) {

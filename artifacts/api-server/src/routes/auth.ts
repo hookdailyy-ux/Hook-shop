@@ -37,14 +37,16 @@ router.post("/auth/login", async (req, res) => {
   try {
     const { password } = req.body as { password?: string };
     if (!password || typeof password !== "string") {
-      return res.status(400).json({ error: "Password required" });
+      res.status(400).json({ error: "Password required" });
+      return;
     }
 
     const storedHash = await getAdminPasswordHash();
     const inputHash = hashPassword(password);
 
     if (inputHash !== storedHash) {
-      return res.status(401).json({ error: "Invalid password" });
+      res.status(401).json({ error: "Invalid password" });
+      return;
     }
 
     req.session.adminAuthenticated = true;
@@ -63,7 +65,8 @@ router.post("/auth/logout", (req, res) => {
 
 router.get("/auth/me", (req, res) => {
   if (req.session?.adminAuthenticated === true) {
-    return res.json({ authenticated: true });
+    res.json({ authenticated: true });
+    return;
   }
   res.status(401).json({ authenticated: false });
 });
@@ -76,16 +79,19 @@ router.put("/auth/password", requireAdmin, async (req, res) => {
     };
 
     if (!currentPassword || !newPassword) {
-      return res.status(400).json({ error: "Both currentPassword and newPassword are required" });
+      res.status(400).json({ error: "Both currentPassword and newPassword are required" });
+      return;
     }
 
     if (newPassword.length < 6) {
-      return res.status(400).json({ error: "New password must be at least 6 characters" });
+      res.status(400).json({ error: "New password must be at least 6 characters" });
+      return;
     }
 
     const storedHash = await getAdminPasswordHash();
     if (hashPassword(currentPassword) !== storedHash) {
-      return res.status(401).json({ error: "Current password is incorrect" });
+      res.status(401).json({ error: "Current password is incorrect" });
+      return;
     }
 
     const newHash = hashPassword(newPassword);

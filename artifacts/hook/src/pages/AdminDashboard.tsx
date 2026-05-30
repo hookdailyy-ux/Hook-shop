@@ -41,6 +41,7 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { X, Plus, Trash2, Pencil, LogOut } from "lucide-react";
+import { SingleImageUpload, MultiImageUpload } from "@/components/ImageUploadField";
 import { useAdminAuth } from "@/contexts/AdminAuthContext";
 import { useLocation } from "wouter";
 
@@ -490,7 +491,6 @@ function ProductDialog({ product }: { product?: Product }) {
   });
 
   const [form, setForm] = useState<ProductFormData>(defaultForm);
-  const [imageUrlInput, setImageUrlInput] = useState("");
 
   useEffect(() => {
     if (open) setForm(defaultForm());
@@ -503,14 +503,6 @@ function ProductDialog({ product }: { product?: Product }) {
 
   const set = (k: keyof ProductFormData) => (v: ProductFormData[typeof k]) =>
     setForm((f) => ({ ...f, [k]: v }));
-
-  const addImageUrl = () => {
-    const url = imageUrlInput.trim();
-    if (url && !form.images.includes(url)) {
-      setForm((f) => ({ ...f, images: [...f.images, url] }));
-    }
-    setImageUrlInput("");
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -707,38 +699,19 @@ function ProductDialog({ product }: { product?: Product }) {
           {/* Sizes — preset chips + custom */}
           <SizePicker values={form.sizes} onChange={set("sizes")} />
 
-          {/* Main Image */}
-          <div className="space-y-2">
-            <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Main Image URL</label>
-            <Input value={form.imageUrl} onChange={(e) => set("imageUrl")(e.target.value)} placeholder="https://..." className="border-border" />
-          </div>
+          {/* Main Image Upload */}
+          <SingleImageUpload
+            value={form.imageUrl}
+            onChange={set("imageUrl")}
+            label="Main Product Image"
+          />
 
-          {/* Additional Images */}
-          <div className="space-y-2">
-            <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Additional Image URLs</label>
-            <div className="flex gap-2">
-              <Input
-                value={imageUrlInput}
-                onChange={(e) => setImageUrlInput(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addImageUrl(); }}}
-                placeholder="Paste URL and press Enter"
-                className="border-border"
-              />
-              <Button type="button" variant="outline" onClick={addImageUrl} className="shrink-0">Add</Button>
-            </div>
-            {form.images.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-2">
-                {form.images.map((url, i) => (
-                  <div key={i} className="flex items-center gap-1 bg-accent text-xs px-2 py-1 max-w-[200px]">
-                    <span className="truncate">{url}</span>
-                    <button type="button" onClick={() => set("images")(form.images.filter((_, j) => j !== i))}>
-                      <X className="h-3 w-3 shrink-0" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          {/* Gallery Images Upload */}
+          <MultiImageUpload
+            values={form.images}
+            onChange={set("images")}
+            label="Gallery Images (back view, close-up, detail shots…)"
+          />
 
           {/* Featured + Trending */}
           <div className="grid grid-cols-2 gap-4 pt-2">

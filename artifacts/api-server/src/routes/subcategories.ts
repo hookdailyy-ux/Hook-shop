@@ -47,7 +47,7 @@ router.patch("/subcategories/:id", async (req, res) => {
     });
     const data = schema.parse(req.body);
     const [sub] = await db.update(subcategoriesTable).set(data).where(eq(subcategoriesTable.id, id)).returning();
-    if (!sub) return res.status(404).json({ error: "Not found" });
+    if (!sub) { res.status(404).json({ error: "Not found" }); return; }
     res.json(sub);
   } catch (err) {
     req.log.error({ err }, "Failed to update subcategory");

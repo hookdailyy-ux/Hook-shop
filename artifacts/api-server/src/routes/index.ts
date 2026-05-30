@@ -9,6 +9,7 @@ import subcategoriesRouter from "./subcategories";
 import authRouter from "./auth";
 import siteSettingsRouter from "./site-settings";
 import categoriesRouter from "./categories";
+import storageRouter from "./storage";
 
 const router: IRouter = Router();
 
@@ -22,5 +23,6 @@ router.use(setupsRouter);
 router.use(newsletterRouter);
 router.use(adminRouter);
 router.use(subcategoriesRouter);
+router.use(storageRouter);
 
 export default router;
