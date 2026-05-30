@@ -927,6 +927,19 @@ function SettingsTab() {
   const { toast } = useToast();
   const [form, setForm] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
   const [loading, setLoading] = useState(false);
+  const [discoverUrl, setDiscoverUrl] = useState("");
+  const [discoverLoading, setDiscoverLoading] = useState(false);
+  const [discoverFetched, setDiscoverFetched] = useState(false);
+
+  useEffect(() => {
+    fetch(`${BASE}/api/site-settings`)
+      .then((r) => r.json())
+      .then((d: { discoverMoreUrl?: string }) => {
+        setDiscoverUrl(d.discoverMoreUrl ?? "");
+        setDiscoverFetched(true);
+      })
+      .catch(() => setDiscoverFetched(true));
+  }, []);
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -963,13 +976,78 @@ function SettingsTab() {
     }
   };
 
+  const handleDiscoverSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setDiscoverLoading(true);
+    try {
+      const res = await fetch(`${BASE}/api/site-settings`, {
+        method: "PUT",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ discoverMoreUrl: discoverUrl }),
+      });
+      if (res.ok) {
+        toast({ title: "Discover More link saved" });
+      } else {
+        toast({ title: "Failed to save link", variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Network error. Please try again.", variant: "destructive" });
+    } finally {
+      setDiscoverLoading(false);
+    }
+  };
+
   return (
-    <div className="max-w-md">
-      <div className="mb-8">
+    <div className="max-w-md space-y-8">
+      <div className="mb-2">
         <h2 className="font-serif text-2xl font-light mb-1">Settings</h2>
-        <p className="text-xs text-muted-foreground tracking-wide">Manage your admin credentials.</p>
+        <p className="text-xs text-muted-foreground tracking-wide">Manage links and admin credentials.</p>
       </div>
 
+      {/* Discover More link */}
+      <div className="border border-border p-6">
+        <h3 className="text-xs tracking-widest uppercase font-medium mb-2">Discover More Link</h3>
+        <p className="text-[10px] text-muted-foreground tracking-wide mb-5 leading-relaxed">
+          This link appears as a "Discover More" button on Fashion, Accessories, and Home Essentials category pages. Paste your SHEIN referral link here.
+        </p>
+        <form onSubmit={handleDiscoverSave} className="space-y-4">
+          <div className="space-y-2">
+            <label className="text-[10px] uppercase tracking-widest text-muted-foreground">SHEIN Referral URL</label>
+            <Input
+              type="url"
+              value={discoverUrl}
+              onChange={(e) => setDiscoverUrl(e.target.value)}
+              placeholder="https://shein.com/..."
+              disabled={!discoverFetched}
+              className="border-border"
+              data-testid="input-discover-url"
+            />
+          </div>
+          <div className="pt-1 flex items-center gap-3">
+            <Button
+              type="submit"
+              disabled={discoverLoading || !discoverFetched}
+              className="text-xs tracking-widest uppercase"
+              data-testid="button-save-discover-url"
+            >
+              {discoverLoading ? "Saving..." : "Save Link"}
+            </Button>
+            {discoverUrl && (
+              <a
+                href={discoverUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[10px] tracking-widest uppercase text-muted-foreground underline underline-offset-4 hover:text-foreground transition-colors"
+              >
+                Preview
+              </a>
+            )}
+          </div>
+        </form>
+      </div>
+
+      {/* Change Password */}
       <div className="border border-border p-6">
         <h3 className="text-xs tracking-widest uppercase font-medium mb-6">Change Password</h3>
         <form onSubmit={handlePasswordChange} className="space-y-4">

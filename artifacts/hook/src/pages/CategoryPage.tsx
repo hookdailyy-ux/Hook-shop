@@ -2,27 +2,33 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useListProducts, useListSubcategories, getListSubcategoriesQueryKey } from "@workspace/api-client-react";
 import { ProductCard } from "@/components/ProductCard";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
-const CATEGORY_DETAILS: Record<string, { title: string; description: string }> = {
+const CATEGORY_DETAILS: Record<string, { title: string; description: string; showDiscoverMore?: boolean }> = {
   women: {
     title: "Women",
     description: "Refined essentials and statement pieces. A study in quiet confidence.",
+    showDiscoverMore: true,
   },
   men: {
     title: "Men",
     description: "Structural simplicity. Wardrobe foundations built to last.",
+    showDiscoverMore: true,
   },
   electronics: {
     title: "Electronics",
     description: "Design-forward technology. Form meets function.",
+    showDiscoverMore: false,
   },
   home: {
     title: "Home Essentials",
     description: "Objects for living. Crafted for the modern interior.",
+    showDiscoverMore: true,
   },
   accessories: {
     title: "Accessories",
     description: "The finishing touch. Pieces that complete every look.",
+    showDiscoverMore: true,
   },
 };
 
@@ -33,6 +39,7 @@ interface CategoryPageProps {
 export default function CategoryPage({ category }: CategoryPageProps) {
   const [, location] = useLocation();
   const [activeSub, setActiveSub] = useState<string | null>(null);
+  const { data: siteSettings } = useSiteSettings();
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -53,16 +60,31 @@ export default function CategoryPage({ category }: CategoryPageProps) {
   const details = CATEGORY_DETAILS[category] ?? {
     title: category.charAt(0).toUpperCase() + category.slice(1),
     description: "",
+    showDiscoverMore: false,
   };
+
+  const discoverMoreUrl = siteSettings?.discoverMoreUrl;
+  const showDiscoverMore = details.showDiscoverMore && !!discoverMoreUrl;
 
   return (
     <div className="pb-32">
       <div className="container mx-auto px-4 sm:px-6 pt-12 pb-10 md:pt-16 md:pb-14 border-b border-border">
         <h1 className="font-serif text-4xl md:text-6xl font-light mb-3">{details.title}</h1>
         {details.description && (
-          <p className="text-xs tracking-widest uppercase text-muted-foreground max-w-md leading-relaxed">
+          <p className="text-xs tracking-widest uppercase text-muted-foreground max-w-md leading-relaxed mb-5">
             {details.description}
           </p>
+        )}
+        {showDiscoverMore && (
+          <a
+            href={discoverMoreUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block text-[10px] tracking-[0.25em] uppercase border border-foreground/60 px-6 py-2.5 text-foreground/80 hover:bg-foreground hover:text-background transition-colors"
+            data-testid="button-discover-more"
+          >
+            Discover More
+          </a>
         )}
       </div>
 

@@ -1,4 +1,5 @@
 import { PlaceholderImage } from "./PlaceholderImage";
+import { HeartButton } from "./HeartButton";
 import type { Setup, Product } from "@workspace/api-client-react";
 
 interface SetupCardProps {
@@ -61,7 +62,7 @@ export function SetupCard({ setup }: SetupCardProps) {
       <div className="flex flex-col md:flex-row md:gap-12 md:items-start">
 
         {/* Setup image */}
-        <div className="w-full md:w-[42%] shrink-0">
+        <div className="w-full md:w-[42%] shrink-0 relative">
           {setup.imageUrl ? (
             <img
               src={setup.imageUrl}
@@ -78,6 +79,17 @@ export function SetupCard({ setup }: SetupCardProps) {
               <PlaceholderImage aspectRatio="tall" className="w-full h-full" />
             </div>
           )}
+          {/* Heart button */}
+          <div className="absolute top-3 right-3">
+            <HeartButton
+              item={{
+                id: setup.id,
+                type: "look",
+                title: setup.title,
+                imageUrl: setup.imageUrl,
+              }}
+            />
+          </div>
         </div>
 
         {/* Setup details */}

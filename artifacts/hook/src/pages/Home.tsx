@@ -1,6 +1,8 @@
 import { Link } from "wouter";
 import { useListLooks, useListSetups } from "@workspace/api-client-react";
 import { NewsletterForm } from "@/components/NewsletterForm";
+import { HeartButton } from "@/components/HeartButton";
+import type { FavoriteItem } from "@/contexts/FavoritesContext";
 import { Truck, RotateCcw, ShieldCheck, Globe } from "lucide-react";
 
 const BENEFITS = [
@@ -10,19 +12,8 @@ const BENEFITS = [
   { icon: Globe, label: "Worldwide" },
 ];
 
-const LOOK_PLACEHOLDERS = [
-  "Weekend Casual",
-  "Office Ready",
-  "Evening Edit",
-  "Street Style",
-];
-
-const SETUP_PLACEHOLDERS = [
-  "Kitchen Setup",
-  "Desk Setup",
-  "Bedroom Setup",
-  "Living Room",
-];
+const LOOK_PLACEHOLDERS = ["Weekend Casual", "Office Ready", "Evening Edit", "Street Style"];
+const SETUP_PLACEHOLDERS = ["Kitchen Setup", "Desk Setup", "Bedroom Setup", "Living Room"];
 
 export default function Home() {
   const { data: latestLooks } = useListLooks({ limit: 4 });
@@ -39,25 +30,19 @@ export default function Home() {
           <div className="hidden md:block absolute left-0 top-0 w-1/4 h-full bg-[#d4c9bb]/30" />
           <div className="hidden md:block absolute right-0 top-0 w-1/4 h-full bg-[#d4c9bb]/30" />
         </div>
-
         <p className="absolute top-8 left-1/2 -translate-x-1/2 text-[10px] tracking-[0.35em] uppercase text-[#8b7355]/60 font-medium">
           New Collection · 2025
         </p>
-
         <div className="relative z-10 text-center px-6 flex flex-col items-center gap-6 py-20">
           <h1
             className="font-serif font-light leading-none tracking-tight"
             style={{ fontSize: "clamp(3.5rem, 13vw, 9rem)", color: "#2a2318" }}
           >
-            Timeless
-            <br />
-            Essentials
+            Timeless<br />Essentials
           </h1>
-
           <p className="text-sm md:text-base tracking-widest uppercase text-[#6b5e4e] max-w-xs md:max-w-sm leading-relaxed">
             Curated pieces for everyday life.
           </p>
-
           <Link
             href="/women"
             className="mt-2 inline-block bg-[#2a2318] text-[#f0ebe3] text-xs tracking-[0.25em] uppercase px-10 py-4 hover:bg-[#3d3226] transition-colors"
@@ -65,7 +50,6 @@ export default function Home() {
             Shop Now
           </Link>
         </div>
-
         <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none" style={{ background: "linear-gradient(to bottom, transparent, hsl(var(--background)))" }} />
       </section>
 
@@ -91,14 +75,10 @@ export default function Home() {
               <p className="text-[10px] tracking-[0.3em] uppercase text-muted-foreground mb-1.5">Editorial</p>
               <h2 className="font-serif text-3xl md:text-4xl font-light">Shop The Look</h2>
             </div>
-            <Link
-              href="/shop-the-look"
-              className="text-[10px] tracking-[0.2em] uppercase border-b border-foreground pb-0.5 hover:opacity-70 transition-opacity"
-            >
+            <Link href="/shop-the-look" className="text-[10px] tracking-[0.2em] uppercase border-b border-foreground pb-0.5 hover:opacity-70 transition-opacity">
               View All
             </Link>
           </div>
-
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5">
             {latestLooks && latestLooks.length > 0
               ? latestLooks.slice(0, 4).map((look) => (
@@ -109,16 +89,11 @@ export default function Home() {
                     imageUrl={look.imageUrl ?? undefined}
                     label="Look"
                     cta="Shop Now"
+                    favoriteItem={{ id: look.id, type: "look", title: look.title, imageUrl: look.imageUrl }}
                   />
                 ))
               : LOOK_PLACEHOLDERS.map((title) => (
-                  <HomeEditorialCard
-                    key={title}
-                    title={title}
-                    href="/shop-the-look"
-                    label="Look"
-                    cta="Shop Now"
-                  />
+                  <HomeEditorialCard key={title} title={title} href="/shop-the-look" label="Look" cta="Shop Now" />
                 ))}
           </div>
         </div>
@@ -132,14 +107,10 @@ export default function Home() {
               <p className="text-[10px] tracking-[0.3em] uppercase text-muted-foreground mb-1.5">Interiors</p>
               <h2 className="font-serif text-3xl md:text-4xl font-light">Shop The Setup</h2>
             </div>
-            <Link
-              href="/shop-the-setup"
-              className="text-[10px] tracking-[0.2em] uppercase border-b border-foreground pb-0.5 hover:opacity-70 transition-opacity"
-            >
+            <Link href="/shop-the-setup" className="text-[10px] tracking-[0.2em] uppercase border-b border-foreground pb-0.5 hover:opacity-70 transition-opacity">
               View All
             </Link>
           </div>
-
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5">
             {latestSetups && latestSetups.length > 0
               ? latestSetups.slice(0, 4).map((setup) => (
@@ -150,16 +121,11 @@ export default function Home() {
                     imageUrl={setup.imageUrl ?? undefined}
                     label="Setup"
                     cta="Shop Setup"
+                    favoriteItem={{ id: setup.id, type: "look", title: setup.title, imageUrl: setup.imageUrl }}
                   />
                 ))
               : SETUP_PLACEHOLDERS.map((title) => (
-                  <HomeEditorialCard
-                    key={title}
-                    title={title}
-                    href="/shop-the-setup"
-                    label="Setup"
-                    cta="Shop Setup"
-                  />
+                  <HomeEditorialCard key={title} title={title} href="/shop-the-setup" label="Setup" cta="Shop Setup" />
                 ))}
           </div>
         </div>
@@ -189,39 +155,55 @@ function HomeEditorialCard({
   imageUrl,
   label,
   cta,
+  favoriteItem,
 }: {
   title: string;
   href: string;
   imageUrl?: string;
   label: string;
   cta: string;
+  favoriteItem?: FavoriteItem;
 }) {
   return (
-    <Link href={href} className="group block">
+    <div className="group flex flex-col">
+      {/* Image container — heart sits inside but stops propagation */}
       <div className="relative overflow-hidden aspect-[3/4] bg-[#ddd5c8] mb-3 md:mb-4">
-        {imageUrl ? (
-          <img
-            src={imageUrl}
-            alt={title}
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-          />
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-12 h-12 border border-[#8b7355]/30 flex items-center justify-center">
-              <span className="text-[10px] tracking-widest text-[#8b7355]/60 uppercase">{label}</span>
+        <Link href={href} className="block w-full h-full">
+          {imageUrl ? (
+            <img
+              src={imageUrl}
+              alt={title}
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              loading="lazy"
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-12 h-12 border border-[#8b7355]/30 flex items-center justify-center">
+                <span className="text-[10px] tracking-widest text-[#8b7355]/60 uppercase">{label}</span>
+              </div>
             </div>
+          )}
+          <div className="absolute bottom-0 left-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <span className="block w-full text-center bg-[#2a2318]/85 text-[#f0ebe3] text-[10px] tracking-[0.2em] uppercase py-2.5 backdrop-blur-sm">
+              {cta}
+            </span>
+          </div>
+        </Link>
+
+        {/* Heart button — on top of image, stops click from reaching the Link */}
+        {favoriteItem && (
+          <div className="absolute top-2 right-2 z-10">
+            <HeartButton item={favoriteItem} />
           </div>
         )}
-        <div className="absolute bottom-0 left-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <span className="block w-full text-center bg-[#2a2318]/85 text-[#f0ebe3] text-[10px] tracking-[0.2em] uppercase py-2.5 backdrop-blur-sm">
-            {cta}
-          </span>
-        </div>
       </div>
-      <p className="text-sm font-medium leading-snug tracking-wide group-hover:underline decoration-1 underline-offset-4 transition-all">
-        {title}
-      </p>
-      <p className="text-[10px] tracking-[0.2em] uppercase text-muted-foreground mt-1">{cta}</p>
-    </Link>
+
+      <Link href={href}>
+        <p className="text-sm font-medium leading-snug tracking-wide group-hover:underline decoration-1 underline-offset-4 transition-all">
+          {title}
+        </p>
+        <p className="text-[10px] tracking-[0.2em] uppercase text-muted-foreground mt-1">{cta}</p>
+      </Link>
+    </div>
   );
 }

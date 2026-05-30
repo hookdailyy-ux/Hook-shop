@@ -6,20 +6,13 @@ import { z } from "zod";
 
 const router: IRouter = Router();
 
-const HERO_KEYS = [
-  "hero_image_url",
-  "hero_title",
-  "hero_subtitle",
-  "hero_cta_text",
-  "hero_cta_link",
-] as const;
-
 const DEFAULTS: Record<string, string> = {
   hero_image_url: "",
   hero_title: "Timeless Essentials",
   hero_subtitle: "Curated pieces for everyday life.",
   hero_cta_text: "Shop Now",
   hero_cta_link: "/women",
+  discover_more_url: "",
 };
 
 async function getAllSettings(): Promise<Record<string, string>> {
@@ -40,6 +33,7 @@ router.get("/site-settings", async (req, res) => {
       heroSubtitle: all["hero_subtitle"] ?? DEFAULTS["hero_subtitle"],
       heroCtaText: all["hero_cta_text"] ?? DEFAULTS["hero_cta_text"],
       heroCtaLink: all["hero_cta_link"] ?? DEFAULTS["hero_cta_link"],
+      discoverMoreUrl: all["discover_more_url"] ?? "",
     });
   } catch (err) {
     req.log.error({ err }, "Failed to get site settings");
@@ -55,6 +49,7 @@ router.put("/site-settings", requireAdmin, async (req, res) => {
       heroSubtitle: z.string().optional(),
       heroCtaText: z.string().optional(),
       heroCtaLink: z.string().optional(),
+      discoverMoreUrl: z.string().optional(),
     });
     const data = schema.parse(req.body);
 
@@ -64,6 +59,7 @@ router.put("/site-settings", requireAdmin, async (req, res) => {
     if (data.heroSubtitle !== undefined) updates.push({ key: "hero_subtitle", value: data.heroSubtitle });
     if (data.heroCtaText !== undefined) updates.push({ key: "hero_cta_text", value: data.heroCtaText });
     if (data.heroCtaLink !== undefined) updates.push({ key: "hero_cta_link", value: data.heroCtaLink });
+    if (data.discoverMoreUrl !== undefined) updates.push({ key: "discover_more_url", value: data.discoverMoreUrl });
 
     for (const { key, value } of updates) {
       await db
@@ -79,6 +75,7 @@ router.put("/site-settings", requireAdmin, async (req, res) => {
       heroSubtitle: all["hero_subtitle"] ?? DEFAULTS["hero_subtitle"],
       heroCtaText: all["hero_cta_text"] ?? DEFAULTS["hero_cta_text"],
       heroCtaLink: all["hero_cta_link"] ?? DEFAULTS["hero_cta_link"],
+      discoverMoreUrl: all["discover_more_url"] ?? "",
     });
   } catch (err) {
     req.log.error({ err }, "Failed to update site settings");
