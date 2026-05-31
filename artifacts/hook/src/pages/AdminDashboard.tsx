@@ -40,13 +40,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { X, Plus, Trash2, Pencil, LogOut, Home, User, ChevronDown, Loader2, Upload } from "lucide-react";
 import { SingleImageUpload, MultiImageUpload } from "@/components/ImageUploadField";
 import { useUpload } from "@workspace/object-storage-web";
@@ -71,13 +64,34 @@ const CATEGORIES = [
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<Tab>("dashboard");
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
   const { logout } = useAdminAuth();
   const [, navigate] = useLocation();
 
   const handleLogout = async () => {
+    setMenuOpen(false);
     await logout();
-    navigate("/");
+    navigate("/admin/login");
   };
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenuOpen(false);
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [menuOpen]);
 
   return (
     <div className="min-h-screen pb-32" style={{ background: "hsl(var(--background))" }}>
@@ -101,47 +115,47 @@ export default function AdminDashboard() {
                 {tab}
               </button>
             ))}
-            <div className="ml-auto shrink-0 pl-4">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button
-                    className="flex items-center gap-1.5 px-3 py-2 text-xs tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors focus:outline-none"
-                    data-testid="admin-account-menu"
+            <div className="ml-auto shrink-0 pl-4 relative" ref={menuRef}>
+              <button
+                onClick={() => setMenuOpen((o) => !o)}
+                className="flex items-center gap-1.5 px-3 py-4 text-xs tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors focus:outline-none"
+                data-testid="admin-account-menu"
+              >
+                <span>Admin</span>
+                <ChevronDown
+                  className={`h-3 w-3 opacity-60 transition-transform duration-150 ${menuOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+              {menuOpen && (
+                <div className="absolute right-0 top-full mt-0 w-44 bg-background border border-border shadow-lg z-50 py-1">
+                  <a
+                    href="/"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-2.5 px-4 py-2.5 text-xs tracking-widest uppercase text-foreground hover:bg-accent transition-colors"
+                    data-testid="admin-menu-home"
                   >
-                    <span>Admin</span>
-                    <ChevronDown className="h-3 w-3 opacity-60" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-44">
-                  <DropdownMenuItem asChild>
-                    <a
-                      href="/"
-                      className="flex items-center gap-2 cursor-pointer text-xs tracking-widest uppercase"
-                      data-testid="admin-menu-home"
-                    >
-                      <Home className="h-3.5 w-3.5 text-muted-foreground" />
-                      Home
-                    </a>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setActiveTab("settings")}
-                    className="flex items-center gap-2 cursor-pointer text-xs tracking-widest uppercase"
+                    <Home className="h-3.5 w-3.5 text-muted-foreground" />
+                    Home
+                  </a>
+                  <button
+                    onClick={() => { setActiveTab("settings"); setMenuOpen(false); }}
+                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs tracking-widest uppercase text-foreground hover:bg-accent transition-colors text-left"
                     data-testid="admin-menu-account"
                   >
                     <User className="h-3.5 w-3.5 text-muted-foreground" />
                     My Account
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={handleLogout}
-                    className="flex items-center gap-2 cursor-pointer text-xs tracking-widest uppercase text-destructive focus:text-destructive"
+                  </button>
+                  <div className="my-1 border-t border-border" />
+                  <button
+                    onClick={() => { void handleLogout(); }}
+                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs tracking-widest uppercase text-destructive hover:bg-destructive/10 transition-colors text-left"
                     data-testid="button-logout"
                   >
                     <LogOut className="h-3.5 w-3.5" />
                     Logout
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>

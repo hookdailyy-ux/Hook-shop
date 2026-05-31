@@ -27,7 +27,8 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
     queryKey: ["admin-auth-me"],
     queryFn: fetchMe,
     retry: false,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0,
+    gcTime: 0,
   });
 
   const login = useCallback(async (password: string) => {
