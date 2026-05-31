@@ -5,34 +5,35 @@ import { ProductCard } from "@/components/ProductCard";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useSiteImages } from "@/hooks/useSiteImages";
 import type { SiteImageKey } from "@/hooks/useSiteImages";
+import { useTranslation } from "react-i18next";
 
 // To add a new SHEIN-powered section, set showDiscoverMore: true below.
 // The "Explore More via SHEIN" button only appears when showDiscoverMore is true
 // AND the admin has configured a SHEIN Referral URL in Settings.
-const CATEGORY_DETAILS: Record<string, { title: string; description: string; showDiscoverMore?: boolean }> = {
+const CATEGORY_META: Record<string, { titleKey: string; descKey: string; showDiscoverMore?: boolean }> = {
   women: {
-    title: "Women",
-    description: "Refined essentials and statement pieces. A study in quiet confidence.",
+    titleKey: "category.women.title",
+    descKey: "category.women.description",
     showDiscoverMore: true,
   },
   men: {
-    title: "Men",
-    description: "Structural simplicity. Wardrobe foundations built to last.",
+    titleKey: "category.men.title",
+    descKey: "category.men.description",
     showDiscoverMore: true,
   },
   electronics: {
-    title: "Electronics",
-    description: "Design-forward technology. Form meets function.",
-    showDiscoverMore: false, // Electronics is powered by Amazon, not SHEIN
+    titleKey: "category.electronics.title",
+    descKey: "category.electronics.description",
+    showDiscoverMore: false,
   },
   home: {
-    title: "Home Essentials",
-    description: "Objects for living. Crafted for the modern interior.",
+    titleKey: "category.homeEssentials.title",
+    descKey: "category.homeEssentials.description",
     showDiscoverMore: true,
   },
   accessories: {
-    title: "Accessories",
-    description: "The finishing touch. Pieces that complete every look.",
+    titleKey: "category.accessories.title",
+    descKey: "category.accessories.description",
     showDiscoverMore: true,
   },
 };
@@ -47,6 +48,7 @@ export default function CategoryPage({ category }: CategoryPageProps) {
   const { data: siteSettings } = useSiteSettings();
   const { data: siteImages } = useSiteImages();
   const categoryImage = siteImages?.[category as SiteImageKey];
+  const { t } = useTranslation();
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -64,14 +66,10 @@ export default function CategoryPage({ category }: CategoryPageProps) {
     ...(activeSub ? { subcategory: activeSub } : {}),
   });
 
-  const details = CATEGORY_DETAILS[category] ?? {
-    title: category.charAt(0).toUpperCase() + category.slice(1),
-    description: "",
-    showDiscoverMore: false,
-  };
-
-  const discoverMoreUrl = siteSettings?.discoverMoreUrl;
-  const showDiscoverMore = details.showDiscoverMore && !!discoverMoreUrl;
+  const meta = CATEGORY_META[category];
+  const title = meta ? t(meta.titleKey) : category.charAt(0).toUpperCase() + category.slice(1);
+  const description = meta ? t(meta.descKey) : "";
+  const showDiscoverMore = (meta?.showDiscoverMore ?? false) && !!siteSettings?.discoverMoreUrl;
 
   return (
     <div className="pb-32">
@@ -90,22 +88,22 @@ export default function CategoryPage({ category }: CategoryPageProps) {
         </div>
       )}
       <div className="container mx-auto px-4 sm:px-6 pt-12 pb-10 md:pt-16 md:pb-14 border-b border-border">
-        <h1 className="font-serif text-4xl md:text-6xl font-light mb-3">{details.title}</h1>
-        {details.description && (
+        <h1 className="font-serif text-4xl md:text-6xl font-light mb-3">{title}</h1>
+        {description && (
           <p className="text-xs tracking-widest uppercase text-muted-foreground max-w-md leading-relaxed mb-5">
-            {details.description}
+            {description}
           </p>
         )}
         {showDiscoverMore && (
           <a
-            href={discoverMoreUrl}
+            href={siteSettings!.discoverMoreUrl!}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 text-[10px] tracking-[0.25em] uppercase border border-foreground/60 px-6 py-2.5 text-foreground/80 hover:bg-foreground hover:text-background transition-colors"
             data-testid="button-discover-more"
           >
             <span>✨</span>
-            <span>Explore More via SHEIN</span>
+            <span>{t("category.exploreMoreShein")}</span>
           </a>
         )}
       </div>
@@ -126,7 +124,7 @@ export default function CategoryPage({ category }: CategoryPageProps) {
                 }`}
                 data-testid="filter-all"
               >
-                All
+                {t("category.all")}
               </button>
               {subcategories.map((sub) => (
                 <button
@@ -157,7 +155,7 @@ export default function CategoryPage({ category }: CategoryPageProps) {
         ) : !products || products.length === 0 ? (
           <div className="text-center py-28 border border-dashed border-border">
             <p className="text-xs tracking-widest text-muted-foreground uppercase">
-              {activeSub ? `No ${activeSub} products yet.` : "Collection coming soon."}
+              {activeSub ? t("category.noProducts") : t("category.collectionComingSoon")}
             </p>
           </div>
         ) : (

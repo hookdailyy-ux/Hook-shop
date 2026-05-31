@@ -1,6 +1,7 @@
 import { useListSetups } from "@workspace/api-client-react";
 import { useSiteImages } from "@/hooks/useSiteImages";
 import { SetupCard } from "@/components/SetupCard";
+import { useTranslation } from "react-i18next";
 
 function SetupSkeleton() {
   return (
@@ -34,6 +35,7 @@ export default function ShopTheSetup() {
   const { data: setups, isLoading } = useListSetups();
   const { data: siteImages } = useSiteImages();
   const sectionImage = siteImages?.setup;
+  const { t } = useTranslation();
 
   return (
     <div className="pb-24">
@@ -51,12 +53,11 @@ export default function ShopTheSetup() {
           />
         </div>
       )}
-      {/* Page header */}
       <div className="container mx-auto px-4 sm:px-6 pt-10 pb-8 md:pt-14 md:pb-12 border-b border-border mb-12">
-        <p className="text-[10px] tracking-[0.35em] uppercase text-muted-foreground mb-2">Interiors</p>
-        <h1 className="font-serif text-4xl md:text-6xl font-light mb-2">Shop The Setup</h1>
+        <p className="text-[10px] tracking-[0.35em] uppercase text-muted-foreground mb-2">{t("shopTheSetup.badge")}</p>
+        <h1 className="font-serif text-4xl md:text-6xl font-light mb-2">{t("shopTheSetup.title")}</h1>
         <p className="text-xs tracking-widest uppercase text-muted-foreground max-w-sm leading-relaxed">
-          Every room, every desk, every kitchen — fully curated and shoppable.
+          {t("shopTheSetup.description")}
         </p>
       </div>
 
@@ -70,7 +71,7 @@ export default function ShopTheSetup() {
           </div>
         ) : !setups || setups.length === 0 ? (
           <div className="text-center py-28 border border-dashed border-border">
-            <p className="text-xs tracking-widest text-muted-foreground uppercase">No setups yet. Check back soon.</p>
+            <p className="text-xs tracking-widest text-muted-foreground uppercase">{t("shopTheSetup.empty")}</p>
           </div>
         ) : (
           <div className="space-y-0">

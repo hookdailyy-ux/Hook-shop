@@ -1,0 +1,188 @@
+{
+  "nav": {
+    "home": "Home",
+    "fashion": "Fashion",
+    "accessories": "Accessories",
+    "electronics": "Electronics",
+    "homeEssentials": "Home Essentials",
+    "shopTheLook": "Shop The Look",
+    "men": "Men",
+    "women": "Women",
+    "allAccessories": "All Accessories",
+    "womenAccessories": "Women Accessories",
+    "menAccessories": "Men Accessories"
+  },
+  "hero": {
+    "badge": "New Collection · 2025",
+    "title1": "Timeless",
+    "title2": "Essentials",
+    "subtitle": "Curated pieces for everyday life.",
+    "cta": "Shop Now"
+  },
+  "benefits": {
+    "freeShipping": "Free Shipping",
+    "easyReturns": "Easy Returns",
+    "securePayment": "Secure Payment",
+    "worldwide": "Worldwide"
+  },
+  "home": {
+    "editorialBadge": "Editorial",
+    "shopTheLook": "Shop The Look",
+    "interiorsBadge": "Interiors",
+    "shopTheSetup": "Shop The Setup",
+    "newsletterBadge": "Stay in the loop",
+    "newsletterTitle": "The Hook Edit"
+  },
+  "category": {
+    "women": {
+      "title": "Women",
+      "description": "Refined essentials and statement pieces. A study in quiet confidence."
+    },
+    "men": {
+      "title": "Men",
+      "description": "Structural simplicity. Wardrobe foundations built to last."
+    },
+    "electronics": {
+      "title": "Electronics",
+      "description": "Design-forward technology. Form meets function."
+    },
+    "homeEssentials": {
+      "title": "Home Essentials",
+      "description": "Objects for living. Crafted for the modern interior."
+    },
+    "accessories": {
+      "title": "Accessories",
+      "description": "The finishing touch. Pieces that complete every look."
+    },
+    "exploreMoreShein": "Explore More via SHEIN",
+    "noProducts": "No products yet.",
+    "collectionComingSoon": "Collection coming soon.",
+    "all": "All"
+  },
+  "product": {
+    "loading": "Loading...",
+    "notFound": "Product not found.",
+    "home": "Home",
+    "youMayAlsoLike": "You May Also Like",
+    "deliveredByAmazon": "Delivered by Amazon",
+    "deliveredByShein": "Delivered by SHEIN",
+    "orderNow": "Order Now",
+    "color": "Color",
+    "size": "Size"
+  },
+  "basket": {
+    "title": "Your Basket",
+    "clearAll": "Clear All",
+    "empty": "Your basket is empty",
+    "emptyHint": "Add products from a store, collection or look to get started.",
+    "shoppingFrom": "Shopping from",
+    "estimatedTotal": "Estimated Total",
+    "shareBasket": "Share Basket",
+    "generatingLink": "Generating Link\u2026",
+    "basketLinkReady": "Basket Link Ready",
+    "copyLink": "Copy Link",
+    "copied": "Copied!",
+    "whatsapp": "WhatsApp",
+    "placeOrder": "Place Order"
+  },
+  "checkout": {
+    "yourDetails": "Your Details",
+    "orderPlaced": "Order Placed!",
+    "fullName": "Full Name",
+    "phoneNumber": "Phone Number",
+    "email": "Email",
+    "shippingAddress": "Shipping Address",
+    "notes": "Notes",
+    "optional": "optional",
+    "orderSummary": "Order Summary",
+    "thankYou": "Thank You!",
+    "orderReceived": "Your order has been received. The seller will contact you shortly.",
+    "orderReference": "Order Reference",
+    "saveForTracking": "Save this for tracking.",
+    "continueShopping": "Continue Shopping",
+    "placingOrder": "Placing Order\u2026",
+    "placeOrderBtn": "Place Order",
+    "item": "item",
+    "items": "items",
+    "namePhoneRequired": "Name and phone are required",
+    "noStoreSelected": "No store selected",
+    "failedToPlace": "Failed to place order. Please try again.",
+    "fullNamePlaceholder": "Your full name",
+    "addressPlaceholder": "Your delivery address",
+    "notesPlaceholder": "Special requests or notes"
+  },
+  "addToBasket": {
+    "title": "Add to Basket",
+    "size": "Size",
+    "color": "Color",
+    "sizePlaceholder": "e.g. M, L, 38",
+    "colorPlaceholder": "e.g. Black, White"
+  },
+  "favorites": {
+    "title": "Favorites",
+    "empty": "No favorites yet",
+    "outfit": "Outfit",
+    "setup": "Setup",
+    "noImage": "No Image"
+  },
+  "shopTheLook": {
+    "badge": "Editorial",
+    "title": "Shop The Look",
+    "description": "Complete the ensemble. Each piece handpicked, every look intentional.",
+    "empty": "No looks yet. Check back soon.",
+    "exploreMore": "Explore More via SHEIN",
+    "outfit": "Outfit",
+    "thisLookIncludes": "This Look Includes",
+    "shopTheLook": "Shop The Look",
+    "completeOutfit": "Complete the outfit",
+    "shopCompleteOutfit": "Shop Complete Outfit",
+    "noItems": "No items added yet."
+  },
+  "shopTheSetup": {
+    "badge": "Interiors",
+    "title": "Shop The Setup",
+    "description": "Every room, every desk, every kitchen — fully curated and shoppable.",
+    "empty": "No setups yet. Check back soon.",
+    "setup": "Setup",
+    "thisSetupIncludes": "This Setup Includes",
+    "shopTheSetup": "Shop The Setup",
+    "completeSetup": "Complete the setup",
+    "shopCompleteSetup": "Shop Complete Setup",
+    "noItems": "No items added yet."
+  },
+  "rankings": {
+    "title": "Leaderboard",
+    "subtitle": "HOOK's top performing sellers, ranked by orders, views, and conversion.",
+    "loading": "Loading leaderboard\u2026",
+    "empty": "No rankings yet. Be the first to make a sale!",
+    "orders": "Orders",
+    "views": "Views",
+    "monthly": "Monthly",
+    "allTime": "All Time",
+    "period": "Period:",
+    "browse": "\u2190 Browse HOOK"
+  },
+  "footer": {
+    "tagline": "Curated essentials for the modern lifestyle. Quality over algorithmic noise.",
+    "follow": "Follow",
+    "copyright": "All rights reserved."
+  },
+  "newsletter": {
+    "emailPlaceholder": "Email address",
+    "subscribe": "Subscribe",
+    "subscribing": "Subscribing...",
+    "successTitle": "Subscribed",
+    "successDesc": "You have successfully subscribed to the newsletter.",
+    "errorTitle": "Error",
+    "errorDesc": "There was a problem subscribing. Please try again."
+  },
+  "notFound": {
+    "title": "Page Not Found",
+    "message": "The page you\u2019re looking for doesn\u2019t exist.",
+    "back": "Back to Home"
+  },
+  "common": {
+    "loading": "Loading...",
+    "noImage": "No Image"
+  }
+}

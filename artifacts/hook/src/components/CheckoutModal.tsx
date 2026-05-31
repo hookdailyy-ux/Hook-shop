@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useBasket } from "@/contexts/BasketContext";
+import { useTranslation } from "react-i18next";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -16,6 +17,7 @@ interface Props {
 export function CheckoutModal({ onClose, onSuccess }: Props) {
   const { items, currentMemberUsername, clearBasket } = useBasket();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [step, setStep] = useState<"form" | "success">("form");
   const [orderRef, setOrderRef] = useState("");
   const [loading, setLoading] = useState(false);
@@ -32,11 +34,11 @@ export function CheckoutModal({ onClose, onSuccess }: Props) {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!form.customerName.trim() || !form.customerPhone.trim()) {
-      toast({ title: "Name and phone are required", variant: "destructive" });
+      toast({ title: t("checkout.namePhoneRequired"), variant: "destructive" });
       return;
     }
     if (!currentMemberUsername) {
-      toast({ title: "No store selected", variant: "destructive" });
+      toast({ title: t("checkout.noStoreSelected"), variant: "destructive" });
       return;
     }
     setLoading(true);
@@ -68,7 +70,7 @@ export function CheckoutModal({ onClose, onSuccess }: Props) {
       setStep("success");
       onSuccess(data.orderRef ?? "");
     } catch {
-      toast({ title: "Failed to place order. Please try again.", variant: "destructive" });
+      toast({ title: t("checkout.failedToPlace"), variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -88,7 +90,7 @@ export function CheckoutModal({ onClose, onSuccess }: Props) {
             <>
               <div className="flex items-center gap-2">
                 <ShoppingBag className="h-4 w-4" />
-                <span className="text-sm font-medium">Your Details</span>
+                <span className="text-sm font-medium">{t("checkout.yourDetails")}</span>
               </div>
               <button onClick={onClose} className="text-muted-foreground hover:text-foreground p-1 transition-colors">
                 <X className="h-4 w-4" />
@@ -100,7 +102,7 @@ export function CheckoutModal({ onClose, onSuccess }: Props) {
               <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center">
                 <Check className="h-3.5 w-3.5 text-green-600" />
               </div>
-              <span className="text-sm font-medium text-green-700">Order Placed!</span>
+              <span className="text-sm font-medium text-green-700">{t("checkout.orderPlaced")}</span>
             </div>
           )}
         </div>
@@ -111,18 +113,18 @@ export function CheckoutModal({ onClose, onSuccess }: Props) {
             <form id="order-form" onSubmit={(e) => void handleSubmit(e)} className="p-5 space-y-4">
               <div className="space-y-1.5">
                 <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
-                  Full Name <span className="text-destructive">*</span>
+                  {t("checkout.fullName")} <span className="text-destructive">*</span>
                 </label>
                 <Input
                   value={form.customerName}
                   onChange={(e) => setForm((f) => ({ ...f, customerName: e.target.value }))}
-                  placeholder="Your full name"
+                  placeholder={t("checkout.fullNamePlaceholder")}
                   required
                 />
               </div>
               <div className="space-y-1.5">
                 <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
-                  Phone Number <span className="text-destructive">*</span>
+                  {t("checkout.phoneNumber")} <span className="text-destructive">*</span>
                 </label>
                 <Input
                   value={form.customerPhone}
@@ -134,7 +136,7 @@ export function CheckoutModal({ onClose, onSuccess }: Props) {
               </div>
               <div className="space-y-1.5">
                 <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
-                  Email <span className="text-muted-foreground/50 normal-case tracking-normal ml-1">optional</span>
+                  {t("checkout.email")} <span className="text-muted-foreground/50 normal-case tracking-normal ml-1">{t("checkout.optional")}</span>
                 </label>
                 <Input
                   value={form.customerEmail}
@@ -145,24 +147,24 @@ export function CheckoutModal({ onClose, onSuccess }: Props) {
               </div>
               <div className="space-y-1.5">
                 <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
-                  Shipping Address <span className="text-muted-foreground/50 normal-case tracking-normal ml-1">optional</span>
+                  {t("checkout.shippingAddress")} <span className="text-muted-foreground/50 normal-case tracking-normal ml-1">{t("checkout.optional")}</span>
                 </label>
                 <Textarea
                   value={form.shippingAddress}
                   onChange={(e) => setForm((f) => ({ ...f, shippingAddress: e.target.value }))}
-                  placeholder="Your delivery address"
+                  placeholder={t("checkout.addressPlaceholder")}
                   rows={2}
                   className="resize-none"
                 />
               </div>
               <div className="space-y-1.5">
                 <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
-                  Notes <span className="text-muted-foreground/50 normal-case tracking-normal ml-1">optional</span>
+                  {t("checkout.notes")} <span className="text-muted-foreground/50 normal-case tracking-normal ml-1">{t("checkout.optional")}</span>
                 </label>
                 <Textarea
                   value={form.notes}
                   onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
-                  placeholder="Special requests or notes"
+                  placeholder={t("checkout.notesPlaceholder")}
                   rows={2}
                   className="resize-none"
                 />
@@ -170,7 +172,7 @@ export function CheckoutModal({ onClose, onSuccess }: Props) {
 
               {/* Order summary */}
               <div className="border border-border p-4 bg-accent/10 space-y-1">
-                <p className="text-[10px] tracking-widest uppercase text-muted-foreground mb-2">Order Summary</p>
+                <p className="text-[10px] tracking-widest uppercase text-muted-foreground mb-2">{t("checkout.orderSummary")}</p>
                 {items.map((item) => (
                   <div key={item.key} className="flex justify-between text-xs py-0.5">
                     <span className="text-muted-foreground line-clamp-1 max-w-[68%]">
@@ -182,7 +184,7 @@ export function CheckoutModal({ onClose, onSuccess }: Props) {
                   </div>
                 ))}
                 <div className="pt-2 mt-1 border-t border-border text-[10px] text-muted-foreground">
-                  {totalItems} item{totalItems !== 1 ? "s" : ""} total
+                  {totalItems} {t(totalItems !== 1 ? "checkout.items" : "checkout.item")}
                 </div>
               </div>
             </form>
@@ -194,18 +196,18 @@ export function CheckoutModal({ onClose, onSuccess }: Props) {
                 <Check className="h-8 w-8 text-green-600" />
               </div>
               <div>
-                <h2 className="font-serif text-2xl font-light mb-2">Thank You!</h2>
+                <h2 className="font-serif text-2xl font-light mb-2">{t("checkout.thankYou")}</h2>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Your order has been received. The seller will contact you shortly.
+                  {t("checkout.orderReceived")}
                 </p>
               </div>
               <div className="border border-border p-4 bg-accent/10">
-                <p className="text-[10px] tracking-widest uppercase text-muted-foreground mb-1">Order Reference</p>
+                <p className="text-[10px] tracking-widest uppercase text-muted-foreground mb-1">{t("checkout.orderReference")}</p>
                 <p className="font-mono text-lg font-semibold">{orderRef}</p>
-                <p className="text-xs text-muted-foreground mt-1">Save this for tracking.</p>
+                <p className="text-xs text-muted-foreground mt-1">{t("checkout.saveForTracking")}</p>
               </div>
               <Button onClick={onClose} className="w-full text-xs tracking-widest uppercase">
-                Continue Shopping
+                {t("checkout.continueShopping")}
               </Button>
             </div>
           )}
@@ -221,8 +223,8 @@ export function CheckoutModal({ onClose, onSuccess }: Props) {
               className="w-full text-xs tracking-widest uppercase"
             >
               {loading
-                ? "Placing Order…"
-                : `Place Order · ${totalItems} item${totalItems !== 1 ? "s" : ""}`}
+                ? t("checkout.placingOrder")
+                : `${t("checkout.placeOrderBtn")} · ${totalItems} ${t(totalItems !== 1 ? "checkout.items" : "checkout.item")}`}
             </Button>
           </div>
         )}

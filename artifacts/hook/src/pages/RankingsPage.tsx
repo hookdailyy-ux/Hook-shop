@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "wouter";
-import { Trophy, Eye, Package, TrendingUp, Medal, Star, Heart } from "lucide-react";
+import { Trophy, Eye, TrendingUp, Medal, Heart } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -23,11 +24,18 @@ interface RankingsData {
   period: { start: string; end: string };
 }
 
-const BADGE_INFO: Record<string, { label: string; color: string; icon: React.ElementType }> = {
-  top_seller: { label: "Top Seller", color: "text-amber-600 bg-amber-50 border-amber-200", icon: Trophy },
-  most_viewed: { label: "Most Viewed", color: "text-blue-600 bg-blue-50 border-blue-200", icon: Eye },
-  most_followed: { label: "Most Followed", color: "text-rose-600 bg-rose-50 border-rose-200", icon: Heart },
-  trending: { label: "Trending", color: "text-purple-600 bg-purple-50 border-purple-200", icon: TrendingUp },
+const BADGE_KEYS: Record<string, { labelKey: string; color: string; icon: React.ElementType }> = {
+  top_seller: { labelKey: "rankings.badgeTopSeller", color: "text-amber-600 bg-amber-50 border-amber-200", icon: Trophy },
+  most_viewed: { labelKey: "rankings.badgeMostViewed", color: "text-blue-600 bg-blue-50 border-blue-200", icon: Eye },
+  most_followed: { labelKey: "rankings.badgeMostFollowed", color: "text-rose-600 bg-rose-50 border-rose-200", icon: Heart },
+  trending: { labelKey: "rankings.badgeTrending", color: "text-purple-600 bg-purple-50 border-purple-200", icon: TrendingUp },
+};
+
+const BADGE_LABELS_EN: Record<string, string> = {
+  top_seller: "Top Seller",
+  most_viewed: "Most Viewed",
+  most_followed: "Most Followed",
+  trending: "Trending",
 };
 
 const RANK_MEDALS = ["🥇", "🥈", "🥉"];
@@ -36,6 +44,7 @@ export default function RankingsPage() {
   const [data, setData] = useState<RankingsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"monthly" | "alltime">("monthly");
+  const { t } = useTranslation();
 
   useEffect(() => {
     void (async () => {
@@ -57,9 +66,9 @@ export default function RankingsPage() {
           <div className="w-14 h-14 mx-auto mb-6 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center">
             <Trophy className="h-6 w-6 text-amber-600" strokeWidth={1.5} />
           </div>
-          <h1 className="font-serif text-4xl sm:text-5xl font-light mb-3">Leaderboard</h1>
+          <h1 className="font-serif text-4xl sm:text-5xl font-light mb-3">{t("rankings.title")}</h1>
           <p className="text-muted-foreground text-sm max-w-md mx-auto">
-            HOOK's top performing sellers, ranked by orders, views, and conversion.
+            {t("rankings.subtitle")}
           </p>
         </div>
       </div>
@@ -67,26 +76,28 @@ export default function RankingsPage() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
         {/* Tabs */}
         <div className="flex gap-1 mb-8 border border-border p-1 w-fit">
-          {(["monthly", "alltime"] as const).map((t) => (
-            <button key={t} onClick={() => setTab(t)}
-              className={`px-5 py-2 text-[10px] tracking-widest uppercase transition-colors ${tab === t ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"}`}>
-              {t === "monthly" ? "Monthly" : "All Time"}
+          {(["monthly", "alltime"] as const).map((tabKey) => (
+            <button key={tabKey} onClick={() => setTab(tabKey)}
+              className={`px-5 py-2 text-[10px] tracking-widest uppercase transition-colors ${tab === tabKey ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"}`}>
+              {tabKey === "monthly" ? t("rankings.monthly") : t("rankings.allTime")}
             </button>
           ))}
         </div>
 
         {tab === "monthly" && data?.period && (
           <p className="text-xs text-muted-foreground mb-6">
-            Period: {new Date(data.period.start).toLocaleDateString()} → {new Date(data.period.end).toLocaleDateString()}
+            {t("rankings.period")} {new Date(data.period.start).toLocaleDateString()} → {new Date(data.period.end).toLocaleDateString()}
           </p>
         )}
 
         {loading ? (
-          <div className="py-20 text-center text-xs tracking-widest uppercase text-muted-foreground animate-pulse">Loading leaderboard…</div>
+          <div className="py-20 text-center text-xs tracking-widest uppercase text-muted-foreground animate-pulse">
+            {t("rankings.loading")}
+          </div>
         ) : !members || members.length === 0 ? (
           <div className="py-20 text-center border border-dashed border-border">
             <Medal className="h-8 w-8 mx-auto mb-3 text-muted-foreground/20" strokeWidth={1} />
-            <p className="text-xs text-muted-foreground">No rankings yet. Be the first to make a sale!</p>
+            <p className="text-xs text-muted-foreground">{t("rankings.empty")}</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -117,13 +128,14 @@ export default function RankingsPage() {
                         <span className="font-medium hover:underline cursor-pointer">{displayName}</span>
                       </Link>
                       {member.badges.map((badge) => {
-                        const info = BADGE_INFO[badge];
+                        const info = BADGE_KEYS[badge];
                         if (!info) return null;
                         const Icon = info.icon;
+                        const label = BADGE_LABELS_EN[badge] ?? badge;
                         return (
                           <span key={badge} className={`inline-flex items-center gap-1 px-2 py-0.5 text-[9px] tracking-widest uppercase border rounded-full ${info.color}`}>
                             <Icon className="h-2.5 w-2.5" />
-                            {info.label}
+                            {label}
                           </span>
                         );
                       })}
@@ -135,18 +147,18 @@ export default function RankingsPage() {
                   <div className="hidden sm:flex items-center gap-6 shrink-0">
                     <div className="text-center">
                       <p className="font-serif text-xl font-light">{tab === "monthly" ? member.monthlyOrders : member.allTimeOrders}</p>
-                      <p className="text-[9px] tracking-widest uppercase text-muted-foreground">Orders</p>
+                      <p className="text-[9px] tracking-widest uppercase text-muted-foreground">{t("rankings.orders")}</p>
                     </div>
                     <div className="text-center">
                       <p className="font-serif text-xl font-light">{member.monthlyViews >= 1000 ? `${(member.monthlyViews / 1000).toFixed(1)}k` : member.monthlyViews}</p>
-                      <p className="text-[9px] tracking-widest uppercase text-muted-foreground">Views</p>
+                      <p className="text-[9px] tracking-widest uppercase text-muted-foreground">{t("rankings.views")}</p>
                     </div>
                   </div>
 
                   {/* Mobile stats */}
                   <div className="sm:hidden text-right shrink-0">
                     <p className="font-serif text-lg">{tab === "monthly" ? member.monthlyOrders : member.allTimeOrders}</p>
-                    <p className="text-[9px] uppercase text-muted-foreground">orders</p>
+                    <p className="text-[9px] uppercase text-muted-foreground">{t("rankings.orders")}</p>
                   </div>
                 </div>
               );
@@ -154,10 +166,9 @@ export default function RankingsPage() {
           </div>
         )}
 
-        {/* Footer */}
         <div className="mt-12 text-center">
           <Link href="/" className="text-[10px] tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors">
-            ← Browse HOOK
+            {t("rankings.browse")}
           </Link>
         </div>
       </div>

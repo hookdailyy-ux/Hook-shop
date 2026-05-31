@@ -2,13 +2,12 @@ import { useListLooks } from "@workspace/api-client-react";
 import { useSiteImages } from "@/hooks/useSiteImages";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { LookCard } from "@/components/LookCard";
+import { useTranslation } from "react-i18next";
 
 function LookSkeleton() {
   return (
     <div>
-      {/* Image skeleton */}
       <div className="w-full md:w-[42%] aspect-[3/4] bg-accent/50 animate-pulse" style={{ maxHeight: "78dvh" }} />
-      {/* Details skeleton */}
       <div className="mt-6 space-y-3">
         <div className="h-3 w-16 bg-accent/50 animate-pulse" />
         <div className="h-8 w-64 bg-accent/50 animate-pulse" />
@@ -16,7 +15,6 @@ function LookSkeleton() {
         <div className="h-3 w-60 bg-accent/50 animate-pulse" />
         <div className="h-12 w-48 bg-accent/50 animate-pulse mt-4" />
       </div>
-      {/* Products skeleton */}
       <div className="mt-12">
         <div className="h-px bg-accent/50 mb-6" />
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -40,6 +38,7 @@ export default function ShopTheLook() {
   const { data: siteSettings } = useSiteSettings();
   const sectionImage = siteImages?.look;
   const discoverMoreUrl = siteSettings?.discoverMoreUrl;
+  const { t } = useTranslation();
 
   return (
     <div className="pb-24">
@@ -57,12 +56,11 @@ export default function ShopTheLook() {
           />
         </div>
       )}
-      {/* Page header */}
       <div className="container mx-auto px-4 sm:px-6 pt-10 pb-8 md:pt-14 md:pb-12 border-b border-border mb-12">
-        <p className="text-[10px] tracking-[0.35em] uppercase text-muted-foreground mb-2">Editorial</p>
-        <h1 className="font-serif text-4xl md:text-6xl font-light mb-2">Shop The Look</h1>
+        <p className="text-[10px] tracking-[0.35em] uppercase text-muted-foreground mb-2">{t("shopTheLook.badge")}</p>
+        <h1 className="font-serif text-4xl md:text-6xl font-light mb-2">{t("shopTheLook.title")}</h1>
         <p className="text-xs tracking-widest uppercase text-muted-foreground max-w-sm leading-relaxed mb-5">
-          Complete the ensemble. Each piece handpicked, every look intentional.
+          {t("shopTheLook.description")}
         </p>
         {discoverMoreUrl && (
           <a
@@ -73,7 +71,7 @@ export default function ShopTheLook() {
             data-testid="button-discover-more-look"
           >
             <span>✨</span>
-            <span>Explore More via SHEIN</span>
+            <span>{t("shopTheLook.exploreMore")}</span>
           </a>
         )}
       </div>
@@ -88,7 +86,7 @@ export default function ShopTheLook() {
           </div>
         ) : !looks || looks.length === 0 ? (
           <div className="text-center py-28 border border-dashed border-border">
-            <p className="text-xs tracking-widest text-muted-foreground uppercase">No looks yet. Check back soon.</p>
+            <p className="text-xs tracking-widest text-muted-foreground uppercase">{t("shopTheLook.empty")}</p>
           </div>
         ) : (
           <div className="space-y-0">

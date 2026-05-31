@@ -16,6 +16,7 @@ import { useBasket } from "@/contexts/BasketContext";
 import { CheckoutModal } from "./CheckoutModal";
 import { Button } from "./ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -34,6 +35,7 @@ export function BasketDrawer() {
   } = useBasket();
 
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [showCheckout, setShowCheckout] = useState(false);
   const [shareToken, setShareToken] = useState<string | null>(null);
   const [sharing, setSharing] = useState(false);
@@ -71,7 +73,7 @@ export function BasketDrawer() {
     try {
       await navigator.clipboard.writeText(shareUrl);
       setCopiedShare(true);
-      toast({ title: "Basket link copied!" });
+      toast({ title: t("basket.copied") });
       setTimeout(() => setCopiedShare(false), 2500);
     } catch {
       toast({ title: "Could not copy link", variant: "destructive" });
@@ -96,14 +98,14 @@ export function BasketDrawer() {
         onClick={closeBasket}
       />
 
-      {/* Drawer panel */}
-      <div className="fixed inset-y-0 right-0 z-50 w-full sm:max-w-md bg-background shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
+      {/* Drawer panel — slides from right (LTR) or left (RTL) */}
+      <div className="fixed inset-y-0 right-0 rtl:right-auto rtl:left-0 z-50 w-full sm:max-w-md bg-background shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
 
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
           <div className="flex items-center gap-2.5">
             <ShoppingBag className="h-4 w-4" />
-            <span className="text-sm font-medium">Your Basket</span>
+            <span className="text-sm font-medium">{t("basket.title")}</span>
             {totalItems > 0 && (
               <span className="text-[10px] font-bold bg-foreground text-background rounded-full w-5 h-5 flex items-center justify-center">
                 {totalItems}
@@ -116,7 +118,7 @@ export function BasketDrawer() {
                 onClick={clearBasket}
                 className="text-[9px] tracking-widest uppercase text-muted-foreground hover:text-destructive transition-colors px-2 py-1"
               >
-                Clear All
+                {t("basket.clearAll")}
               </button>
             )}
             <button
@@ -137,10 +139,10 @@ export function BasketDrawer() {
                 strokeWidth={1}
               />
               <p className="text-[10px] tracking-widest uppercase text-muted-foreground mb-2">
-                Your basket is empty
+                {t("basket.empty")}
               </p>
               <p className="text-xs text-muted-foreground/50 leading-relaxed">
-                Add products from a store, collection or look to get started.
+                {t("basket.emptyHint")}
               </p>
             </div>
           ) : (
@@ -148,7 +150,7 @@ export function BasketDrawer() {
               {currentMemberName && currentMemberUsername && (
                 <div className="flex items-center gap-2 pb-3 border-b border-border">
                   <p className="text-[9px] tracking-widest uppercase text-muted-foreground">
-                    Shopping from
+                    {t("basket.shoppingFrom")}
                   </p>
                   <p className="text-[9px] tracking-widest uppercase font-semibold">
                     @{currentMemberUsername}
@@ -252,7 +254,7 @@ export function BasketDrawer() {
             {totalPrice !== null && (
               <div className="flex items-center justify-between py-1">
                 <span className="text-[10px] tracking-widest uppercase text-muted-foreground">
-                  Estimated Total
+                  {t("basket.estimatedTotal")}
                 </span>
                 <span className="font-serif text-xl font-light">
                   RM {totalPrice.toFixed(2)}
@@ -272,12 +274,12 @@ export function BasketDrawer() {
                 ) : (
                   <Share2 className="h-3.5 w-3.5" />
                 )}
-                {sharing ? "Generating Link…" : "Share Basket"}
+                {sharing ? t("basket.generatingLink") : t("basket.shareBasket")}
               </button>
             ) : (
               <div className="border border-border p-3 space-y-2.5 bg-accent/20">
                 <p className="text-[9px] tracking-widest uppercase text-muted-foreground">
-                  Basket Link Ready
+                  {t("basket.basketLinkReady")}
                 </p>
                 <p className="text-[10px] font-mono truncate text-muted-foreground border border-border px-2 py-1.5 bg-background">
                   {shareUrl}
@@ -290,12 +292,12 @@ export function BasketDrawer() {
                     {copiedShare ? (
                       <>
                         <Check className="h-3 w-3 text-green-600" />
-                        <span className="text-green-600">Copied!</span>
+                        <span className="text-green-600">{t("basket.copied")}</span>
                       </>
                     ) : (
                       <>
                         <Copy className="h-3 w-3" />
-                        Copy Link
+                        {t("basket.copyLink")}
                       </>
                     )}
                   </button>
@@ -304,7 +306,7 @@ export function BasketDrawer() {
                     className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-green-600 text-white text-[9px] tracking-widest uppercase hover:bg-green-700 transition-colors"
                   >
                     <MessageCircle className="h-3 w-3" />
-                    WhatsApp
+                    {t("basket.whatsapp")}
                   </button>
                 </div>
               </div>
@@ -315,7 +317,7 @@ export function BasketDrawer() {
               onClick={() => setShowCheckout(true)}
               className="w-full text-xs tracking-widest uppercase gap-2"
             >
-              Place Order
+              {t("basket.placeOrder")}
               <ArrowRight className="h-3.5 w-3.5" />
             </Button>
           </div>
@@ -331,7 +333,7 @@ export function BasketDrawer() {
             closeBasket();
             toast({
               title: `Order placed — ref ${ref}`,
-              description: "The seller will contact you shortly.",
+              description: t("checkout.orderReceived"),
             });
           }}
         />

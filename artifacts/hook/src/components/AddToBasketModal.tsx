@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useBasket, type AddItemInput } from "@/contexts/BasketContext";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   product: {
@@ -33,6 +34,7 @@ export function AddToBasketModal({
 }: Props) {
   const { addItem, openBasket, currentMemberId } = useBasket();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [size, setSize] = useState("");
   const [color, setColor] = useState("");
   const [qty, setQty] = useState(1);
@@ -85,7 +87,7 @@ export function AddToBasketModal({
       <div className="relative z-10 w-full sm:max-w-sm bg-background shadow-2xl sm:rounded-2xl">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-          <span className="text-sm font-medium">Add to Basket</span>
+          <span className="text-sm font-medium">{t("addToBasket.title")}</span>
           <button
             onClick={onClose}
             className="text-muted-foreground hover:text-foreground transition-colors p-1"
@@ -137,23 +139,23 @@ export function AddToBasketModal({
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <label className="text-[9px] uppercase tracking-widest text-muted-foreground">
-                Size <span className="normal-case font-normal opacity-60">(optional)</span>
+                {t("addToBasket.size")} <span className="normal-case font-normal opacity-60">({t("checkout.optional")})</span>
               </label>
               <Input
                 value={size}
                 onChange={(e) => setSize(e.target.value)}
-                placeholder="e.g. M, L, 38"
+                placeholder={t("addToBasket.sizePlaceholder")}
                 className="h-9 text-sm"
               />
             </div>
             <div className="space-y-1.5">
               <label className="text-[9px] uppercase tracking-widest text-muted-foreground">
-                Color <span className="normal-case font-normal opacity-60">(optional)</span>
+                {t("addToBasket.color")} <span className="normal-case font-normal opacity-60">({t("checkout.optional")})</span>
               </label>
               <Input
                 value={color}
                 onChange={(e) => setColor(e.target.value)}
-                placeholder="e.g. Black, White"
+                placeholder={t("addToBasket.colorPlaceholder")}
                 className="h-9 text-sm"
               />
             </div>
@@ -196,7 +198,7 @@ export function AddToBasketModal({
             ) : (
               <>
                 <ShoppingBag className="h-3.5 w-3.5" />
-                Add to Basket
+                {t("addToBasket.title")}
               </>
             )}
           </Button>

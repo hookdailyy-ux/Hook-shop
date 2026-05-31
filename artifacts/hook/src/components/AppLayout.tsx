@@ -4,6 +4,31 @@ import { Menu, X, ChevronDown, Heart, ShoppingBag } from "lucide-react";
 import { useFavorites } from "@/contexts/FavoritesContext";
 import { useBasket } from "@/contexts/BasketContext";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { useTranslation } from "react-i18next";
+
+function LanguageSwitcher() {
+  const { i18n } = useTranslation();
+  const isAr = i18n.language === "ar";
+
+  const toggle = () => {
+    const next = isAr ? "en" : "ar";
+    void i18n.changeLanguage(next);
+    try { localStorage.setItem("hook_lang", next); } catch { /* ignore */ }
+    document.documentElement.dir = next === "ar" ? "rtl" : "ltr";
+    document.documentElement.lang = next;
+  };
+
+  return (
+    <button
+      onClick={toggle}
+      className="shrink-0 text-[10px] tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors px-1 py-2"
+      title={isAr ? "Switch to English" : "التبديل إلى العربية"}
+      data-testid="language-switcher"
+    >
+      {isAr ? "EN" : "عر"}
+    </button>
+  );
+}
 
 function NavDropdown({
   label,
@@ -71,17 +96,18 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const whatsappNumber = siteSettings?.whatsappNumber ?? "";
   const whatsappText = siteSettings?.whatsappText || "Contact Us";
   const whatsappMessage = siteSettings?.whatsappMessage ?? "";
+  const { t } = useTranslation();
 
   const clothesItems = [
-    { href: "/women", label: "Women" },
-    { href: "/men", label: "Men" },
-    { href: "/shop-the-look", label: "Shop The Look" },
+    { href: "/women", label: t("nav.women") },
+    { href: "/men", label: t("nav.men") },
+    { href: "/shop-the-look", label: t("nav.shopTheLook") },
   ];
 
   const accessoriesItems = [
-    { href: "/accessories", label: "All Accessories" },
-    { href: "/accessories?gender=women", label: "Women Accessories" },
-    { href: "/accessories?gender=men", label: "Men Accessories" },
+    { href: "/accessories", label: t("nav.allAccessories") },
+    { href: "/accessories?gender=women", label: t("nav.womenAccessories") },
+    { href: "/accessories?gender=men", label: t("nav.menAccessories") },
   ];
 
   const isClothesActive =
@@ -107,26 +133,29 @@ export function AppLayout({ children }: { children: ReactNode }) {
               href="/"
               className={`transition-colors uppercase ${location === "/" ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`}
             >
-              Home
+              {t("nav.home")}
             </Link>
-            <NavDropdown label="Fashion" items={clothesItems} isActive={isClothesActive} />
-            <NavDropdown label="Accessories" items={accessoriesItems} isActive={isAccessoriesActive} />
+            <NavDropdown label={t("nav.fashion")} items={clothesItems} isActive={isClothesActive} />
+            <NavDropdown label={t("nav.accessories")} items={accessoriesItems} isActive={isAccessoriesActive} />
             <Link
               href="/electronics"
               className={`transition-colors uppercase ${location.startsWith("/electronics") ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`}
             >
-              Electronics
+              {t("nav.electronics")}
             </Link>
             <Link
               href="/home-essentials"
               className={`transition-colors uppercase ${location.startsWith("/home-essentials") ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`}
             >
-              Home Essentials
+              {t("nav.homeEssentials")}
             </Link>
           </nav>
 
           {/* Spacer */}
           <div className="flex-1" />
+
+          {/* Language switcher */}
+          <LanguageSwitcher />
 
           {/* Favorites icon */}
           <Link
@@ -176,9 +205,12 @@ export function AppLayout({ children }: { children: ReactNode }) {
             <Link href="/" onClick={() => setMobileOpen(false)} className="font-serif text-xl tracking-widest font-semibold">
               HOOK
             </Link>
-            <button onClick={() => setMobileOpen(false)} className="ml-auto p-2 -mr-2" aria-label="Close menu">
-              <X className="h-5 w-5" />
-            </button>
+            <div className="ml-auto flex items-center gap-3">
+              <LanguageSwitcher />
+              <button onClick={() => setMobileOpen(false)} className="p-2 -mr-2" aria-label="Close menu">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
           </div>
           <nav className="flex flex-col py-2 overflow-y-auto flex-1">
             <Link
@@ -186,7 +218,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
               onClick={() => setMobileOpen(false)}
               className="px-5 py-4 text-sm tracking-widest uppercase border-b border-border/50 hover:text-foreground text-muted-foreground transition-colors"
             >
-              Home
+              {t("nav.home")}
             </Link>
 
             {/* Fashion accordion */}
@@ -194,7 +226,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
               onClick={() => setClothesOpen((v) => !v)}
               className="px-5 py-4 text-sm tracking-widest uppercase border-b border-border/50 text-muted-foreground flex items-center justify-between"
             >
-              Fashion
+              {t("nav.fashion")}
               <ChevronDown className={`h-4 w-4 transition-transform ${clothesOpen ? "rotate-180" : ""}`} strokeWidth={2} />
             </button>
             {clothesOpen && (
@@ -217,7 +249,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
               onClick={() => setAccessoriesOpen((v) => !v)}
               className="px-5 py-4 text-sm tracking-widest uppercase border-b border-border/50 text-muted-foreground flex items-center justify-between"
             >
-              Accessories
+              {t("nav.accessories")}
               <ChevronDown className={`h-4 w-4 transition-transform ${accessoriesOpen ? "rotate-180" : ""}`} strokeWidth={2} />
             </button>
             {accessoriesOpen && (
@@ -236,8 +268,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
             )}
 
             {[
-              { href: "/electronics", label: "Electronics" },
-              { href: "/home-essentials", label: "Home Essentials" },
+              { href: "/electronics", label: t("nav.electronics") },
+              { href: "/home-essentials", label: t("nav.homeEssentials") },
             ].map((link) => (
               <Link
                 key={link.href}
@@ -256,7 +288,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
               className="px-5 py-4 text-sm tracking-widest uppercase border-b border-border/50 text-muted-foreground hover:text-foreground transition-colors flex items-center gap-3"
             >
               <Heart className="h-4 w-4" strokeWidth={1.5} />
-              Favorites
+              {t("favorites.title")}
               {count > 0 && (
                 <span className="ml-auto min-w-[20px] h-5 bg-[#2a2318] text-[#f0ebe3] text-[9px] font-semibold flex items-center justify-center px-1">
                   {count}
@@ -270,7 +302,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
               className="px-5 py-4 text-sm tracking-widest uppercase border-b border-border/50 text-muted-foreground hover:text-foreground transition-colors flex items-center gap-3 w-full text-left"
             >
               <ShoppingBag className="h-4 w-4" strokeWidth={1.5} />
-              Basket
+              {t("basket.title")}
               {totalItems > 0 && (
                 <span className="ml-auto min-w-[20px] h-5 bg-green-600 text-white text-[9px] font-semibold flex items-center justify-center px-1">
                   {totalItems}
@@ -292,7 +324,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
               HOOK
             </Link>
             <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
-              Curated essentials for the modern lifestyle. Quality over algorithmic noise.
+              {t("footer.tagline")}
             </p>
             {whatsappNumber && (
               <a
@@ -311,7 +343,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
           </div>
           {footerLinks.length > 0 && (
             <div>
-              <h4 className="text-[10px] font-semibold tracking-widest uppercase mb-5">Follow</h4>
+              <h4 className="text-[10px] font-semibold tracking-widest uppercase mb-5">{t("footer.follow")}</h4>
               <ul className="space-y-3 text-sm text-muted-foreground">
                 {footerLinks.map((link) => (
                   <li key={link.id}>
@@ -331,7 +363,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
         </div>
         <div className="border-t border-border">
           <div className="container mx-auto px-4 sm:px-6 py-5 flex flex-col sm:flex-row justify-between items-center gap-3">
-            <p className="text-[10px] text-muted-foreground/60">© {new Date().getFullYear()} HOOK. All rights reserved.</p>
+            <p className="text-[10px] text-muted-foreground/60">© {new Date().getFullYear()} HOOK. {t("footer.copyright")}</p>
             <div className="flex items-center gap-6">
               <Link href="/team/login" className="text-[10px] text-muted-foreground/30 hover:text-muted-foreground/60 transition-colors tracking-wide">
                 Team

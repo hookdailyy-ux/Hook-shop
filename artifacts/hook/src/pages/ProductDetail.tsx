@@ -5,6 +5,7 @@ import { PlaceholderImage } from "@/components/PlaceholderImage";
 import { ProductCard } from "@/components/ProductCard";
 import { HeartButton } from "@/components/HeartButton";
 import { ImageGallery } from "@/components/ImageGallery";
+import { useTranslation } from "react-i18next";
 
 const COLOR_MAP: Record<string, string> = {
   black: "#1a1a1a",
@@ -38,15 +39,10 @@ function getColorHex(name: string): string {
   return COLOR_MAP[name.toLowerCase()] ?? "#d4b896";
 }
 
-function getDeliveryLabel(source?: string | null, category?: string): string {
-  if (source === "Amazon") return "Delivered by Amazon";
-  if (category === "electronics") return "Delivered by Amazon";
-  return "Delivered by SHEIN";
-}
-
 export default function ProductDetail() {
   const params = useParams();
   const id = Number(params.id);
+  const { t } = useTranslation();
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
@@ -69,7 +65,7 @@ export default function ProductDetail() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-xs tracking-widest uppercase text-muted-foreground animate-pulse">Loading...</p>
+        <p className="text-xs tracking-widest uppercase text-muted-foreground animate-pulse">{t("product.loading")}</p>
       </div>
     );
   }
@@ -77,7 +73,7 @@ export default function ProductDetail() {
   if (!product) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-xs tracking-widest uppercase text-muted-foreground">Product not found.</p>
+        <p className="text-xs tracking-widest uppercase text-muted-foreground">{t("product.notFound")}</p>
       </div>
     );
   }
@@ -98,19 +94,28 @@ export default function ProductDetail() {
       : `/${product.category}`;
   const categoryLabel =
     product.category === "home"
-      ? "Home Essentials"
+      ? t("nav.homeEssentials")
       : product.category === "electronics"
-      ? "Electronics"
+      ? t("nav.electronics")
+      : product.category === "women"
+      ? t("nav.women")
+      : product.category === "men"
+      ? t("nav.men")
+      : product.category === "accessories"
+      ? t("nav.accessories")
       : product.category.charAt(0).toUpperCase() + product.category.slice(1);
 
-  const deliveryLabel = getDeliveryLabel(product.source, product.category);
+  const deliveryLabel =
+    product.source === "Amazon" || product.category === "electronics"
+      ? t("product.deliveredByAmazon")
+      : t("product.deliveredByShein");
 
   return (
     <div className="pb-32">
       {/* Breadcrumb */}
       <div className="container mx-auto px-4 sm:px-6 py-4 md:py-5">
         <nav className="flex items-center gap-2 text-[10px] tracking-widest uppercase text-muted-foreground">
-          <Link href="/" className="hover:text-foreground transition-colors">Home</Link>
+          <Link href="/" className="hover:text-foreground transition-colors">{t("product.home")}</Link>
           <span>/</span>
           <Link href={categoryPath} className="hover:text-foreground transition-colors">{categoryLabel}</Link>
           {product.subcategory && (
@@ -135,7 +140,6 @@ export default function ProductDetail() {
           {/* Image Gallery */}
           <div className="flex flex-col gap-3">
 
-            {/* Desktop: thumbs left + main image right / Mobile: main image only */}
             <div className="flex gap-3">
 
               {/* Vertical thumbnail strip — desktop only */}
@@ -175,7 +179,6 @@ export default function ProductDetail() {
                 ) : (
                   <PlaceholderImage aspectRatio="portrait" />
                 )}
-                {/* Heart button */}
                 <div className="absolute top-3 right-3 z-10" onClick={(e) => e.stopPropagation()}>
                   <HeartButton
                     item={{
@@ -193,7 +196,7 @@ export default function ProductDetail() {
               </div>
             </div>
 
-            {/* Mobile thumbnail row — below main image */}
+            {/* Mobile thumbnail row */}
             {allImages.length > 1 && (
               <div
                 className="flex md:hidden gap-2 overflow-x-auto pb-1"
@@ -247,7 +250,7 @@ export default function ProductDetail() {
             {colors.length > 0 && (
               <div className="mb-6">
                 <p className="text-[10px] tracking-widest uppercase text-muted-foreground mb-3">
-                  Color{selectedColor ? `: ${selectedColor}` : ""}
+                  {t("product.color")}{selectedColor ? `: ${selectedColor}` : ""}
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {colors.map((color) => (
@@ -272,7 +275,7 @@ export default function ProductDetail() {
             {sizes.length > 0 && (
               <div className="mb-8">
                 <p className="text-[10px] tracking-widest uppercase text-muted-foreground mb-3">
-                  Size{selectedSize ? `: ${selectedSize}` : ""}
+                  {t("product.size")}{selectedSize ? `: ${selectedSize}` : ""}
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {sizes.map((size) => (
@@ -301,7 +304,7 @@ export default function ProductDetail() {
               className="w-full text-center bg-foreground text-background text-xs tracking-widest uppercase py-5 hover:opacity-90 transition-opacity block"
               data-testid="button-order-now"
             >
-              Order Now
+              {t("product.orderNow")}
             </a>
 
             <p className="text-[10px] text-center text-muted-foreground mt-3 tracking-wide">
@@ -321,7 +324,7 @@ export default function ProductDetail() {
         {/* Related Products */}
         {relatedProducts && relatedProducts.filter((p) => p.id !== product.id).length > 0 && (
           <div className="mt-24 pt-16 border-t border-border">
-            <h2 className="font-serif text-2xl md:text-3xl font-light mb-10">You May Also Like</h2>
+            <h2 className="font-serif text-2xl md:text-3xl font-light mb-10">{t("product.youMayAlsoLike")}</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-10 md:gap-x-8">
               {relatedProducts
                 .filter((p) => p.id !== product.id)

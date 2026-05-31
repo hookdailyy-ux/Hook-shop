@@ -5,32 +5,34 @@ import { NewsletterForm } from "@/components/NewsletterForm";
 import { HeartButton } from "@/components/HeartButton";
 import type { FavoriteItem } from "@/contexts/FavoritesContext";
 import { Truck, RotateCcw, ShieldCheck, Globe } from "lucide-react";
-
-const BENEFITS = [
-  { icon: Truck, label: "Free Shipping" },
-  { icon: RotateCcw, label: "Easy Returns" },
-  { icon: ShieldCheck, label: "Secure Payment" },
-  { icon: Globe, label: "Worldwide" },
-];
-
-const LOOK_PLACEHOLDERS = [
-  { id: -1, title: "Weekend Casual" },
-  { id: -2, title: "Office Ready" },
-  { id: -3, title: "Evening Edit" },
-  { id: -4, title: "Street Style" },
-];
-const SETUP_PLACEHOLDERS = [
-  { id: -1, title: "Kitchen Setup" },
-  { id: -2, title: "Desk Setup" },
-  { id: -3, title: "Bedroom Setup" },
-  { id: -4, title: "Living Room" },
-];
+import { useTranslation } from "react-i18next";
 
 export default function Home() {
   const { data: latestLooks } = useListLooks({ limit: 4 });
   const { data: latestSetups } = useListSetups({ limit: 4 });
   const { data: siteImages } = useSiteImages();
   const heroImage = siteImages?.hero;
+  const { t } = useTranslation();
+
+  const BENEFITS = [
+    { icon: Truck, label: t("benefits.freeShipping") },
+    { icon: RotateCcw, label: t("benefits.easyReturns") },
+    { icon: ShieldCheck, label: t("benefits.securePayment") },
+    { icon: Globe, label: t("benefits.worldwide") },
+  ];
+
+  const LOOK_PLACEHOLDERS = [
+    { id: -1, title: "Weekend Casual" },
+    { id: -2, title: "Office Ready" },
+    { id: -3, title: "Evening Edit" },
+    { id: -4, title: "Street Style" },
+  ];
+  const SETUP_PLACEHOLDERS = [
+    { id: -1, title: "Kitchen Setup" },
+    { id: -2, title: "Desk Setup" },
+    { id: -3, title: "Bedroom Setup" },
+    { id: -4, title: "Living Room" },
+  ];
 
   return (
     <div className="flex flex-col">
@@ -60,23 +62,23 @@ export default function Home() {
           </div>
         )}
         <p className={`absolute top-8 left-1/2 -translate-x-1/2 text-[10px] tracking-[0.35em] uppercase font-medium ${heroImage ? "text-white/60" : "text-[#8b7355]/60"}`}>
-          New Collection · 2025
+          {t("hero.badge")}
         </p>
         <div className="relative z-10 text-center px-6 flex flex-col items-center gap-6 py-20">
           <h1
             className="font-serif font-light leading-none tracking-tight"
             style={{ fontSize: "clamp(3.5rem, 13vw, 9rem)", color: heroImage ? "#f5f0e8" : "#2a2318" }}
           >
-            Timeless<br />Essentials
+            {t("hero.title1")}<br />{t("hero.title2")}
           </h1>
           <p className={`text-sm md:text-base tracking-widest uppercase max-w-xs md:max-w-sm leading-relaxed ${heroImage ? "text-white/80" : "text-[#6b5e4e]"}`}>
-            Curated pieces for everyday life.
+            {t("hero.subtitle")}
           </p>
           <Link
             href="/women"
             className={`mt-2 inline-block text-xs tracking-[0.25em] uppercase px-10 py-4 transition-colors ${heroImage ? "bg-white/90 text-[#2a2318] hover:bg-white" : "bg-[#2a2318] text-[#f0ebe3] hover:bg-[#3d3226]"}`}
           >
-            Shop Now
+            {t("hero.cta")}
           </Link>
         </div>
         <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none" style={{ background: "linear-gradient(to bottom, transparent, hsl(var(--background)))" }} />
@@ -101,8 +103,8 @@ export default function Home() {
         <div className="container mx-auto px-4 sm:px-6">
           <div className="flex items-end justify-between mb-10 md:mb-12">
             <div>
-              <p className="text-[10px] tracking-[0.3em] uppercase text-muted-foreground mb-1.5">Editorial</p>
-              <h2 className="font-serif text-3xl md:text-4xl font-light">Shop The Look</h2>
+              <p className="text-[10px] tracking-[0.3em] uppercase text-muted-foreground mb-1.5">{t("home.editorialBadge")}</p>
+              <h2 className="font-serif text-3xl md:text-4xl font-light">{t("home.shopTheLook")}</h2>
             </div>
             <Link href="/shop-the-look" className="text-[10px] tracking-[0.2em] uppercase border-b border-foreground pb-0.5 hover:opacity-70 transition-opacity">
               View All
@@ -116,8 +118,8 @@ export default function Home() {
                     title={look.title}
                     href="/shop-the-look"
                     imageUrl={look.imageUrl ?? undefined}
-                    label="Look"
-                    cta="Shop Now"
+                    label={t("shopTheLook.outfit")}
+                    cta={t("hero.cta")}
                     favoriteItem={{ id: look.id, type: "look", title: look.title, imageUrl: look.imageUrl }}
                   />
                 ))
@@ -126,8 +128,8 @@ export default function Home() {
                     key={p.id}
                     title={p.title}
                     href="/shop-the-look"
-                    label="Look"
-                    cta="Shop Now"
+                    label={t("shopTheLook.outfit")}
+                    cta={t("hero.cta")}
                     favoriteItem={{ id: p.id, type: "look", title: p.title }}
                   />
                 ))}
@@ -140,8 +142,8 @@ export default function Home() {
         <div className="container mx-auto px-4 sm:px-6">
           <div className="flex items-end justify-between mb-10 md:mb-12">
             <div>
-              <p className="text-[10px] tracking-[0.3em] uppercase text-muted-foreground mb-1.5">Interiors</p>
-              <h2 className="font-serif text-3xl md:text-4xl font-light">Shop The Setup</h2>
+              <p className="text-[10px] tracking-[0.3em] uppercase text-muted-foreground mb-1.5">{t("home.interiorsBadge")}</p>
+              <h2 className="font-serif text-3xl md:text-4xl font-light">{t("home.shopTheSetup")}</h2>
             </div>
             <Link href="/shop-the-setup" className="text-[10px] tracking-[0.2em] uppercase border-b border-foreground pb-0.5 hover:opacity-70 transition-opacity">
               View All
@@ -155,8 +157,8 @@ export default function Home() {
                     title={setup.title}
                     href="/shop-the-setup"
                     imageUrl={setup.imageUrl ?? undefined}
-                    label="Setup"
-                    cta="Shop Setup"
+                    label={t("shopTheSetup.setup")}
+                    cta={t("home.shopTheSetup")}
                     favoriteItem={{ id: setup.id, type: "setup", title: setup.title, imageUrl: setup.imageUrl }}
                   />
                 ))
@@ -165,8 +167,8 @@ export default function Home() {
                     key={p.id}
                     title={p.title}
                     href="/shop-the-setup"
-                    label="Setup"
-                    cta="Shop Setup"
+                    label={t("shopTheSetup.setup")}
+                    cta={t("home.shopTheSetup")}
                     favoriteItem={{ id: p.id, type: "setup", title: p.title }}
                   />
                 ))}
@@ -177,8 +179,8 @@ export default function Home() {
       {/* ── Newsletter ── */}
       <section className="py-20 md:py-28 bg-[#2a2318] text-[#f0ebe3]">
         <div className="container mx-auto px-4 sm:px-6 text-center">
-          <p className="text-[10px] tracking-[0.35em] uppercase text-[#8b7355] mb-3">Stay in the loop</p>
-          <h2 className="font-serif text-3xl md:text-4xl font-light mb-4">The Hook Edit</h2>
+          <p className="text-[10px] tracking-[0.35em] uppercase text-[#8b7355] mb-3">{t("home.newsletterBadge")}</p>
+          <h2 className="font-serif text-3xl md:text-4xl font-light mb-4">{t("home.newsletterTitle")}</h2>
           <p className="text-sm text-[#b09a82] tracking-wide max-w-xs mx-auto mb-10 leading-relaxed">
             A weekly curation of style, space, and culture. Straight to your inbox.
           </p>
