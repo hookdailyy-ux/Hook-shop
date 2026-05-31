@@ -55,6 +55,7 @@ router.post("/team/auth/login", async (req, res) => {
         createdAt: member.createdAt.toISOString(),
         displayName: member.displayName ?? null,
         bio: member.bio ?? null,
+        whyShopWithMe: member.whyShopWithMe ?? null,
         profilePhotoUrl: member.profilePhotoUrl ?? null,
         coverImageUrl: member.coverImageUrl ?? null,
       },
@@ -101,6 +102,7 @@ router.get("/team/auth/me", async (req, res) => {
         createdAt: member.createdAt.toISOString(),
         displayName: member.displayName ?? null,
         bio: member.bio ?? null,
+        whyShopWithMe: member.whyShopWithMe ?? null,
         profilePhotoUrl: member.profilePhotoUrl ?? null,
         coverImageUrl: member.coverImageUrl ?? null,
       },
@@ -148,6 +150,7 @@ router.put("/team/profile", async (req, res) => {
     const schema = z.object({
       displayName: z.string().max(80).nullable().optional(),
       bio: z.string().max(500).nullable().optional(),
+      whyShopWithMe: z.string().max(500).nullable().optional(),
       profilePhotoUrl: z.string().nullable().optional(),
       coverImageUrl: z.string().nullable().optional(),
       whatsapp: z.string().max(30).nullable().optional(),
@@ -158,6 +161,7 @@ router.put("/team/profile", async (req, res) => {
       .set({
         ...(data.displayName !== undefined ? { displayName: data.displayName } : {}),
         ...(data.bio !== undefined ? { bio: data.bio } : {}),
+        ...(data.whyShopWithMe !== undefined ? { whyShopWithMe: data.whyShopWithMe } : {}),
         ...(data.profilePhotoUrl !== undefined ? { profilePhotoUrl: data.profilePhotoUrl } : {}),
         ...(data.coverImageUrl !== undefined ? { coverImageUrl: data.coverImageUrl } : {}),
         ...(data.whatsapp !== undefined ? { whatsapp: data.whatsapp } : {}),
@@ -171,6 +175,7 @@ router.put("/team/profile", async (req, res) => {
       whatsapp: updated.whatsapp ?? "",
       displayName: updated.displayName ?? null,
       bio: updated.bio ?? null,
+      whyShopWithMe: updated.whyShopWithMe ?? null,
       profilePhotoUrl: updated.profilePhotoUrl ?? null,
       coverImageUrl: updated.coverImageUrl ?? null,
     });

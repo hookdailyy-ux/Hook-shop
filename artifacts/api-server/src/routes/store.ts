@@ -1,14 +1,16 @@
 import { Router, type IRouter } from "express";
-import { db, teamMembersTable, collectionsTable, teamLooksTable } from "@workspace/db";
-import { eq, and, count } from "drizzle-orm";
+import {
+  db,
+  teamMembersTable,
+  collectionsTable,
+  teamLooksTable,
+  collectionProductsTable,
+  productsTable,
+} from "@workspace/db";
+import { eq, and, sql } from "drizzle-orm";
 
 const router: IRouter = Router();
 
-/**
- * GET /api/store/:username
- * Public store page for a team member.
- * Returns profile + active collections + active looks.
- */
 router.get("/store/:username", async (req, res) => {
   try {
     const username = String(req.params.username).toLowerCase();
@@ -20,6 +22,7 @@ router.get("/store/:username", async (req, res) => {
         displayName: teamMembersTable.displayName,
         username: teamMembersTable.username,
         bio: teamMembersTable.bio,
+        whyShopWithMe: teamMembersTable.whyShopWithMe,
         profilePhotoUrl: teamMembersTable.profilePhotoUrl,
         coverImageUrl: teamMembersTable.coverImageUrl,
         whatsapp: teamMembersTable.whatsapp,
@@ -34,7 +37,7 @@ router.get("/store/:username", async (req, res) => {
       return;
     }
 
-    const [collections, looks] = await Promise.all([
+    const [collections, looks, productCountResult, featuredProducts] = await Promise.all([
       db
         .select({
           id: collectionsTable.id,
@@ -42,16 +45,11 @@ router.get("/store/:username", async (req, res) => {
           coverImageUrl: collectionsTable.coverImageUrl,
           shareToken: collectionsTable.shareToken,
           views: collectionsTable.views,
-          status: collectionsTable.status,
           createdAt: collectionsTable.createdAt,
         })
         .from(collectionsTable)
-        .where(
-          and(
-            eq(collectionsTable.teamMemberId, member.id),
-            eq(collectionsTable.status, "active")
-          )
-        ),
+        .where(and(eq(collectionsTable.teamMemberId, member.id), eq(collectionsTable.status, "active"))),
+
       db
         .select({
           id: teamLooksTable.id,
@@ -60,18 +58,36 @@ router.get("/store/:username", async (req, res) => {
           price: teamLooksTable.price,
           shareToken: teamLooksTable.shareToken,
           views: teamLooksTable.views,
-          status: teamLooksTable.status,
           createdAt: teamLooksTable.createdAt,
         })
         .from(teamLooksTable)
-        .where(
-          and(
-            eq(teamLooksTable.teamMemberId, member.id),
-            eq(teamLooksTable.status, "active")
-          )
-        ),
+        .where(and(eq(teamLooksTable.teamMemberId, member.id), eq(teamLooksTable.status, "active"))),
+
+      db
+        .select({ count: sql<number>`count(distinct ${collectionProductsTable.productId})::int` })
+        .from(collectionProductsTable)
+        .innerJoin(collectionsTable, eq(collectionProductsTable.collectionId, collectionsTable.id))
+        .where(and(eq(collectionsTable.teamMemberId, member.id), eq(collectionsTable.status, "active"))),
+
+      db
+        .selectDistinctOn([productsTable.id], {
+          id: productsTable.id,
+          title: productsTable.title,
+          imageUrl: productsTable.imageUrl,
+          brand: productsTable.brand,
+          affiliateUrl: productsTable.affiliateUrl,
+          category: productsTable.category,
+          hookPrice: productsTable.price,
+          collectionPrice: collectionProductsTable.collectionPrice,
+        })
+        .from(productsTable)
+        .innerJoin(collectionProductsTable, eq(collectionProductsTable.productId, productsTable.id))
+        .innerJoin(collectionsTable, eq(collectionProductsTable.collectionId, collectionsTable.id))
+        .where(and(eq(collectionsTable.teamMemberId, member.id), eq(collectionsTable.status, "active")))
+        .limit(12),
     ]);
 
+    const productCount = productCountResult[0]?.count ?? 0;
     const totalViews =
       collections.reduce((s, c) => s + c.views, 0) +
       looks.reduce((s, l) => s + l.views, 0);
@@ -83,13 +99,16 @@ router.get("/store/:username", async (req, res) => {
         displayName: member.displayName ?? null,
         username: member.username,
         bio: member.bio ?? null,
+        whyShopWithMe: member.whyShopWithMe ?? null,
         profilePhotoUrl: member.profilePhotoUrl ?? null,
         coverImageUrl: member.coverImageUrl ?? null,
         whatsapp: member.whatsapp ?? null,
       },
       stats: {
+        products: productCount,
         collections: collections.length,
         looks: looks.length,
+        followers: 0,
         totalViews,
       },
       collections: collections.map((c) => ({
@@ -108,6 +127,15 @@ router.get("/store/:username", async (req, res) => {
         shareToken: l.shareToken,
         views: l.views,
         createdAt: l.createdAt.toISOString(),
+      })),
+      featuredProducts: featuredProducts.map((p) => ({
+        id: p.id,
+        title: p.title,
+        imageUrl: p.imageUrl ?? null,
+        brand: p.brand ?? null,
+        affiliateUrl: p.affiliateUrl,
+        category: p.category,
+        displayPrice: p.collectionPrice ?? p.hookPrice ?? null,
       })),
     });
   } catch (err) {

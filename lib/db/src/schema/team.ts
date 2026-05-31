@@ -16,6 +16,7 @@ export const teamMembersTable = pgTable("team_members", {
   bio: text("bio"),
   profilePhotoUrl: text("profile_photo_url"),
   coverImageUrl: text("cover_image_url"),
+  whyShopWithMe: text("why_shop_with_me"),
 });
 
 export const teamMemberActivityTable = pgTable("team_member_activity", {

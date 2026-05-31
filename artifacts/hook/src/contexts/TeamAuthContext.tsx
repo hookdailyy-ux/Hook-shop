@@ -11,6 +11,7 @@ export interface TeamMemberInfo {
   // Store profile fields
   displayName: string | null;
   bio: string | null;
+  whyShopWithMe: string | null;
   profilePhotoUrl: string | null;
   coverImageUrl: string | null;
 }
