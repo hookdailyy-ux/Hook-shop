@@ -24,7 +24,7 @@ import { TeamAuthProvider, useTeamAuth } from "@/contexts/TeamAuthContext";
 import { FavoritesProvider } from "@/contexts/FavoritesContext";
 import { BasketProvider } from "@/contexts/BasketContext";
 import { TeamMemberBar } from "@/components/TeamMemberBar";
-import { BasketDrawer, FloatingBasketButton } from "@/components/BasketDrawer";
+import { BasketDrawer } from "@/components/BasketDrawer";
 import BasketSharePage from "@/pages/BasketSharePage";
 
 const queryClient = new QueryClient({
@@ -145,8 +145,7 @@ function Router() {
         </Route>
       </Switch>
 
-      {/* Floating basket button + drawer — visible on public pages only */}
-      {showBasket && <FloatingBasketButton />}
+      {/* Basket drawer — visible on public pages only */}
       {showBasket && <BasketDrawer />}
 
       {/* Floating team member workspace bar — visible on public pages only */}

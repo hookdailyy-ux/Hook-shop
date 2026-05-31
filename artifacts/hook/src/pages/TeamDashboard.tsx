@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { Link, useLocation } from "wouter";
 import { useTeamAuth } from "@/contexts/TeamAuthContext";
-import { LogOut, LayoutDashboard, FolderOpen, Layers, ShoppingBag, Gift, User, BarChart3 } from "lucide-react";
+import { LogOut, LayoutDashboard, FolderOpen, Layers, ShoppingBag, Gift, User, BarChart3, Inbox } from "lucide-react";
 import { MyCollections } from "@/components/MyCollections";
 import { CollectionDetail } from "@/components/CollectionDetail";
 import { MyLooks } from "@/components/MyLooks";
@@ -10,6 +10,7 @@ import { StoreProfileBuilder } from "@/components/StoreProfileBuilder";
 import { MyOrders } from "@/components/MyOrders";
 import { MyAnalytics } from "@/components/MyAnalytics";
 import { MyRewards } from "@/components/MyRewards";
+import { SharedBaskets } from "@/components/SharedBaskets";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -18,6 +19,7 @@ type TeamPage =
   | "collections"
   | "looks"
   | "orders"
+  | "baskets"
   | "analytics"
   | "rewards"
   | "profile";
@@ -27,6 +29,7 @@ const NAV: { id: TeamPage; label: string; icon: React.ElementType }[] = [
   { id: "collections", label: "My Collections", icon: FolderOpen },
   { id: "looks", label: "My Looks", icon: Layers },
   { id: "orders", label: "My Orders", icon: ShoppingBag },
+  { id: "baskets", label: "Shared Baskets", icon: Inbox },
   { id: "analytics", label: "Analytics", icon: BarChart3 },
   { id: "rewards", label: "My Rewards", icon: Gift },
   { id: "profile", label: "My Profile", icon: User },
@@ -61,7 +64,7 @@ export default function TeamDashboard() {
         <div className="container mx-auto px-4 sm:px-6">
           <div className="flex items-center gap-0 overflow-x-auto" style={{ scrollbarWidth: "none" }}>
             <div className="shrink-0 pr-6 py-4 border-r border-border mr-4 hidden md:flex items-center gap-2">
-              <Link href="/" className="font-serif text-lg font-light tracking-wide">HOOK</Link>
+              <Link href="/" className="font-serif text-lg font-light tracking-wide hover:opacity-70 transition-opacity" title="Back to website">HOOK</Link>
               <span className="text-[9px] tracking-widest uppercase border border-border px-1.5 py-0.5 text-muted-foreground">
                 Workspace
               </span>
@@ -127,6 +130,8 @@ export default function TeamDashboard() {
         )}
 
         {activePage === "orders" && <MyOrders />}
+
+        {activePage === "baskets" && <SharedBaskets />}
 
         {activePage === "analytics" && <MyAnalytics />}
 

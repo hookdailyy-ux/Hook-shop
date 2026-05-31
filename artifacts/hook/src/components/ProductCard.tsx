@@ -1,13 +1,37 @@
 import { Link } from "wouter";
+import { ShoppingBag } from "lucide-react";
 import { PlaceholderImage } from "./PlaceholderImage";
 import { HeartButton } from "./HeartButton";
 import type { Product } from "@workspace/api-client-react";
+import { useBasket } from "@/contexts/BasketContext";
 
 interface ProductCardProps {
   product: Product;
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+  const { addItem, openBasket } = useBasket();
+
+  const handleAddToBasket = (e: React.MouseEvent) => {
+    e.preventDefault();
+    addItem({
+      productId: product.id,
+      productTitle: product.title,
+      productImageUrl: product.imageUrl ?? null,
+      displayPrice: product.price ?? null,
+      affiliateUrl: product.affiliateUrl,
+      brand: product.brand ?? null,
+      size: null,
+      color: null,
+      sourceMemberId: 0,
+      sourceMemberUsername: "",
+      sourceMemberName: "HOOK",
+      sourceContext: "store",
+      sourceToken: null,
+    });
+    openBasket();
+  };
+
   return (
     <div className="group flex flex-col gap-3" data-testid={`card-product-${product.id}`}>
       <div className="relative overflow-hidden bg-accent">
@@ -24,18 +48,15 @@ export function ProductCard({ product }: ProductCardProps) {
           )}
           <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 md:block hidden">
             <button
-              className="w-full bg-background/90 text-foreground text-xs tracking-widest uppercase py-3 backdrop-blur-sm border border-border/50"
-              onClick={(e) => {
-                e.preventDefault();
-                window.open(product.affiliateUrl, "_blank", "noopener,noreferrer");
-              }}
+              className="w-full bg-background/90 text-foreground text-xs tracking-widest uppercase py-3 backdrop-blur-sm border border-border/50 flex items-center justify-center gap-2"
+              onClick={handleAddToBasket}
             >
-              Order Now
+              <ShoppingBag className="h-3.5 w-3.5" />
+              Add to Basket
             </button>
           </div>
         </Link>
 
-        {/* Heart button — top right, always visible on mobile, visible on hover on desktop */}
         <div className="absolute top-2 right-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200">
           <HeartButton
             item={{
@@ -71,11 +92,12 @@ export function ProductCard({ product }: ProductCardProps) {
           )}
         </div>
         <button
-          className="mt-2 w-full text-xs tracking-widest uppercase py-3 border border-foreground bg-foreground text-background md:hidden"
-          onClick={() => window.open(product.affiliateUrl, "_blank", "noopener,noreferrer")}
+          className="mt-2 w-full text-xs tracking-widest uppercase py-3 border border-foreground bg-foreground text-background md:hidden flex items-center justify-center gap-2"
+          onClick={handleAddToBasket}
           data-testid={`button-shop-${product.id}`}
         >
-          Order Now
+          <ShoppingBag className="h-3.5 w-3.5" />
+          Add to Basket
         </button>
       </div>
     </div>

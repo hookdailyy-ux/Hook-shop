@@ -1,7 +1,8 @@
 import { ReactNode, useState, useRef } from "react";
 import { Link, useLocation } from "wouter";
-import { Menu, X, ChevronDown, Heart } from "lucide-react";
+import { Menu, X, ChevronDown, Heart, ShoppingBag } from "lucide-react";
 import { useFavorites } from "@/contexts/FavoritesContext";
+import { useBasket } from "@/contexts/BasketContext";
 
 function NavDropdown({
   label,
@@ -63,6 +64,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const [accessoriesOpen, setAccessoriesOpen] = useState(false);
   const [location] = useLocation();
   const { count } = useFavorites();
+  const { totalItems, openBasket } = useBasket();
 
   const clothesItems = [
     { href: "/women", label: "Women" },
@@ -123,7 +125,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
           {/* Favorites icon */}
           <Link
             href="/favorites"
-            className="relative p-2 -mr-1 text-muted-foreground hover:text-foreground transition-colors"
+            className="relative p-2 text-muted-foreground hover:text-foreground transition-colors"
             aria-label="Favorites"
             data-testid="nav-favorites"
           >
@@ -134,6 +136,20 @@ export function AppLayout({ children }: { children: ReactNode }) {
               </span>
             )}
           </Link>
+
+          {/* Basket icon */}
+          <button
+            onClick={openBasket}
+            aria-label="Open basket"
+            className="relative p-2 -mr-1 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ShoppingBag className="h-5 w-5" strokeWidth={1.5} />
+            {totalItems > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 bg-green-600 text-white text-[9px] font-semibold flex items-center justify-center px-0.5 leading-none">
+                {totalItems > 99 ? "99+" : totalItems}
+              </span>
+            )}
+          </button>
 
           {/* Mobile hamburger */}
           <button
@@ -241,6 +257,20 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 </span>
               )}
             </Link>
+
+            {/* Basket */}
+            <button
+              onClick={() => { setMobileOpen(false); openBasket(); }}
+              className="px-5 py-4 text-sm tracking-widest uppercase border-b border-border/50 text-muted-foreground hover:text-foreground transition-colors flex items-center gap-3 w-full text-left"
+            >
+              <ShoppingBag className="h-4 w-4" strokeWidth={1.5} />
+              Basket
+              {totalItems > 0 && (
+                <span className="ml-auto min-w-[20px] h-5 bg-green-600 text-white text-[9px] font-semibold flex items-center justify-center px-1">
+                  {totalItems}
+                </span>
+              )}
+            </button>
           </nav>
         </div>
       )}

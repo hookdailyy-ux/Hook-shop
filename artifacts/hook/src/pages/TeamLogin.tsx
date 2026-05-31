@@ -1,14 +1,17 @@
 import { useState, type FormEvent } from "react";
-import { Link, useLocation } from "wouter";
+import { Link, useLocation, Redirect } from "wouter";
 import { useTeamAuth } from "@/contexts/TeamAuthContext";
 
 export default function TeamLogin() {
-  const { login } = useTeamAuth();
+  const { login, authenticated, isLoading } = useTeamAuth();
   const [, navigate] = useLocation();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  if (isLoading) return null;
+  if (authenticated) return <Redirect to="/team" />;
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();

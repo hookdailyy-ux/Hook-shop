@@ -40,7 +40,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { X, Plus, Trash2, Pencil, LogOut, Loader2, Upload } from "lucide-react";
+import { X, Plus, Trash2, Pencil, LogOut, Home, Loader2, Upload } from "lucide-react";
 import { SingleImageUpload, MultiImageUpload } from "@/components/ImageUploadField";
 import { useUpload } from "@workspace/object-storage-web";
 import { useSiteImages, useUpsertSiteImage, useDeleteSiteImage } from "@/hooks/useSiteImages";
@@ -93,7 +93,15 @@ export default function AdminDashboard() {
                 {tab}
               </button>
             ))}
-            <div className="ml-auto shrink-0">
+            <div className="ml-auto shrink-0 flex items-center">
+              <a
+                href="/"
+                className="flex items-center gap-1.5 px-4 py-4 text-xs tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors"
+                title="Back to website"
+              >
+                <Home className="h-3.5 w-3.5" />
+                <span className="hidden md:inline">Website</span>
+              </a>
               <button
                 onClick={handleLogout}
                 className="flex items-center gap-2 px-4 py-4 text-xs tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors"

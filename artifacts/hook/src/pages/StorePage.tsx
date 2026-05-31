@@ -9,7 +9,6 @@ import {
   Check,
   Share2,
   ShoppingBag,
-  ExternalLink,
   Eye,
   Heart,
   Tag,
@@ -668,17 +667,10 @@ function ProductCard({ product, onAddToBasket, onTrackClick }: {
         )}
         <div className="flex gap-2 mt-1">
           <button
-            onClick={() => onAddToBasket(product)}
+            onClick={() => { onTrackClick(); onAddToBasket(product); }}
             className="flex-1 py-2.5 bg-foreground text-background text-[10px] tracking-widest uppercase rounded-xl hover:opacity-90 transition-opacity"
           >
             Add to Basket
-          </button>
-          <button
-            onClick={() => { onTrackClick(); window.open(product.affiliateUrl, "_blank", "noopener,noreferrer"); }}
-            className="px-3 py-2.5 border border-border rounded-xl text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors"
-            title="Shop directly"
-          >
-            <ExternalLink className="h-3.5 w-3.5" />
           </button>
         </div>
       </div>

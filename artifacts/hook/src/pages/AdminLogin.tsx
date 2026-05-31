@@ -1,14 +1,17 @@
 import { useState, FormEvent } from "react";
-import { useLocation } from "wouter";
+import { useLocation, Redirect } from "wouter";
 import { useAdminAuth } from "@/contexts/AdminAuthContext";
 import { Link } from "wouter";
 
 export default function AdminLogin() {
-  const { login } = useAdminAuth();
+  const { login, authenticated, isLoading } = useAdminAuth();
   const [, navigate] = useLocation();
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  if (isLoading) return null;
+  if (authenticated) return <Redirect to="/admin" />;
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();

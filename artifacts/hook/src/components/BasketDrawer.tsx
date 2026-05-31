@@ -145,7 +145,7 @@ export function BasketDrawer() {
             </div>
           ) : (
             <div className="p-5 space-y-5">
-              {currentMemberName && (
+              {currentMemberName && currentMemberUsername && (
                 <div className="flex items-center gap-2 pb-3 border-b border-border">
                   <p className="text-[9px] tracking-widest uppercase text-muted-foreground">
                     Shopping from
