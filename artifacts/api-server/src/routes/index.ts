@@ -12,6 +12,7 @@ import siteImagesRouter from "./site-images";
 import categoriesRouter from "./categories";
 import storageRouter from "./storage";
 import teamRouter from "./team";
+import teamAuthRouter from "./team-auth";
 
 const router: IRouter = Router();
 
@@ -28,5 +29,6 @@ router.use(adminRouter);
 router.use(subcategoriesRouter);
 router.use(storageRouter);
 router.use(teamRouter);
+router.use(teamAuthRouter);
 
 export default router;
