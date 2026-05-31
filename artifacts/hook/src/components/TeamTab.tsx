@@ -28,6 +28,8 @@ import {
   Check,
   X,
   ChevronLeft,
+  FolderOpen,
+  Link2,
 } from "lucide-react";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -60,7 +62,7 @@ interface TeamMemberDetail extends TeamMember {
   activity: ActivityItem[];
 }
 
-type SubView = "members" | "add";
+type SubView = "members" | "add" | "collections";
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString("en-US", {
@@ -161,7 +163,7 @@ export function TeamTab() {
   return (
     <div>
       <div className="flex gap-0 border-b border-border mb-6">
-        {(["members", "add"] as SubView[]).map((v) => (
+        {(["members", "add", "collections"] as SubView[]).map((v) => (
           <button
             key={v}
             onClick={() => setSubView(v)}
@@ -171,7 +173,7 @@ export function TeamTab() {
                 : "border-transparent text-muted-foreground hover:text-foreground"
             }`}
           >
-            {v === "members" ? "Team Members" : "Add Member"}
+            {v === "members" ? "Team Members" : v === "add" ? "Add Member" : "Collections"}
           </button>
         ))}
       </div>
@@ -203,6 +205,8 @@ export function TeamTab() {
           />
         </div>
       )}
+
+      {subView === "collections" && <CollectionsAdminView />}
 
       <Dialog open={viewOpen} onOpenChange={setViewOpen}>
         <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
@@ -861,6 +865,134 @@ function MemberDetailContent({ member }: { member: TeamMemberDetail }) {
             ))}
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+interface AdminCollection {
+  id: number;
+  title: string;
+  description: string;
+  coverImageUrl: string | null;
+  status: string;
+  shareToken: string;
+  teamMemberId: number;
+  createdAt: string;
+  member: { fullName: string; username: string };
+}
+
+function CollectionsAdminView() {
+  const [collections, setCollections] = useState<AdminCollection[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [copied, setCopied] = useState<number | null>(null);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    void (async () => {
+      try {
+        const res = await fetch(`${BASE}/api/admin/collections`, { credentials: "include" });
+        if (!res.ok) throw new Error("Failed");
+        setCollections((await res.json()) as AdminCollection[]);
+      } catch {
+        toast({ title: "Failed to load collections", variant: "destructive" });
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  const copyLink = async (c: AdminCollection) => {
+    const url = `${window.location.origin}${BASE}/c/${c.shareToken}`;
+    await navigator.clipboard.writeText(url);
+    setCopied(c.id);
+    toast({ title: "Share link copied" });
+    setTimeout(() => setCopied(null), 2000);
+  };
+
+  if (loading) {
+    return (
+      <div className="py-20 text-center">
+        <p className="text-xs tracking-widest uppercase text-muted-foreground animate-pulse">Loading...</p>
+      </div>
+    );
+  }
+
+  if (collections.length === 0) {
+    return (
+      <div className="py-20 text-center border border-dashed border-border">
+        <FolderOpen className="h-8 w-8 mx-auto mb-4 text-muted-foreground/25" strokeWidth={1.5} />
+        <p className="text-[10px] tracking-widest uppercase text-muted-foreground mb-1">No Collections Yet</p>
+        <p className="text-xs text-muted-foreground">Team members haven't created any collections yet.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-5">
+        <p className="text-xs text-muted-foreground">
+          {collections.length} collection{collections.length !== 1 ? "s" : ""} across all members
+        </p>
+      </div>
+
+      <div className="border border-border divide-y divide-border">
+        <div className="grid grid-cols-[auto_1fr_160px_80px_100px] gap-0 px-4 py-2.5 bg-accent/30">
+          <div className="w-10 mr-4" />
+          <p className="text-[10px] tracking-widest uppercase text-muted-foreground">Collection</p>
+          <p className="text-[10px] tracking-widest uppercase text-muted-foreground">Member</p>
+          <p className="text-[10px] tracking-widest uppercase text-muted-foreground">Status</p>
+          <p className="text-[10px] tracking-widest uppercase text-muted-foreground text-right">Share</p>
+        </div>
+
+        {collections.map((c) => (
+          <div
+            key={c.id}
+            className="grid grid-cols-[auto_1fr_160px_80px_100px] gap-0 items-center px-4 py-3 hover:bg-accent/20 transition-colors"
+          >
+            <div className="w-10 h-10 mr-4 shrink-0 overflow-hidden bg-accent/40 border border-border">
+              {c.coverImageUrl ? (
+                <img src={c.coverImageUrl} alt={c.title} className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <FolderOpen className="h-4 w-4 text-muted-foreground/30" strokeWidth={1.5} />
+                </div>
+              )}
+            </div>
+            <div>
+              <p className="text-xs font-medium line-clamp-1">{c.title}</p>
+              {c.description && (
+                <p className="text-[10px] text-muted-foreground line-clamp-1 mt-0.5">{c.description}</p>
+              )}
+            </div>
+            <div>
+              <p className="text-xs">{c.member.fullName}</p>
+              <p className="text-[10px] text-muted-foreground">@{c.member.username}</p>
+            </div>
+            <div>
+              <span className={`text-[9px] tracking-widest uppercase px-1.5 py-0.5 ${
+                c.status === "active"
+                  ? "bg-green-50 text-green-700 border border-green-200"
+                  : "bg-accent text-muted-foreground border border-border"
+              }`}>
+                {c.status}
+              </span>
+            </div>
+            <div className="flex justify-end">
+              <button
+                onClick={() => void copyLink(c)}
+                className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-accent/40 transition-colors"
+                title="Copy share link"
+              >
+                {copied === c.id ? (
+                  <Check className="h-3.5 w-3.5 text-green-600" />
+                ) : (
+                  <Link2 className="h-3.5 w-3.5" />
+                )}
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

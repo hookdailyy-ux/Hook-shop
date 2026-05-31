@@ -5,4 +5,5 @@ export * from "./newsletter";
 export * from "./subcategories";
 export * from "./settings";
 export * from "./team";
+export * from "./collections";
 export * from "./categories";

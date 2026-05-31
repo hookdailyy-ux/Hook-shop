@@ -15,6 +15,7 @@ import Favorites from "@/pages/Favorites";
 import TeamLogin from "@/pages/TeamLogin";
 import TeamChangePassword from "@/pages/TeamChangePassword";
 import TeamDashboard from "@/pages/TeamDashboard";
+import CollectionShare from "@/pages/CollectionShare";
 import { AdminAuthProvider, useAdminAuth } from "@/contexts/AdminAuthContext";
 import { TeamAuthProvider, useTeamAuth } from "@/contexts/TeamAuthContext";
 import { FavoritesProvider } from "@/contexts/FavoritesContext";
@@ -125,6 +126,7 @@ function Router() {
               />
               <Route path="/favorites" component={Favorites} />
               <Route path="/product/:id" component={ProductDetail} />
+              <Route path="/c/:token" component={CollectionShare} />
               <Route component={NotFound} />
             </Switch>
           </AppLayout>

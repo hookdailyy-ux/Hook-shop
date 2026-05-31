@@ -13,6 +13,7 @@ import categoriesRouter from "./categories";
 import storageRouter from "./storage";
 import teamRouter from "./team";
 import teamAuthRouter from "./team-auth";
+import collectionsRouter from "./collections";
 
 const router: IRouter = Router();
 
@@ -30,5 +31,6 @@ router.use(subcategoriesRouter);
 router.use(storageRouter);
 router.use(teamRouter);
 router.use(teamAuthRouter);
+router.use(collectionsRouter);
 
 export default router;
