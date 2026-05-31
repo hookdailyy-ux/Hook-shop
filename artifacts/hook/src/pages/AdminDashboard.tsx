@@ -40,7 +40,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { X, Plus, Trash2, Pencil, LogOut, Home, Loader2, Upload } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { X, Plus, Trash2, Pencil, LogOut, Home, User, ChevronDown, Loader2, Upload } from "lucide-react";
 import { SingleImageUpload, MultiImageUpload } from "@/components/ImageUploadField";
 import { useUpload } from "@workspace/object-storage-web";
 import { useSiteImages, useUpsertSiteImage, useDeleteSiteImage } from "@/hooks/useSiteImages";
@@ -94,23 +101,47 @@ export default function AdminDashboard() {
                 {tab}
               </button>
             ))}
-            <div className="ml-auto shrink-0 flex items-center">
-              <a
-                href="/"
-                className="flex items-center gap-1.5 px-4 py-4 text-xs tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors"
-                title="Back to website"
-              >
-                <Home className="h-3.5 w-3.5" />
-                <span className="hidden md:inline">Website</span>
-              </a>
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-2 px-4 py-4 text-xs tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors"
-                data-testid="button-logout"
-              >
-                <LogOut className="h-3.5 w-3.5" />
-                <span className="hidden md:inline">Logout</span>
-              </button>
+            <div className="ml-auto shrink-0 pl-4">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    className="flex items-center gap-1.5 px-3 py-2 text-xs tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors focus:outline-none"
+                    data-testid="admin-account-menu"
+                  >
+                    <span>Admin</span>
+                    <ChevronDown className="h-3 w-3 opacity-60" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-44">
+                  <DropdownMenuItem asChild>
+                    <a
+                      href="/"
+                      className="flex items-center gap-2 cursor-pointer text-xs tracking-widest uppercase"
+                      data-testid="admin-menu-home"
+                    >
+                      <Home className="h-3.5 w-3.5 text-muted-foreground" />
+                      Home
+                    </a>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setActiveTab("settings")}
+                    className="flex items-center gap-2 cursor-pointer text-xs tracking-widest uppercase"
+                    data-testid="admin-menu-account"
+                  >
+                    <User className="h-3.5 w-3.5 text-muted-foreground" />
+                    My Account
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={handleLogout}
+                    className="flex items-center gap-2 cursor-pointer text-xs tracking-widest uppercase text-destructive focus:text-destructive"
+                    data-testid="button-logout"
+                  >
+                    <LogOut className="h-3.5 w-3.5" />
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </div>
