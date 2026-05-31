@@ -72,7 +72,6 @@ export default function AdminDashboard() {
   const handleLogout = async () => {
     setMenuOpen(false);
     await logout();
-    navigate("/admin/login");
   };
 
   useEffect(() => {

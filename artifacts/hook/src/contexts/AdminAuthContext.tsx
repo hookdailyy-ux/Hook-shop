@@ -47,8 +47,8 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
   }, [queryClient]);
 
   const logout = useCallback(async () => {
-    await fetch(`${BASE}/api/auth/logout`, { method: "POST", credentials: "include" });
-    queryClient.removeQueries({ queryKey: ["admin-auth-me"] });
+    queryClient.setQueryData(["admin-auth-me"], { authenticated: false });
+    fetch(`${BASE}/api/auth/logout`, { method: "POST", credentials: "include" }).catch(() => null);
   }, [queryClient]);
 
   return (
