@@ -112,6 +112,9 @@ function Router() {
         <Route path="/team/change-password" component={ProtectedTeamChangePassword} />
         <Route path="/team" component={ProtectedTeamDashboard} />
 
+        {/* Store pages — own header, no AppLayout */}
+        <Route path="/store/:username" component={StorePage} />
+
         {/* Public routes — wrapped in AppLayout */}
         <Route>
           <AppLayout>
@@ -121,6 +124,8 @@ function Router() {
               <Route path="/shop-the-setup" component={ShopTheSetup} />
               <Route path="/women" component={() => <CategoryPage category="women" />} />
               <Route path="/men" component={() => <CategoryPage category="men" />} />
+              <Route path="/women-sport" component={() => <CategoryPage category="women-sport" />} />
+              <Route path="/men-sport" component={() => <CategoryPage category="men-sport" />} />
               <Route
                 path="/accessories"
                 component={() => <CategoryPage category="accessories" />}
@@ -137,7 +142,6 @@ function Router() {
               <Route path="/product/:id" component={ProductDetail} />
               <Route path="/c/:token" component={CollectionShare} />
               <Route path="/l/:token" component={LookShare} />
-              <Route path="/store/:username" component={StorePage} />
               <Route path="/rankings" component={RankingsPage} />
               <Route path="/basket/:token" component={BasketSharePage} />
               <Route component={NotFound} />

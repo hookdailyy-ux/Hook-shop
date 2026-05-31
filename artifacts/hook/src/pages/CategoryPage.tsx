@@ -21,6 +21,16 @@ const CATEGORY_META: Record<string, { titleKey: string; descKey: string; showDis
     descKey: "category.men.description",
     showDiscoverMore: true,
   },
+  "women-sport": {
+    titleKey: "category.womenSport.title",
+    descKey: "category.womenSport.description",
+    showDiscoverMore: true,
+  },
+  "men-sport": {
+    titleKey: "category.menSport.title",
+    descKey: "category.menSport.description",
+    showDiscoverMore: true,
+  },
   electronics: {
     titleKey: "category.electronics.title",
     descKey: "category.electronics.description",

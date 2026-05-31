@@ -17,9 +17,12 @@ import {
   Star,
   Package,
   TrendingUp,
+  Search,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AddToBasketModal } from "@/components/AddToBasketModal";
+import { useBasket } from "@/contexts/BasketContext";
+import { useFavorites } from "@/contexts/FavoritesContext";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -90,7 +93,10 @@ export default function StorePage() {
   const [notFound, setNotFound] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
   const [addingProduct, setAddingProduct] = useState<StoreFeaturedProduct | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
+  const { items: basketItems, openBasket } = useBasket();
+  const { count: favCount } = useFavorites();
 
   useEffect(() => {
     if (!username) return;
@@ -193,8 +199,78 @@ export default function StorePage() {
   const { member, stats, collections, looks, featuredProducts } = store;
   const displayName = member.displayName ?? member.fullName;
 
+  const q = searchQuery.trim().toLowerCase();
+  const filteredProducts = q
+    ? featuredProducts.filter(
+        (p) =>
+          p.title.toLowerCase().includes(q) ||
+          (p.brand ?? "").toLowerCase().includes(q)
+      )
+    : featuredProducts;
+  const filteredCollections = q
+    ? collections.filter((c) => c.title.toLowerCase().includes(q))
+    : collections;
+  const filteredLooks = q
+    ? looks.filter((l) => l.title.toLowerCase().includes(q))
+    : looks;
+
   return (
     <div className="min-h-screen" style={{ background: "hsl(var(--background))" }}>
+
+      {/* ══ STORE HEADER ═════════════════════════════════════════════════════ */}
+      <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center gap-4">
+
+          {/* Logo + "Powered by HOOK" */}
+          <Link href="/" className="flex flex-col items-start shrink-0 group">
+            <span className="font-serif text-lg leading-none tracking-widest text-foreground group-hover:opacity-70 transition-opacity">
+              HOOK
+            </span>
+            <span className="text-[8px] tracking-[0.2em] uppercase text-muted-foreground/60 leading-none mt-0.5">
+              Powered by HOOK
+            </span>
+          </Link>
+
+          {/* Search bar */}
+          <div className="flex-1 max-w-sm mx-auto relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50 pointer-events-none" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search this store…"
+              className="w-full pl-8 pr-3 py-2 text-xs tracking-wide border border-border bg-accent/20 focus:bg-background focus:outline-none focus:border-foreground/30 transition-colors placeholder:text-muted-foreground/40"
+            />
+          </div>
+
+          {/* Wishlist + Basket */}
+          <div className="flex items-center gap-1 shrink-0">
+            <Link
+              href="/favorites"
+              className="relative p-2 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Heart className="h-5 w-5" strokeWidth={1.5} />
+              {favCount > 0 && (
+                <span className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-foreground text-background text-[8px] flex items-center justify-center leading-none">
+                  {favCount > 9 ? "9+" : favCount}
+                </span>
+              )}
+            </Link>
+            <button
+              onClick={openBasket}
+              className="relative p-2 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ShoppingBag className="h-5 w-5" strokeWidth={1.5} />
+              {basketItems.length > 0 && (
+                <span className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-foreground text-background text-[8px] flex items-center justify-center leading-none">
+                  {basketItems.length > 9 ? "9+" : basketItems.length}
+                </span>
+              )}
+            </button>
+          </div>
+
+        </div>
+      </header>
 
       {/* ══ COVER IMAGE ══════════════════════════════════════════════════════ */}
       <div className="relative">
@@ -324,16 +400,16 @@ export default function StorePage() {
             </div>
 
             {/* ── COLLECTIONS ──────────────────────────────────────────────── */}
-            {collections.length > 0 && (
+            {filteredCollections.length > 0 && (
               <section className="mb-12">
-                <SectionHeader icon={FolderOpen} title="Collections" count={collections.length} />
+                <SectionHeader icon={FolderOpen} title="Collections" count={filteredCollections.length} />
 
                 {/* Mobile: horizontal scroll */}
                 <div
                   className="flex gap-4 overflow-x-auto pb-3 lg:hidden"
                   style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch" } as React.CSSProperties}
                 >
-                  {collections.map((c) => (
+                  {filteredCollections.map((c) => (
                     <Link key={c.id} href={`/c/${c.shareToken}`}>
                       <div className="w-[72vw] max-w-[280px] min-w-[220px] shrink-0 bg-white dark:bg-stone-900 rounded-2xl overflow-hidden shadow-sm border border-border/50 hover:shadow-md transition-shadow">
                         <div className="aspect-[4/3] overflow-hidden bg-stone-100 dark:bg-stone-800">
@@ -356,7 +432,7 @@ export default function StorePage() {
 
                 {/* Desktop: grid */}
                 <div className="hidden lg:grid lg:grid-cols-2 xl:grid-cols-3 gap-5">
-                  {collections.map((c) => (
+                  {filteredCollections.map((c) => (
                     <Link key={c.id} href={`/c/${c.shareToken}`}>
                       <div className="group bg-white dark:bg-stone-900 rounded-2xl overflow-hidden shadow-sm border border-border/50 hover:shadow-md transition-all duration-300">
                         <div className="aspect-[4/3] overflow-hidden bg-stone-100 dark:bg-stone-800">
@@ -380,16 +456,16 @@ export default function StorePage() {
             )}
 
             {/* ── LOOKS ────────────────────────────────────────────────────── */}
-            {looks.length > 0 && (
+            {filteredLooks.length > 0 && (
               <section className="mb-12">
-                <SectionHeader icon={Layers} title="Looks" count={looks.length} />
+                <SectionHeader icon={Layers} title="Looks" count={filteredLooks.length} />
 
                 {/* Mobile: horizontal scroll */}
                 <div
                   className="flex gap-4 overflow-x-auto pb-3 lg:hidden"
                   style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch" } as React.CSSProperties}
                 >
-                  {looks.map((l) => (
+                  {filteredLooks.map((l) => (
                     <Link key={l.id} href={`/l/${l.shareToken}`}>
                       <div className="w-[60vw] max-w-[240px] min-w-[180px] shrink-0 bg-white dark:bg-stone-900 rounded-2xl overflow-hidden shadow-sm border border-border/50 hover:shadow-md transition-shadow">
                         <div className="aspect-[3/4] overflow-hidden bg-stone-100 dark:bg-stone-800">
@@ -412,7 +488,7 @@ export default function StorePage() {
 
                 {/* Desktop: grid */}
                 <div className="hidden lg:grid lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                  {looks.map((l) => (
+                  {filteredLooks.map((l) => (
                     <Link key={l.id} href={`/l/${l.shareToken}`}>
                       <div className="group bg-white dark:bg-stone-900 rounded-2xl overflow-hidden shadow-sm border border-border/50 hover:shadow-md transition-all duration-300">
                         <div className="aspect-[3/4] overflow-hidden bg-stone-100 dark:bg-stone-800">
@@ -436,12 +512,12 @@ export default function StorePage() {
             )}
 
             {/* ── FEATURED PRODUCTS ─────────────────────────────────────────── */}
-            {featuredProducts.length > 0 && (
+            {filteredProducts.length > 0 && (
               <section className="mb-12">
-                <SectionHeader icon={ShoppingBag} title="Products" count={stats.products} />
+                <SectionHeader icon={ShoppingBag} title="Products" count={filteredProducts.length} />
 
                 <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
-                  {featuredProducts.map((p) => (
+                  {filteredProducts.map((p) => (
                     <ProductCard key={p.id} product={p} onAddToBasket={handleProductAddToBasket} onTrackClick={() => trackProductClick(p.id)} />
                   ))}
                 </div>
@@ -449,7 +525,7 @@ export default function StorePage() {
             )}
 
             {/* Empty state */}
-            {collections.length === 0 && looks.length === 0 && featuredProducts.length === 0 && (
+            {filteredCollections.length === 0 && filteredLooks.length === 0 && filteredProducts.length === 0 && (
               <div className="py-16 text-center border border-dashed border-border rounded-2xl my-8">
                 <TrendingUp className="h-8 w-8 mx-auto mb-3 text-muted-foreground/20" strokeWidth={1} />
                 <p className="text-[10px] tracking-widest uppercase text-muted-foreground mb-2">Coming Soon</p>

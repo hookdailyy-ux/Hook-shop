@@ -8,6 +8,8 @@
     "shopTheLook": "Shop The Look",
     "men": "Men",
     "women": "Women",
+    "womenSport": "Women Sport",
+    "menSport": "Men Sport",
     "allAccessories": "All Accessories",
     "womenAccessories": "Women Accessories",
     "menAccessories": "Men Accessories"
@@ -49,6 +51,14 @@
     "homeEssentials": {
       "title": "Home Essentials",
       "description": "Objects for living. Crafted for the modern interior."
+    },
+    "womenSport": {
+      "title": "Women Sport",
+      "description": "Performance meets style. Activewear for the modern woman."
+    },
+    "menSport": {
+      "title": "Men Sport",
+      "description": "Built for movement. Sport essentials for every pursuit."
     },
     "accessories": {
       "title": "Accessories",

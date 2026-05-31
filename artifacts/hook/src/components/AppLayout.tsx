@@ -101,6 +101,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const clothesItems = [
     { href: "/women", label: t("nav.women") },
     { href: "/men", label: t("nav.men") },
+    { href: "/women-sport", label: t("nav.womenSport") },
+    { href: "/men-sport", label: t("nav.menSport") },
     { href: "/shop-the-look", label: t("nav.shopTheLook") },
   ];
 
