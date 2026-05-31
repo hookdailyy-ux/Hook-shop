@@ -1,0 +1,1 @@
+- [Express route ordering](express-route-ordering.md) — literal `/products/catalog` must come before `/products/:id` in the same router file to avoid `NaN` ID lookups.
