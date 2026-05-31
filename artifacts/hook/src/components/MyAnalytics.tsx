@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Eye, ShoppingBag, MousePointer, Package, TrendingUp, FolderOpen, Layers, BarChart3 } from "lucide-react";
+import { Eye, ShoppingBag, MousePointer, Package, TrendingUp, FolderOpen, Layers, BarChart3, Share2 } from "lucide-react";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -15,6 +15,7 @@ interface AnalyticsData {
     allTimeOrders: number;
     collectionViews: number;
     lookViews: number;
+    sharedBaskets: number;
   };
   bestPerformers: {
     collection: { id: number; title: string; views: number } | null;
@@ -96,6 +97,7 @@ export function MyAnalytics() {
           { label: "Look Views", value: fmt(metrics.lookViews), icon: Layers, sub: "All time" },
           { label: "Product Clicks", value: fmt(metrics.productClicks), icon: MousePointer, sub: "This cycle" },
           { label: "Basket Adds", value: fmt(metrics.basketAdds), icon: ShoppingBag, sub: "This cycle" },
+          { label: "Shared Baskets", value: fmt(metrics.sharedBaskets), icon: Share2, sub: "All time" },
           { label: "Orders", value: fmt(metrics.confirmedOrders), icon: Package, sub: "This cycle" },
         ].map(({ label, value, icon: Icon, sub }) => (
           <div key={label} className="border border-border p-5">

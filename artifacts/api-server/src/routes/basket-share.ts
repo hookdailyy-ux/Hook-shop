@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { db, sharedBasketsTable } from "@workspace/db";
+import { db, sharedBasketsTable, analyticsEventsTable, teamMembersTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 
@@ -20,6 +20,23 @@ router.post("/basket/share", async (req, res) => {
       memberUsername: data.memberUsername,
       memberName: data.memberName,
       itemsJson: JSON.stringify(data.items),
+    });
+
+    // Track shared_basket analytics event
+    let memberId: number | null = null;
+    if (data.memberUsername) {
+      const [found] = await db
+        .select({ id: teamMembersTable.id })
+        .from(teamMembersTable)
+        .where(eq(teamMembersTable.username, data.memberUsername))
+        .limit(1);
+      memberId = found?.id ?? null;
+    }
+    await db.insert(analyticsEventsTable).values({
+      teamMemberId: memberId,
+      entityType: "profile",
+      entityId: null,
+      eventType: "shared_basket",
     });
 
     res.status(201).json({ token });

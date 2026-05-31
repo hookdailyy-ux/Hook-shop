@@ -42,7 +42,7 @@ export const orderProofsTable = pgTable("order_proofs", {
 
 export const analyticsEventsTable = pgTable("analytics_events", {
   id: serial("id").primaryKey(),
-  teamMemberId: integer("team_member_id").notNull().references(() => teamMembersTable.id),
+  teamMemberId: integer("team_member_id").references(() => teamMembersTable.id),
   entityType: text("entity_type").notNull(),
   entityId: integer("entity_id"),
   eventType: text("event_type").notNull(),

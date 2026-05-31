@@ -5,6 +5,16 @@ import { HeartButton } from "./HeartButton";
 import type { Product } from "@workspace/api-client-react";
 import { useBasket } from "@/contexts/BasketContext";
 
+const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+
+function trackDirectEvent(productId: number, eventType: "click" | "add_to_basket") {
+  void fetch(`${BASE}/api/analytics/event`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ entityType: "product", entityId: productId, eventType }),
+  });
+}
+
 interface ProductCardProps {
   product: Product;
 }
@@ -14,6 +24,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
   const handleAddToBasket = (e: React.MouseEvent) => {
     e.preventDefault();
+    trackDirectEvent(product.id, "add_to_basket");
     addItem({
       productId: product.id,
       productTitle: product.title,

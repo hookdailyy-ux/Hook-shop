@@ -50,8 +50,9 @@ import { useLocation } from "wouter";
 import { TeamTab } from "@/components/TeamTab";
 import { AdminOrders } from "@/components/AdminOrders";
 import { AdminRewards } from "@/components/AdminRewards";
+import { AdminAnalytics } from "@/components/AdminAnalytics";
 
-type Tab = "dashboard" | "products" | "looks" | "categories" | "settings" | "images" | "team" | "orders" | "rewards";
+type Tab = "dashboard" | "products" | "looks" | "categories" | "settings" | "images" | "team" | "orders" | "rewards" | "analytics";
 
 const CATEGORIES = [
   { value: "women", label: "Women" },
@@ -79,7 +80,7 @@ export default function AdminDashboard() {
             <h1 className="font-serif text-lg font-light tracking-wide shrink-0 pr-8 py-4 border-r border-border mr-4 hidden md:block">
               Admin
             </h1>
-            {(["dashboard", "products", "looks", "categories", "settings", "images", "team", "orders", "rewards"] as Tab[]).map((tab) => (
+            {(["dashboard", "products", "looks", "categories", "settings", "images", "team", "orders", "rewards", "analytics"] as Tab[]).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -125,6 +126,7 @@ export default function AdminDashboard() {
         {activeTab === "team" && <TeamTab />}
         {activeTab === "orders" && <AdminOrders />}
         {activeTab === "rewards" && <AdminRewards />}
+        {activeTab === "analytics" && <AdminAnalytics />}
       </div>
     </div>
   );
