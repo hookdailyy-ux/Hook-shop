@@ -271,20 +271,51 @@ function MembersView({
   onDelete: (m: TeamMember) => void;
   onAddClick: () => void;
 }) {
+  const [search, setSearch] = useState("");
+
+  const q = search.toLowerCase().trim();
+  const sorted = [...members].sort(
+    (a, b) =>
+      b.monthOrdersValue - a.monthOrdersValue ||
+      b.totalCollections - a.totalCollections
+  );
+  const filtered = q
+    ? sorted.filter(
+        (m) =>
+          m.fullName.toLowerCase().includes(q) ||
+          m.username.toLowerCase().includes(q) ||
+          m.whatsapp.toLowerCase().includes(q) ||
+          m.status.toLowerCase().includes(q)
+      )
+    : sorted;
+
   return (
     <div>
-      <div className="flex items-center justify-between mb-5">
-        <p className="text-xs tracking-widest uppercase text-muted-foreground">
-          {members.length} member{members.length !== 1 ? "s" : ""}
-        </p>
-        <Button
-          onClick={onAddClick}
-          size="sm"
-          className="text-xs tracking-widest uppercase gap-2"
-        >
-          <Plus className="h-3 w-3" />
-          Add Member
-        </Button>
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-5">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by name, username, WhatsApp or status..."
+            className="w-full pl-9 pr-3 py-2 text-xs border border-border bg-background placeholder:text-muted-foreground/50 focus:outline-none focus:border-foreground/40 transition-colors"
+          />
+        </div>
+        <div className="flex items-center gap-3 shrink-0">
+          <p className="text-xs text-muted-foreground whitespace-nowrap">
+            {q
+              ? `${filtered.length} of ${members.length}`
+              : `${members.length} member${members.length !== 1 ? "s" : ""}`}
+          </p>
+          <Button
+            onClick={onAddClick}
+            size="sm"
+            className="text-xs tracking-widest uppercase gap-2"
+          >
+            <Plus className="h-3 w-3" />
+            Add Member
+          </Button>
+        </div>
       </div>
 
       {loading ? (
@@ -336,7 +367,14 @@ function MembersView({
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {members.map((m) => (
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan={10} className="py-10 text-center text-xs text-muted-foreground">
+                    No members match "{search}"
+                  </td>
+                </tr>
+              )}
+              {filtered.map((m) => (
                 <tr key={m.id} className="hover:bg-accent/20 transition-colors group">
                   <td className="py-3.5 pr-4 font-medium text-sm">{m.fullName}</td>
                   <td className="py-3.5 pr-4 font-mono text-xs text-muted-foreground">
