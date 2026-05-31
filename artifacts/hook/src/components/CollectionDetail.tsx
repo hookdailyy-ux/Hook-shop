@@ -47,6 +47,7 @@ import {
   Package,
   Pencil,
   ShoppingBag,
+  ExternalLink,
 } from "lucide-react";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -270,7 +271,7 @@ export function CollectionDetail({
 
   return (
     <div>
-      {/* Back + Edit bar */}
+      {/* Back + actions bar */}
       <div className="flex items-center justify-between mb-8">
         <button
           onClick={onBack}
@@ -279,15 +280,26 @@ export function CollectionDetail({
           <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
           My Collections
         </button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setEditOpen(true)}
-          className="text-xs tracking-widest uppercase gap-2"
-        >
-          <Pencil className="h-3 w-3" />
-          Edit
-        </Button>
+        <div className="flex items-center gap-2">
+          <a
+            href={`${BASE}/c/${collection.shareToken}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 text-[10px] tracking-widest uppercase px-3 py-1.5 border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"
+          >
+            <ExternalLink className="h-3 w-3" />
+            Preview
+          </a>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setEditOpen(true)}
+            className="text-xs tracking-widest uppercase gap-2"
+          >
+            <Pencil className="h-3 w-3" />
+            Edit
+          </Button>
+        </div>
       </div>
 
       {/* Collection header */}

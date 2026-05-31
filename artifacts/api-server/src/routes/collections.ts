@@ -112,6 +112,7 @@ router.get("/collections/public/:token", async (req, res) => {
         coverImageUrl: collectionsTable.coverImageUrl,
         status: collectionsTable.status,
         shareToken: collectionsTable.shareToken,
+        views: collectionsTable.views,
         createdAt: collectionsTable.createdAt,
         memberFullName: teamMembersTable.fullName,
         memberUsername: teamMembersTable.username,
@@ -150,6 +151,19 @@ router.get("/collections/public/:token", async (req, res) => {
       .where(eq(collectionProductsTable.collectionId, row.id))
       .orderBy(asc(collectionProductsTable.sortOrder), asc(collectionProductsTable.id));
 
+    const mappedProducts = products.map((p) => ({
+      id: p.id,
+      productId: p.productId,
+      title: p.title,
+      // Public page shows collectionPrice if set, else hookPrice — never expose hookPrice separately
+      displayPrice: p.collectionPrice ?? p.hookPrice ?? null,
+      imageUrl: p.imageUrl ?? null,
+      brand: p.brand ?? null,
+      affiliateUrl: p.affiliateUrl,
+      category: p.category,
+      sortOrder: p.sortOrder,
+    }));
+
     res.json({
       id: row.id,
       title: row.title,
@@ -157,19 +171,11 @@ router.get("/collections/public/:token", async (req, res) => {
       coverImageUrl: row.coverImageUrl ?? null,
       shareToken: row.shareToken,
       createdAt: row.createdAt.toISOString(),
+      // +1 because we just incremented it above (fire-and-forget)
+      views: row.views + 1,
+      productCount: mappedProducts.length,
       member: { fullName: row.memberFullName, username: row.memberUsername },
-      products: products.map((p) => ({
-        id: p.id,
-        productId: p.productId,
-        title: p.title,
-        // Public page shows collectionPrice if set, else hookPrice
-        displayPrice: p.collectionPrice ?? p.hookPrice ?? null,
-        imageUrl: p.imageUrl ?? null,
-        brand: p.brand ?? null,
-        affiliateUrl: p.affiliateUrl,
-        category: p.category,
-        sortOrder: p.sortOrder,
-      })),
+      products: mappedProducts,
     });
   } catch (err) {
     req.log.error({ err }, "Failed to get public collection");

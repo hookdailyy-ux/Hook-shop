@@ -1,8 +1,31 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Link, useParams } from "wouter";
-import { FolderOpen } from "lucide-react";
+import {
+  FolderOpen,
+  ShoppingBag,
+  Link2,
+  Check,
+  Share2,
+  Eye,
+  Package,
+} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+interface PublicProduct {
+  id: number;
+  productId: number;
+  title: string;
+  displayPrice: string | null;
+  imageUrl: string | null;
+  brand: string | null;
+  affiliateUrl: string;
+  category: string;
+  sortOrder: number;
+}
 
 interface PublicCollection {
   id: number;
@@ -10,9 +33,14 @@ interface PublicCollection {
   description: string;
   coverImageUrl: string | null;
   shareToken: string;
+  views: number;
+  productCount: number;
   createdAt: string;
   member: { fullName: string; username: string };
+  products: PublicProduct[];
 }
+
+// ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function CollectionShare() {
   const params = useParams<{ token: string }>();
@@ -20,6 +48,8 @@ export default function CollectionShare() {
   const [collection, setCollection] = useState<PublicCollection | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (!token) return;
@@ -37,6 +67,40 @@ export default function CollectionShare() {
     })();
   }, [token]);
 
+  const shareUrl = useCallback(() => {
+    if (!collection) return window.location.href;
+    return `${window.location.origin}${BASE}/c/${collection.shareToken}`;
+  }, [collection]);
+
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(shareUrl());
+      setCopiedLink(true);
+      toast({ title: "Link copied" });
+      setTimeout(() => setCopiedLink(false), 2500);
+    } catch {
+      toast({ title: "Could not copy link", variant: "destructive" });
+    }
+  };
+
+  const share = async () => {
+    if (!collection) return;
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: collection.title,
+          text: `${collection.member.fullName}'s collection on HOOK`,
+          url: shareUrl(),
+        });
+      } catch {
+        // dismissed — ignore
+      }
+    } else {
+      await copyLink();
+    }
+  };
+
+  // ── Loading ──
   if (loading) {
     return (
       <div className="py-32 text-center">
@@ -47,12 +111,13 @@ export default function CollectionShare() {
     );
   }
 
+  // ── Not Found / Hidden ──
   if (notFound || !collection) {
     return (
       <div className="py-32 text-center max-w-sm mx-auto px-4">
         <FolderOpen className="h-8 w-8 mx-auto mb-4 text-muted-foreground/30" strokeWidth={1} />
         <p className="text-[10px] tracking-widest uppercase text-muted-foreground mb-2">
-          Not Found
+          Not Available
         </p>
         <h1 className="font-serif text-2xl font-light mb-4">
           Collection unavailable
@@ -72,8 +137,9 @@ export default function CollectionShare() {
 
   return (
     <div>
+      {/* ── Hero cover image ── */}
       {collection.coverImageUrl ? (
-        <div className="w-full aspect-[3/1] sm:aspect-[4/1] overflow-hidden mb-10">
+        <div className="w-full aspect-[3/1] sm:aspect-[4/1] overflow-hidden -mx-0 mb-0">
           <img
             src={collection.coverImageUrl}
             alt={collection.title}
@@ -81,38 +147,110 @@ export default function CollectionShare() {
           />
         </div>
       ) : (
-        <div className="w-full aspect-[3/1] sm:aspect-[4/1] bg-accent/40 mb-10" />
+        <div className="w-full aspect-[5/1] bg-accent/40" />
       )}
 
-      <div className="container mx-auto px-4 sm:px-6">
-        <div className="max-w-2xl mb-10">
-          <p className="text-[10px] tracking-[0.3em] uppercase text-muted-foreground mb-3">
-            {collection.member.fullName} · Collection
+      <div className="container mx-auto px-4 sm:px-6 max-w-6xl">
+
+        {/* ── Collection meta ── */}
+        <div className="pt-10 pb-8 border-b border-border">
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
+            <div className="max-w-xl">
+              <p className="text-[10px] tracking-[0.3em] uppercase text-muted-foreground mb-3">
+                {collection.member.fullName} · Collection
+              </p>
+              <h1 className="font-serif text-4xl sm:text-5xl font-light leading-tight mb-4">
+                {collection.title}
+              </h1>
+              {collection.description && (
+                <p className="text-sm text-muted-foreground leading-relaxed max-w-lg">
+                  {collection.description}
+                </p>
+              )}
+            </div>
+
+            {/* Stats */}
+            <div className="flex items-center gap-6 shrink-0">
+              <div className="text-center">
+                <p className="font-serif text-3xl font-light leading-none">
+                  {collection.productCount}
+                </p>
+                <p className="text-[9px] tracking-widest uppercase text-muted-foreground mt-1">
+                  Products
+                </p>
+              </div>
+              <div className="w-px h-10 bg-border" />
+              <div className="text-center">
+                <p className="font-serif text-3xl font-light leading-none">
+                  {collection.views.toLocaleString()}
+                </p>
+                <p className="text-[9px] tracking-widest uppercase text-muted-foreground mt-1">
+                  Views
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Share bar ── */}
+        <div className="py-5 flex items-center gap-3 border-b border-border">
+          <p className="text-[10px] tracking-widest uppercase text-muted-foreground mr-1">
+            Share
           </p>
-          <h1 className="font-serif text-4xl sm:text-5xl font-light mb-4">
-            {collection.title}
-          </h1>
-          {collection.description && (
-            <p className="text-sm text-muted-foreground leading-relaxed max-w-lg">
-              {collection.description}
-            </p>
+          <button
+            onClick={() => void copyLink()}
+            className="flex items-center gap-1.5 text-[10px] tracking-widest uppercase px-4 py-2 border border-border hover:border-foreground/40 transition-colors text-muted-foreground hover:text-foreground"
+          >
+            {copiedLink ? (
+              <>
+                <Check className="h-3 w-3 text-green-600" />
+                <span className="text-green-600">Copied!</span>
+              </>
+            ) : (
+              <>
+                <Link2 className="h-3 w-3" />
+                Copy Link
+              </>
+            )}
+          </button>
+          <button
+            onClick={() => void share()}
+            className="flex items-center gap-1.5 text-[10px] tracking-widest uppercase px-4 py-2 border border-border hover:border-foreground/40 transition-colors text-muted-foreground hover:text-foreground"
+          >
+            <Share2 className="h-3 w-3" />
+            Share
+          </button>
+        </div>
+
+        {/* ── Products ── */}
+        <div className="py-10">
+          {collection.products.length === 0 ? (
+            <div className="py-24 flex flex-col items-center justify-center text-center border border-dashed border-border">
+              <Package className="h-8 w-8 text-muted-foreground/20 mb-4" strokeWidth={1} />
+              <p className="text-[10px] tracking-widest uppercase text-muted-foreground">
+                No Products Yet
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-10">
+              {collection.products.map((product) => (
+                <CollectionProductCard key={product.id} product={product} />
+              ))}
+            </div>
           )}
         </div>
 
-        <div className="border border-dashed border-border py-20 text-center mb-16">
-          <p className="text-[10px] tracking-widest uppercase text-muted-foreground mb-2">
-            Products
-          </p>
-          <p className="text-sm text-muted-foreground">
-            No products added yet.
-          </p>
-        </div>
-
+        {/* ── Footer ── */}
         <div className="border-t border-border pt-8 pb-16 flex items-center justify-between">
-          <p className="text-xs text-muted-foreground">
-            Curated by{" "}
-            <span className="font-medium text-foreground">{collection.member.fullName}</span>
-          </p>
+          <div className="flex items-center gap-3">
+            <Eye className="h-3.5 w-3.5 text-muted-foreground/40" />
+            <p className="text-xs text-muted-foreground">
+              Curated by{" "}
+              <span className="font-medium text-foreground">
+                {collection.member.fullName}
+              </span>
+            </p>
+          </div>
           <Link
             href="/"
             className="text-[10px] tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors"
@@ -120,6 +258,70 @@ export default function CollectionShare() {
             Shop at HOOK →
           </Link>
         </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Collection Product Card ──────────────────────────────────────────────────
+
+function CollectionProductCard({ product }: { product: PublicProduct }) {
+  const handleShop = () => {
+    window.open(product.affiliateUrl, "_blank", "noopener,noreferrer");
+  };
+
+  return (
+    <div className="group flex flex-col gap-3">
+      {/* Image */}
+      <div className="relative overflow-hidden bg-accent/30">
+        <div className="aspect-[3/4]">
+          {product.imageUrl ? (
+            <img
+              src={product.imageUrl}
+              alt={product.title}
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              loading="lazy"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <ShoppingBag
+                className="h-8 w-8 text-muted-foreground/20"
+                strokeWidth={1}
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Hover overlay button — desktop */}
+        <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 hidden md:block">
+          <button
+            onClick={handleShop}
+            className="w-full bg-background/90 text-foreground text-[10px] tracking-widest uppercase py-3 backdrop-blur-sm border border-border/50 hover:bg-foreground hover:text-background transition-colors"
+          >
+            Add To Basket
+          </button>
+        </div>
+      </div>
+
+      {/* Info */}
+      <div className="flex flex-col gap-1 px-0.5">
+        {product.brand && (
+          <p className="text-[10px] font-medium tracking-widest uppercase text-muted-foreground">
+            {product.brand}
+          </p>
+        )}
+        <p className="text-sm leading-snug line-clamp-2">{product.title}</p>
+        {product.displayPrice && (
+          <p className="text-sm font-medium mt-0.5">{product.displayPrice}</p>
+        )}
+
+        {/* Always-visible button — mobile */}
+        <button
+          onClick={handleShop}
+          className="mt-2 w-full text-[10px] tracking-widest uppercase py-3 border border-foreground bg-foreground text-background hover:bg-background hover:text-foreground transition-colors md:hidden"
+        >
+          Add To Basket
+        </button>
       </div>
     </div>
   );
