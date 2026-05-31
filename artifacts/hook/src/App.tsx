@@ -20,6 +20,7 @@ import LookShare from "@/pages/LookShare";
 import StorePage from "@/pages/StorePage";
 import RankingsPage from "@/pages/RankingsPage";
 import { AdminAuthProvider, useAdminAuth } from "@/contexts/AdminAuthContext";
+import { HeadManager } from "@/components/HeadManager";
 import { TeamAuthProvider, useTeamAuth } from "@/contexts/TeamAuthContext";
 import { FavoritesProvider } from "@/contexts/FavoritesContext";
 import { BasketProvider } from "@/contexts/BasketContext";
@@ -162,6 +163,7 @@ function App() {
           <FavoritesProvider>
             <BasketProvider>
               <TooltipProvider>
+                <HeadManager />
                 <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
                   <Router />
                 </WouterRouter>

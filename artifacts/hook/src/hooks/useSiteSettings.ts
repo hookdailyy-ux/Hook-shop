@@ -2,6 +2,12 @@ import { useQuery } from "@tanstack/react-query";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
+export interface FooterLink {
+  id: string;
+  label: string;
+  url: string;
+}
+
 export interface SiteSettings {
   heroImageUrl: string;
   heroTitle: string;
@@ -9,6 +15,14 @@ export interface SiteSettings {
   heroCtaText: string;
   heroCtaLink: string;
   discoverMoreUrl: string;
+  footerLinks: FooterLink[];
+  whatsappText: string;
+  whatsappNumber: string;
+  whatsappMessage: string;
+  faviconUrl: string;
+  appleTouchIconUrl: string;
+  pwaIcon192Url: string;
+  pwaIcon512Url: string;
 }
 
 export function useSiteSettings() {

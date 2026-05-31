@@ -97,36 +97,20 @@ export default function AdminDashboard() {
       <div className="border-b border-border sticky top-0 z-30 bg-background/95 backdrop-blur-sm">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="flex items-center gap-0 overflow-x-auto" style={{ scrollbarWidth: "none" }}>
-            <h1 className="font-serif text-lg font-light tracking-wide shrink-0 pr-8 py-4 border-r border-border mr-4 hidden md:block">
-              Admin
-            </h1>
-            {(["dashboard", "products", "looks", "categories", "settings", "images", "team", "orders", "rewards", "analytics"] as Tab[]).map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`shrink-0 px-4 py-4 text-xs tracking-widest uppercase border-b-2 transition-colors ${
-                  activeTab === tab
-                    ? "border-foreground text-foreground"
-                    : "border-transparent text-muted-foreground hover:text-foreground"
-                }`}
-                data-testid={`tab-${tab}`}
-              >
-                {tab}
-              </button>
-            ))}
-            <div className="ml-auto shrink-0 pl-4 relative" ref={menuRef}>
+            {/* Admin dropdown — left side under "Admin" label */}
+            <div className="shrink-0 border-r border-border pr-4 mr-4 relative" ref={menuRef}>
               <button
                 onClick={() => setMenuOpen((o) => !o)}
-                className="flex items-center gap-1.5 px-3 py-4 text-xs tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors focus:outline-none"
+                className="flex items-center gap-1.5 py-4 font-serif text-lg font-light tracking-wide text-foreground hover:text-muted-foreground transition-colors focus:outline-none"
                 data-testid="admin-account-menu"
               >
                 <span>Admin</span>
                 <ChevronDown
-                  className={`h-3 w-3 opacity-60 transition-transform duration-150 ${menuOpen ? "rotate-180" : ""}`}
+                  className={`h-3 w-3 opacity-50 transition-transform duration-150 ${menuOpen ? "rotate-180" : ""}`}
                 />
               </button>
               {menuOpen && (
-                <div className="absolute right-0 top-full mt-0 w-44 bg-background border border-border shadow-lg z-50 py-1">
+                <div className="absolute left-0 top-full mt-0 w-44 bg-background border border-border shadow-lg z-50 py-1">
                   <a
                     href="/"
                     onClick={() => setMenuOpen(false)}
@@ -156,6 +140,20 @@ export default function AdminDashboard() {
                 </div>
               )}
             </div>
+            {(["dashboard", "products", "looks", "categories", "settings", "images", "team", "orders", "rewards", "analytics"] as Tab[]).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`shrink-0 px-4 py-4 text-xs tracking-widest uppercase border-b-2 transition-colors ${
+                  activeTab === tab
+                    ? "border-foreground text-foreground"
+                    : "border-transparent text-muted-foreground hover:text-foreground"
+                }`}
+                data-testid={`tab-${tab}`}
+              >
+                {tab}
+              </button>
+            ))}
           </div>
         </div>
       </div>
@@ -1388,6 +1386,316 @@ function SettingsTab() {
           </div>
         </form>
       </div>
+
+      {/* Footer Links */}
+      <FooterLinksSection />
+
+      {/* WhatsApp Contact */}
+      <WhatsAppSection />
+
+      {/* App Icons & Favicon */}
+      <IconsSection />
+    </div>
+  );
+}
+
+type FooterLink = { id: string; label: string; url: string };
+
+function FooterLinksSection() {
+  const { toast } = useToast();
+  const [links, setLinks] = useState<FooterLink[]>([]);
+  const [loaded, setLoaded] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [newLabel, setNewLabel] = useState("");
+  const [newUrl, setNewUrl] = useState("");
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editLabel, setEditLabel] = useState("");
+  const [editUrl, setEditUrl] = useState("");
+
+  useEffect(() => {
+    fetch(`${BASE}/api/site-settings`)
+      .then((r) => r.json())
+      .then((d: { footerLinks?: FooterLink[] }) => {
+        setLinks(d.footerLinks ?? []);
+        setLoaded(true);
+      })
+      .catch(() => setLoaded(true));
+  }, []);
+
+  const saveLinks = async (updated: FooterLink[]) => {
+    setSaving(true);
+    try {
+      const res = await fetch(`${BASE}/api/site-settings`, {
+        method: "PUT",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ footerLinks: updated }),
+      });
+      if (res.ok) {
+        setLinks(updated);
+        toast({ title: "Footer links saved" });
+      } else {
+        toast({ title: "Failed to save", variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Network error", variant: "destructive" });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleAdd = () => {
+    if (!newLabel.trim() || !newUrl.trim()) return;
+    const next: FooterLink = {
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2),
+      label: newLabel.trim(),
+      url: newUrl.trim(),
+    };
+    void saveLinks([...links, next]);
+    setNewLabel("");
+    setNewUrl("");
+  };
+
+  const handleDelete = (id: string) => void saveLinks(links.filter((l) => l.id !== id));
+
+  const handleEditSave = (id: string) => {
+    void saveLinks(links.map((l) => (l.id === id ? { ...l, label: editLabel, url: editUrl } : l)));
+    setEditId(null);
+  };
+
+  return (
+    <div className="border border-border p-6">
+      <h3 className="text-xs tracking-widest uppercase font-medium mb-1">Footer Links</h3>
+      <p className="text-[10px] text-muted-foreground tracking-wide mb-5 leading-relaxed">
+        Links shown in the footer. Each opens in a new tab.
+      </p>
+      {!loaded ? (
+        <p className="text-xs text-muted-foreground">Loading...</p>
+      ) : (
+        <div className="space-y-2 mb-5">
+          {links.length === 0 && (
+            <p className="text-[10px] text-muted-foreground/60">No links yet.</p>
+          )}
+          {links.map((link) => (
+            <div key={link.id} className="border border-border p-3">
+              {editId === link.id ? (
+                <div className="space-y-2">
+                  <Input value={editLabel} onChange={(e) => setEditLabel(e.target.value)} placeholder="Label" className="border-border text-xs h-8" />
+                  <Input value={editUrl} onChange={(e) => setEditUrl(e.target.value)} placeholder="URL" className="border-border text-xs h-8" />
+                  <div className="flex gap-2">
+                    <Button size="sm" onClick={() => handleEditSave(link.id)} disabled={saving} className="text-[10px] tracking-widest uppercase h-7">Save</Button>
+                    <Button size="sm" variant="outline" onClick={() => setEditId(null)} className="text-[10px] tracking-widest uppercase h-7">Cancel</Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="text-xs font-medium truncate">{link.label}</p>
+                    <p className="text-[10px] text-muted-foreground truncate">{link.url}</p>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button onClick={() => { setEditId(link.id); setEditLabel(link.label); setEditUrl(link.url); }} className="p-1.5 text-muted-foreground hover:text-foreground transition-colors">
+                      <Pencil className="h-3 w-3" />
+                    </button>
+                    <button onClick={() => handleDelete(link.id)} className="p-1.5 text-muted-foreground hover:text-destructive transition-colors">
+                      <Trash2 className="h-3 w-3" />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+      <div className="border border-dashed border-border p-4 space-y-3">
+        <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Add New Link</p>
+        <Input value={newLabel} onChange={(e) => setNewLabel(e.target.value)} placeholder="Label (e.g. Instagram)" className="border-border text-xs h-8" data-testid="input-footer-link-label" />
+        <Input value={newUrl} onChange={(e) => setNewUrl(e.target.value)} placeholder="URL (e.g. https://instagram.com/...)" className="border-border text-xs h-8" data-testid="input-footer-link-url" />
+        <Button onClick={handleAdd} disabled={saving || !newLabel.trim() || !newUrl.trim()} className="text-[10px] tracking-widest uppercase h-8" data-testid="button-add-footer-link">
+          <Plus className="h-3 w-3 mr-1.5" />Add Link
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function WhatsAppSection() {
+  const { toast } = useToast();
+  const [text, setText] = useState("Contact Us");
+  const [number, setNumber] = useState("");
+  const [message, setMessage] = useState("Hi, I have a question about your products!");
+  const [loaded, setLoaded] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    fetch(`${BASE}/api/site-settings`)
+      .then((r) => r.json())
+      .then((d: { whatsappText?: string; whatsappNumber?: string; whatsappMessage?: string }) => {
+        if (d.whatsappText !== undefined) setText(d.whatsappText || "Contact Us");
+        if (d.whatsappNumber !== undefined) setNumber(d.whatsappNumber);
+        if (d.whatsappMessage !== undefined) setMessage(d.whatsappMessage || "Hi, I have a question about your products!");
+        setLoaded(true);
+      })
+      .catch(() => setLoaded(true));
+  }, []);
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const res = await fetch(`${BASE}/api/site-settings`, {
+        method: "PUT",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ whatsappText: text, whatsappNumber: number, whatsappMessage: message }),
+      });
+      if (res.ok) toast({ title: "WhatsApp settings saved" });
+      else toast({ title: "Failed to save", variant: "destructive" });
+    } catch {
+      toast({ title: "Network error", variant: "destructive" });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="border border-border p-6">
+      <h3 className="text-xs tracking-widest uppercase font-medium mb-1">Contact Us Button</h3>
+      <p className="text-[10px] text-muted-foreground tracking-wide mb-5 leading-relaxed">
+        A WhatsApp button shown in the footer. Leave number blank to hide it.
+      </p>
+      <form onSubmit={handleSave} className="space-y-4">
+        <div className="space-y-2">
+          <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Button Text</label>
+          <Input value={text} onChange={(e) => setText(e.target.value)} placeholder="Contact Us" disabled={!loaded} className="border-border" data-testid="input-whatsapp-text" />
+        </div>
+        <div className="space-y-2">
+          <label className="text-[10px] uppercase tracking-widest text-muted-foreground">WhatsApp Number</label>
+          <Input value={number} onChange={(e) => setNumber(e.target.value)} placeholder="e.g. 447911123456 (no + or spaces)" disabled={!loaded} className="border-border" data-testid="input-whatsapp-number" />
+          <p className="text-[10px] text-muted-foreground">Country code first, no + or spaces</p>
+        </div>
+        <div className="space-y-2">
+          <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Default Message</label>
+          <Textarea value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Hi, I have a question..." disabled={!loaded} className="border-border text-xs" rows={3} data-testid="input-whatsapp-message" />
+        </div>
+        {number && (
+          <div className="p-3 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800">
+            <p className="text-[10px] text-green-800 dark:text-green-400 tracking-wide">
+              Preview:{" "}
+              <a href={`https://wa.me/${number}?text=${encodeURIComponent(message)}`} target="_blank" rel="noopener noreferrer" className="underline">
+                Test WhatsApp link
+              </a>
+            </p>
+          </div>
+        )}
+        <Button type="submit" disabled={saving || !loaded} className="text-xs tracking-widest uppercase" data-testid="button-save-whatsapp">
+          {saving ? "Saving..." : "Save"}
+        </Button>
+      </form>
+    </div>
+  );
+}
+
+function IconsSection() {
+  const { toast } = useToast();
+  const BASE_PATH = import.meta.env.BASE_URL.replace(/\/$/, "");
+  const { uploadFile } = useUpload({ basePath: `${BASE_PATH}/api/storage` });
+  const [icons, setIcons] = useState({ faviconUrl: "", appleTouchIconUrl: "", pwaIcon192Url: "", pwaIcon512Url: "" });
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    fetch(`${BASE}/api/site-settings`)
+      .then((r) => r.json())
+      .then((d: { faviconUrl?: string; appleTouchIconUrl?: string; pwaIcon192Url?: string; pwaIcon512Url?: string }) => {
+        setIcons({
+          faviconUrl: d.faviconUrl ?? "",
+          appleTouchIconUrl: d.appleTouchIconUrl ?? "",
+          pwaIcon192Url: d.pwaIcon192Url ?? "",
+          pwaIcon512Url: d.pwaIcon512Url ?? "",
+        });
+        setLoaded(true);
+      })
+      .catch(() => setLoaded(true));
+  }, []);
+
+  const handleUpload = async (file: File, field: keyof typeof icons) => {
+    const result = await uploadFile(file);
+    if (!result) {
+      toast({ title: "Upload failed", variant: "destructive" });
+      return;
+    }
+    const url = `${BASE_PATH}/api/storage${result.objectPath}`;
+    try {
+      const res = await fetch(`${BASE}/api/site-settings`, {
+        method: "PUT",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ [field]: url }),
+      });
+      if (res.ok) {
+        setIcons((prev) => ({ ...prev, [field]: url }));
+        toast({ title: "Icon saved" });
+      } else {
+        toast({ title: "Failed to save icon", variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Save failed", variant: "destructive" });
+    }
+  };
+
+  const iconFields: { field: keyof typeof icons; key: string; label: string; desc: string }[] = [
+    { field: "faviconUrl", key: "favicon", label: "Favicon (browser tab)", desc: "Recommended: 32×32 ICO or PNG" },
+    { field: "appleTouchIconUrl", key: "apple", label: "Apple Touch Icon (iOS home screen)", desc: "Recommended: 180×180 PNG" },
+    { field: "pwaIcon192Url", key: "icon192", label: "App Icon 192×192 (Android)", desc: "Recommended: 192×192 PNG" },
+    { field: "pwaIcon512Url", key: "icon512", label: "App Icon 512×512 (PWA)", desc: "Recommended: 512×512 PNG" },
+  ];
+
+  return (
+    <div className="border border-border p-6">
+      <h3 className="text-xs tracking-widest uppercase font-medium mb-1">App Icon &amp; Favicon</h3>
+      <p className="text-[10px] text-muted-foreground tracking-wide mb-6 leading-relaxed">
+        Icons shown in browser tabs, iOS/Android home screens, and when users install HOOK as an app.
+      </p>
+      {!loaded ? (
+        <p className="text-xs text-muted-foreground">Loading...</p>
+      ) : (
+        <div className="space-y-6">
+          {iconFields.map(({ field, key, label, desc }) => (
+            <div key={field}>
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-0.5">{label}</p>
+              <p className="text-[10px] text-muted-foreground/60 mb-3">{desc}</p>
+              <div className="flex items-center gap-3">
+                {icons[field] ? (
+                  <img src={icons[field]} alt={label} className="w-10 h-10 object-contain border border-border" />
+                ) : (
+                  <div className="w-10 h-10 border border-dashed border-border flex items-center justify-center">
+                    <Upload className="h-3.5 w-3.5 text-muted-foreground/30" />
+                  </div>
+                )}
+                <label className="cursor-pointer">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) void handleUpload(file, field);
+                    }}
+                  />
+                  <span className="text-[10px] tracking-widest uppercase border border-border px-3 py-2 hover:bg-accent transition-colors cursor-pointer">
+                    {icons[field] ? "Replace" : "Upload"}
+                  </span>
+                </label>
+                {icons[field] && (
+                  <a href={icons[field]} target="_blank" rel="noopener noreferrer" className="text-[10px] tracking-widest uppercase text-muted-foreground underline underline-offset-4 hover:text-foreground transition-colors">
+                    View
+                  </a>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
