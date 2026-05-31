@@ -5,11 +5,12 @@ import {
 } from "@workspace/db";
 import { eq, desc, and } from "drizzle-orm";
 import { z } from "zod";
+import { requireAdmin as requireAdminMiddleware } from "../middlewares/requireAdmin";
 
 const router: IRouter = Router();
 
 function requireAdmin(req: Parameters<Parameters<typeof router.get>[1]>[0], res: Parameters<Parameters<typeof router.get>[1]>[1]): boolean {
-  if (!req.session?.adminAuthenticated) {
+  if (req.session?.adminAuthenticated !== true) {
     res.status(401).json({ error: "Unauthorized" });
     return false;
   }

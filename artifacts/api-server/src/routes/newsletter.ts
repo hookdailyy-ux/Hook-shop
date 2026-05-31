@@ -19,16 +19,15 @@ router.post("/newsletter", async (req, res) => {
       .where(eq(newsletterTable.email, data.email));
 
     if (existing) {
-      res.status(201).json({ ...existing, createdAt: existing.createdAt.toISOString() });
+      res.status(201).json({ ok: true });
       return;
     }
 
-    const [subscriber] = await db
+    await db
       .insert(newsletterTable)
-      .values({ email: data.email })
-      .returning();
+      .values({ email: data.email });
 
-    res.status(201).json({ ...subscriber, createdAt: subscriber.createdAt.toISOString() });
+    res.status(201).json({ ok: true });
   } catch (err) {
     req.log.error({ err }, "Failed to subscribe");
     res.status(400).json({ error: "Invalid email" });

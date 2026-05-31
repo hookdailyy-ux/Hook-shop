@@ -59,7 +59,7 @@ router.post("/auth/login", async (req, res) => {
 
 router.post("/auth/logout", (req, res) => {
   req.session.destroy(() => {
-    res.clearCookie("connect.sid", { httpOnly: true, secure: false, path: "/" });
+    res.clearCookie("connect.sid", { httpOnly: true, secure: process.env["NODE_ENV"] === "production", path: "/" });
     res.json({ ok: true });
   });
 });

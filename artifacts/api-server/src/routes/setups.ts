@@ -2,6 +2,7 @@ import { Router, type IRouter } from "express";
 import { db, setupsTable, setupProductsTable, productsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
+import { requireAdmin } from "../middlewares/requireAdmin";
 
 const router: IRouter = Router();
 
@@ -35,7 +36,7 @@ router.get("/setups", async (req, res) => {
   }
 });
 
-router.post("/setups", async (req, res) => {
+router.post("/setups", requireAdmin, async (req, res) => {
   try {
     const schema = z.object({
       title: z.string().min(1),
@@ -80,9 +81,9 @@ router.get("/setups/:id", async (req, res) => {
   }
 });
 
-router.patch("/setups/:id", async (req, res) => {
+router.patch("/setups/:id", requireAdmin, async (req, res) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const schema = z.object({
       title: z.string().optional(),
       description: z.string().optional(),
@@ -120,9 +121,9 @@ router.patch("/setups/:id", async (req, res) => {
   }
 });
 
-router.delete("/setups/:id", async (req, res) => {
+router.delete("/setups/:id", requireAdmin, async (req, res) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     await db.delete(setupProductsTable).where(eq(setupProductsTable.setupId, id));
     await db.delete(setupsTable).where(eq(setupsTable.id, id));
     res.status(204).send();
