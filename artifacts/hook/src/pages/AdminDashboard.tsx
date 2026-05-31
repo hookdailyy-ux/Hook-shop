@@ -40,7 +40,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { X, Plus, Trash2, Pencil, LogOut, Home, User, ChevronDown, Loader2, Upload } from "lucide-react";
+import { X, Plus, Trash2, Pencil, Loader2, Upload } from "lucide-react";
 import { SingleImageUpload, MultiImageUpload } from "@/components/ImageUploadField";
 import { useUpload } from "@workspace/object-storage-web";
 import { useSiteImages, useUpsertSiteImage, useDeleteSiteImage } from "@/hooks/useSiteImages";
@@ -64,81 +64,28 @@ const CATEGORIES = [
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<Tab>("dashboard");
-  const [menuOpen, setMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
   const { logout } = useAdminAuth();
   const [, navigate] = useLocation();
 
   const handleLogout = async () => {
-    setMenuOpen(false);
     await logout();
   };
-
-  useEffect(() => {
-    if (!menuOpen) return;
-    const handleClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuOpen(false);
-      }
-    };
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setMenuOpen(false);
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("keydown", handleEscape);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("keydown", handleEscape);
-    };
-  }, [menuOpen]);
 
   return (
     <div className="min-h-screen pb-32" style={{ background: "hsl(var(--background))" }}>
       <div className="border-b border-border sticky top-0 z-30 bg-background/95 backdrop-blur-sm">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="flex items-center gap-0 overflow-x-auto" style={{ scrollbarWidth: "none" }}>
-            {/* Admin dropdown — left side under "Admin" label */}
-            <div className="shrink-0 border-r border-border pr-4 mr-4 relative" ref={menuRef}>
+            {/* Admin label + Logout — left side */}
+            <div className="shrink-0 border-r border-border pr-4 mr-4 flex flex-col justify-center py-2">
+              <span className="font-serif text-lg font-light tracking-wide text-foreground leading-tight">Admin</span>
               <button
-                onClick={() => setMenuOpen((o) => !o)}
-                className="flex items-center gap-1.5 py-4 font-serif text-lg font-light tracking-wide text-foreground hover:text-muted-foreground transition-colors focus:outline-none"
-                data-testid="admin-account-menu"
+                onClick={() => { void handleLogout(); }}
+                className="text-[10px] tracking-widest uppercase text-muted-foreground hover:text-destructive transition-colors text-left"
+                data-testid="button-logout"
               >
-                <span>Admin</span>
-                <ChevronDown
-                  className={`h-3 w-3 opacity-50 transition-transform duration-150 ${menuOpen ? "rotate-180" : ""}`}
-                />
+                Logout
               </button>
-              {menuOpen && (
-                <div className="absolute left-0 top-full mt-0 w-44 bg-background border border-border shadow-lg z-50 py-1">
-                  <a
-                    href="/"
-                    onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-2.5 px-4 py-2.5 text-xs tracking-widest uppercase text-foreground hover:bg-accent transition-colors"
-                    data-testid="admin-menu-home"
-                  >
-                    <Home className="h-3.5 w-3.5 text-muted-foreground" />
-                    Home
-                  </a>
-                  <button
-                    onClick={() => { setActiveTab("settings"); setMenuOpen(false); }}
-                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs tracking-widest uppercase text-foreground hover:bg-accent transition-colors text-left"
-                    data-testid="admin-menu-account"
-                  >
-                    <User className="h-3.5 w-3.5 text-muted-foreground" />
-                    My Account
-                  </button>
-                  <div className="my-1 border-t border-border" />
-                  <button
-                    onClick={() => { void handleLogout(); }}
-                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs tracking-widest uppercase text-destructive hover:bg-destructive/10 transition-colors text-left"
-                    data-testid="button-logout"
-                  >
-                    <LogOut className="h-3.5 w-3.5" />
-                    Logout
-                  </button>
-                </div>
-              )}
             </div>
             {(["dashboard", "products", "looks", "categories", "settings", "images", "team", "orders", "rewards", "analytics"] as Tab[]).map((tab) => (
               <button
