@@ -10,6 +10,7 @@ export interface SiteImage {
   posX: number;
   posY: number;
   scale: number;
+  objectFit?: "cover" | "contain";
 }
 
 export type SiteImagesMap = Partial<Record<SiteImageKey, SiteImage>>;

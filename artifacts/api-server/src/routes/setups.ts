@@ -41,6 +41,9 @@ router.post("/setups", async (req, res) => {
       title: z.string().min(1),
       description: z.string().optional(),
       imageUrl: z.string().optional(),
+      imagePosX: z.number().int().min(0).max(100).optional(),
+      imagePosY: z.number().int().min(0).max(100).optional(),
+      imageScale: z.number().int().min(50).max(200).optional(),
       productIds: z.array(z.number()).optional(),
     });
     const data = schema.parse(req.body);
@@ -48,6 +51,9 @@ router.post("/setups", async (req, res) => {
       title: data.title,
       description: data.description ?? null,
       imageUrl: data.imageUrl ?? null,
+      imagePosX: data.imagePosX ?? 50,
+      imagePosY: data.imagePosY ?? 50,
+      imageScale: data.imageScale ?? 100,
     }).returning();
     if (data.productIds && data.productIds.length > 0) {
       await db.insert(setupProductsTable).values(
@@ -81,6 +87,9 @@ router.patch("/setups/:id", async (req, res) => {
       title: z.string().optional(),
       description: z.string().optional(),
       imageUrl: z.string().optional(),
+      imagePosX: z.number().int().min(0).max(100).optional(),
+      imagePosY: z.number().int().min(0).max(100).optional(),
+      imageScale: z.number().int().min(50).max(200).optional(),
       productIds: z.array(z.number()).optional(),
     });
     const data = schema.parse(req.body);
@@ -88,6 +97,9 @@ router.patch("/setups/:id", async (req, res) => {
     if (data.title) updateData.title = data.title;
     if (data.description !== undefined) updateData.description = data.description;
     if (data.imageUrl !== undefined) updateData.imageUrl = data.imageUrl;
+    if (data.imagePosX !== undefined) updateData.imagePosX = data.imagePosX;
+    if (data.imagePosY !== undefined) updateData.imagePosY = data.imagePosY;
+    if (data.imageScale !== undefined) updateData.imageScale = data.imageScale;
     if (Object.keys(updateData).length > 0) {
       await db.update(setupsTable).set(updateData).where(eq(setupsTable.id, id));
     }

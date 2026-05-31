@@ -44,8 +44,9 @@ export default function ShopTheSetup() {
           <img
             src={sectionImage.imageUrl}
             alt=""
-            className="absolute w-full h-full object-cover"
+            className="absolute w-full h-full"
             style={{
+              objectFit: sectionImage.objectFit ?? "cover",
               objectPosition: `${sectionImage.posX}% ${sectionImage.posY}%`,
               transform: `scale(${sectionImage.scale / 100})`,
               transformOrigin: `${sectionImage.posX}% ${sectionImage.posY}%`,

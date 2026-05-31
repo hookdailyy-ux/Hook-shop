@@ -103,7 +103,7 @@ export default function ProductDetail() {
       ? t("nav.men")
       : product.category === "accessories"
       ? t("nav.accessories")
-      : product.category.charAt(0).toUpperCase() + product.category.slice(1);
+      : (product.category as string).charAt(0).toUpperCase() + (product.category as string).slice(1);
 
   const deliveryLabel =
     product.source === "Amazon" || product.category === "electronics"
@@ -174,7 +174,11 @@ export default function ProductDetail() {
                   <img
                     src={allImages[selectedImage]}
                     alt={product.title}
-                    className="w-full h-full object-cover transition-opacity duration-200"
+                    className="w-full h-full transition-opacity duration-200"
+                    style={{
+                      objectFit: (product.imageObjectFit as "cover" | "contain") ?? "cover",
+                      objectPosition: `${product.imagePosX ?? 50}% ${product.imagePosY ?? 50}%`,
+                    }}
                   />
                 ) : (
                   <PlaceholderImage aspectRatio="portrait" />

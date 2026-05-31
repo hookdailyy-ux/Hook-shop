@@ -51,19 +51,30 @@ export function ProductCard({ product }: ProductCardProps) {
     openBasket();
   };
 
+  const objectFit = (product.imageObjectFit as "cover" | "contain") ?? "cover";
+  const posX = product.imagePosX ?? 50;
+  const posY = product.imagePosY ?? 50;
+  const scale = product.imageScale ?? 100;
+
   return (
     <>
       <div className="group flex flex-col gap-3" data-testid={`card-product-${product.id}`}>
         {/* Image area — click opens gallery */}
         <div
-          className="relative overflow-hidden bg-accent cursor-zoom-in"
+          className="relative overflow-hidden bg-accent cursor-zoom-in aspect-[3/4]"
           onClick={() => galleryImages.length > 0 && setGalleryOpen(true)}
         >
           {product.imageUrl ? (
             <img
               src={product.imageUrl}
               alt={product.title}
-              className="w-full aspect-[3/4] object-cover transition-transform duration-700 group-hover:scale-105"
+              className="absolute w-full h-full transition-transform duration-700 group-hover:scale-105"
+              style={{
+                objectFit,
+                objectPosition: `${posX}% ${posY}%`,
+                transform: `scale(${scale / 100})`,
+                transformOrigin: `${posX}% ${posY}%`,
+              }}
               loading="lazy"
             />
           ) : (

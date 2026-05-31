@@ -1,4 +1,4 @@
-import { pgTable, text, serial, boolean, timestamp, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, boolean, timestamp, jsonb, integer } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -22,6 +22,10 @@ export const productsTable = pgTable("products", {
   featured: boolean("featured").notNull().default(false),
   trending: boolean("trending").notNull().default(false),
   status: text("status").notNull().default("active"),
+  imagePosX: integer("image_pos_x").notNull().default(50),
+  imagePosY: integer("image_pos_y").notNull().default(50),
+  imageScale: integer("image_scale").notNull().default(100),
+  imageObjectFit: text("image_object_fit").notNull().default("cover"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

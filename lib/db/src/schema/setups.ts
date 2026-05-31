@@ -7,6 +7,9 @@ export const setupsTable = pgTable("setups", {
   title: text("title").notNull(),
   description: text("description"),
   imageUrl: text("image_url"),
+  imagePosX: integer("image_pos_x").notNull().default(50),
+  imagePosY: integer("image_pos_y").notNull().default(50),
+  imageScale: integer("image_scale").notNull().default(100),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

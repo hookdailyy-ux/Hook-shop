@@ -61,6 +61,10 @@ router.post("/products", async (req, res) => {
       featured: z.boolean().optional(),
       trending: z.boolean().optional(),
       status: z.enum(statusEnum).default("active"),
+      imagePosX: z.number().int().min(0).max(100).optional(),
+      imagePosY: z.number().int().min(0).max(100).optional(),
+      imageScale: z.number().int().min(50).max(200).optional(),
+      imageObjectFit: z.enum(["cover", "contain"]).optional(),
     });
     const data = schema.parse(req.body);
     const [product] = await db.insert(productsTable).values({
@@ -82,6 +86,10 @@ router.post("/products", async (req, res) => {
       featured: data.featured ?? false,
       trending: data.trending ?? false,
       status: data.status,
+      imagePosX: data.imagePosX ?? 50,
+      imagePosY: data.imagePosY ?? 50,
+      imageScale: data.imageScale ?? 100,
+      imageObjectFit: data.imageObjectFit ?? "cover",
     }).returning();
     res.status(201).json(serializeProduct(product));
   } catch (err) {
@@ -162,6 +170,10 @@ router.patch("/products/:id", async (req, res) => {
       featured: z.boolean().optional(),
       trending: z.boolean().optional(),
       status: z.enum(statusEnum).optional(),
+      imagePosX: z.number().int().min(0).max(100).optional(),
+      imagePosY: z.number().int().min(0).max(100).optional(),
+      imageScale: z.number().int().min(50).max(200).optional(),
+      imageObjectFit: z.enum(["cover", "contain"]).optional(),
     });
     const data = schema.parse(req.body);
     const [product] = await db.update(productsTable).set(data).where(eq(productsTable.id, id)).returning();

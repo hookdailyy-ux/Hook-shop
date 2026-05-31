@@ -44,8 +44,9 @@ export default function Home() {
             <img
               src={heroImage.imageUrl}
               alt=""
-              className="absolute w-full h-full object-cover"
+              className="absolute w-full h-full"
               style={{
+                objectFit: heroImage.objectFit ?? "cover",
                 objectPosition: `${heroImage.posX}% ${heroImage.posY}%`,
                 transform: `scale(${heroImage.scale / 100})`,
                 transformOrigin: `${heroImage.posX}% ${heroImage.posY}%`,

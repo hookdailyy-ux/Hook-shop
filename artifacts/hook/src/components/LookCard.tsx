@@ -13,12 +13,16 @@ function LookProductCard({ product }: { product: Product }) {
     product.category === "electronics" ? t("product.deliveredByAmazon") : t("product.deliveredByShein");
   return (
     <div className="flex flex-col" data-testid={`look-item-${product.id}`}>
-      <div className="aspect-[4/5] bg-[#ddd5c8] overflow-hidden mb-3">
+      <div className="aspect-[4/5] bg-[#ddd5c8] overflow-hidden mb-3 relative">
         {product.imageUrl ? (
           <img
             src={product.imageUrl}
             alt={product.title}
-            className="w-full h-full object-cover"
+            className="absolute w-full h-full"
+            style={{
+              objectFit: (product.imageObjectFit as "cover" | "contain") ?? "cover",
+              objectPosition: `${product.imagePosX ?? 50}% ${product.imagePosY ?? 50}%`,
+            }}
             loading="lazy"
           />
         ) : (
@@ -55,6 +59,10 @@ export function LookCard({ look }: LookCardProps) {
   const hasProducts = look.products && look.products.length > 0;
   const itemsId = `look-items-${look.id}`;
 
+  const posX = look.imagePosX ?? 50;
+  const posY = look.imagePosY ?? 50;
+  const scale = look.imageScale ?? 100;
+
   return (
     <section data-testid={`card-look-${look.id}`}>
 
@@ -64,13 +72,22 @@ export function LookCard({ look }: LookCardProps) {
         {/* Outfit image */}
         <div className="w-full md:w-[42%] shrink-0 relative group">
           {look.imageUrl ? (
-            <img
-              src={look.imageUrl}
-              alt={look.title}
-              className="w-full object-cover"
+            <div
+              className="relative overflow-hidden"
               style={{ aspectRatio: "3/4", maxHeight: "78dvh" }}
-              loading="lazy"
-            />
+            >
+              <img
+                src={look.imageUrl}
+                alt={look.title}
+                className="absolute w-full h-full object-cover"
+                style={{
+                  objectPosition: `${posX}% ${posY}%`,
+                  transform: `scale(${scale / 100})`,
+                  transformOrigin: `${posX}% ${posY}%`,
+                }}
+                loading="lazy"
+              />
+            </div>
           ) : (
             <div
               className="w-full bg-[#ddd5c8] flex items-center justify-center"

@@ -67,6 +67,14 @@ export const ProductStatus = {
   hidden: 'hidden',
 } as const;
 
+export type ProductImageObjectFit = typeof ProductImageObjectFit[keyof typeof ProductImageObjectFit];
+
+
+export const ProductImageObjectFit = {
+  cover: 'cover',
+  contain: 'contain',
+} as const;
+
 export interface Product {
   id: number;
   title: string;
@@ -93,6 +101,10 @@ export interface Product {
   featured?: boolean;
   trending?: boolean;
   status: ProductStatus;
+  imagePosX?: number;
+  imagePosY?: number;
+  imageScale?: number;
+  imageObjectFit?: ProductImageObjectFit;
   createdAt: string;
 }
 
@@ -123,6 +135,14 @@ export const ProductInputStatus = {
   hidden: 'hidden',
 } as const;
 
+export type ProductInputImageObjectFit = typeof ProductInputImageObjectFit[keyof typeof ProductInputImageObjectFit];
+
+
+export const ProductInputImageObjectFit = {
+  cover: 'cover',
+  contain: 'contain',
+} as const;
+
 export interface ProductInput {
   title: string;
   description?: string;
@@ -141,6 +161,10 @@ export interface ProductInput {
   featured?: boolean;
   trending?: boolean;
   status?: ProductInputStatus;
+  imagePosX?: number;
+  imagePosY?: number;
+  imageScale?: number;
+  imageObjectFit?: ProductInputImageObjectFit;
 }
 
 export type ProductUpdateSource = typeof ProductUpdateSource[keyof typeof ProductUpdateSource];
@@ -170,6 +194,14 @@ export const ProductUpdateStatus = {
   hidden: 'hidden',
 } as const;
 
+export type ProductUpdateImageObjectFit = typeof ProductUpdateImageObjectFit[keyof typeof ProductUpdateImageObjectFit];
+
+
+export const ProductUpdateImageObjectFit = {
+  cover: 'cover',
+  contain: 'contain',
+} as const;
+
 export interface ProductUpdate {
   title?: string;
   description?: string;
@@ -188,6 +220,10 @@ export interface ProductUpdate {
   featured?: boolean;
   trending?: boolean;
   status?: ProductUpdateStatus;
+  imagePosX?: number;
+  imagePosY?: number;
+  imageScale?: number;
+  imageObjectFit?: ProductUpdateImageObjectFit;
 }
 
 export interface Look {
@@ -197,6 +233,9 @@ export interface Look {
   description?: string | null;
   /** @nullable */
   imageUrl?: string | null;
+  imagePosX?: number;
+  imagePosY?: number;
+  imageScale?: number;
   products?: Product[];
   createdAt: string;
 }
@@ -205,6 +244,9 @@ export interface LookInput {
   title: string;
   description?: string;
   imageUrl?: string;
+  imagePosX?: number;
+  imagePosY?: number;
+  imageScale?: number;
   productIds?: number[];
 }
 
@@ -212,6 +254,9 @@ export interface LookUpdate {
   title?: string;
   description?: string;
   imageUrl?: string;
+  imagePosX?: number;
+  imagePosY?: number;
+  imageScale?: number;
   productIds?: number[];
 }
 
@@ -222,6 +267,9 @@ export interface Setup {
   description?: string | null;
   /** @nullable */
   imageUrl?: string | null;
+  imagePosX?: number;
+  imagePosY?: number;
+  imageScale?: number;
   products?: Product[];
   createdAt: string;
 }
@@ -230,6 +278,9 @@ export interface SetupInput {
   title: string;
   description?: string;
   imageUrl?: string;
+  imagePosX?: number;
+  imagePosY?: number;
+  imageScale?: number;
   productIds?: number[];
 }
 
@@ -237,6 +288,9 @@ export interface SetupUpdate {
   title?: string;
   description?: string;
   imageUrl?: string;
+  imagePosX?: number;
+  imagePosY?: number;
+  imageScale?: number;
   productIds?: number[];
 }
 

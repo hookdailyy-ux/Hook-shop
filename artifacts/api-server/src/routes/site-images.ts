@@ -22,7 +22,10 @@ const imageSchema = z.object({
   posX: z.number().int().min(0).max(100),
   posY: z.number().int().min(0).max(100),
   scale: z.number().int().min(50).max(200),
+  objectFit: z.enum(["cover", "contain"]).optional().default("cover"),
 });
+
+type SiteImageData = z.infer<typeof imageSchema>;
 
 router.get("/site-images", async (req, res) => {
   try {
@@ -31,11 +34,11 @@ router.get("/site-images", async (req, res) => {
       .from(settingsTable)
       .where(like(settingsTable.key, "site_image_%"));
 
-    const result: Record<string, { imageUrl: string; posX: number; posY: number; scale: number }> = {};
+    const result: Record<string, SiteImageData> = {};
     for (const row of rows) {
       const key = row.key.replace("site_image_", "");
       try {
-        result[key] = JSON.parse(row.value) as { imageUrl: string; posX: number; posY: number; scale: number };
+        result[key] = JSON.parse(row.value) as SiteImageData;
       } catch {
         // skip malformed entries
       }

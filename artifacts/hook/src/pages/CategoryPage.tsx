@@ -78,8 +78,9 @@ export default function CategoryPage({ category }: CategoryPageProps) {
           <img
             src={categoryImage.imageUrl}
             alt=""
-            className="absolute w-full h-full object-cover"
+            className="absolute w-full h-full"
             style={{
+              objectFit: categoryImage.objectFit ?? "cover",
               objectPosition: `${categoryImage.posX}% ${categoryImage.posY}%`,
               transform: `scale(${categoryImage.scale / 100})`,
               transformOrigin: `${categoryImage.posX}% ${categoryImage.posY}%`,

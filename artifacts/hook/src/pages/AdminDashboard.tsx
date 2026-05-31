@@ -518,6 +518,10 @@ type ProductFormData = {
   status: string;
   featured: boolean;
   trending: boolean;
+  imagePosX: number;
+  imagePosY: number;
+  imageScale: number;
+  imageObjectFit: "cover" | "contain";
 };
 
 function ProductDialog({ product }: { product?: Product }) {
@@ -545,6 +549,10 @@ function ProductDialog({ product }: { product?: Product }) {
     status: (product as any)?.status ?? "active",
     featured: product?.featured ?? false,
     trending: product?.trending ?? false,
+    imagePosX: product?.imagePosX ?? 50,
+    imagePosY: product?.imagePosY ?? 50,
+    imageScale: product?.imageScale ?? 100,
+    imageObjectFit: (product?.imageObjectFit as "cover" | "contain") ?? "cover",
   });
 
   const [form, setForm] = useState<ProductFormData>(defaultForm);
@@ -763,6 +771,54 @@ function ProductDialog({ product }: { product?: Product }) {
             label="Main Product Image"
           />
 
+          {/* Product Image Positioning */}
+          {form.imageUrl && (() => {
+            const pBtnClass = "w-8 h-8 border border-border flex items-center justify-center text-sm hover:bg-accent transition-colors select-none";
+            return (
+              <div className="border border-border p-3 flex flex-col gap-2">
+                <p className="text-[9px] tracking-widest uppercase text-muted-foreground">Image Positioning</p>
+                <div className="aspect-[3/4] overflow-hidden relative max-h-40 bg-accent">
+                  <img
+                    src={form.imageUrl}
+                    alt=""
+                    className="absolute w-full h-full"
+                    style={{
+                      objectFit: form.imageObjectFit,
+                      objectPosition: `${form.imagePosX}% ${form.imagePosY}%`,
+                      transform: `scale(${form.imageScale / 100})`,
+                      transformOrigin: `${form.imagePosX}% ${form.imagePosY}%`,
+                    }}
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <p className="text-[9px] tracking-widest uppercase text-muted-foreground flex-1">Fit</p>
+                  <button
+                    type="button"
+                    onClick={() => setForm((f) => ({ ...f, imageObjectFit: f.imageObjectFit === "contain" ? "cover" : "contain" }))}
+                    className={`px-3 py-1 text-[9px] tracking-widest uppercase border transition-colors ${form.imageObjectFit === "contain" ? "border-foreground bg-foreground text-background" : "border-border"}`}
+                  >
+                    {form.imageObjectFit === "contain" ? "Contain" : "Cover"}
+                  </button>
+                </div>
+                <div className="flex flex-col items-center gap-1">
+                  <button type="button" onClick={() => setForm((f) => ({ ...f, imagePosY: Math.max(0, f.imagePosY - 5) }))} className={pBtnClass} title="Move up">↑</button>
+                  <div className="flex gap-1">
+                    <button type="button" onClick={() => setForm((f) => ({ ...f, imagePosX: Math.max(0, f.imagePosX - 5) }))} className={pBtnClass} title="Move left">←</button>
+                    <div className="w-8 h-8 border border-border/40 bg-accent/30 flex items-center justify-center"><span className="text-[10px] text-muted-foreground/50">·</span></div>
+                    <button type="button" onClick={() => setForm((f) => ({ ...f, imagePosX: Math.min(100, f.imagePosX + 5) }))} className={pBtnClass} title="Move right">→</button>
+                  </div>
+                  <button type="button" onClick={() => setForm((f) => ({ ...f, imagePosY: Math.min(100, f.imagePosY + 5) }))} className={pBtnClass} title="Move down">↓</button>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button type="button" onClick={() => setForm((f) => ({ ...f, imageScale: Math.max(50, f.imageScale - 10) }))} className={pBtnClass} title="Zoom out">−</button>
+                  <span className="flex-1 text-center text-[9px] tracking-widest text-muted-foreground">{form.imageScale}%</span>
+                  <button type="button" onClick={() => setForm((f) => ({ ...f, imageScale: Math.min(200, f.imageScale + 10) }))} className={pBtnClass} title="Zoom in">+</button>
+                </div>
+                <p className="text-[9px] text-center text-muted-foreground/60">x {form.imagePosX}% · y {form.imagePosY}%</p>
+              </div>
+            );
+          })()}
+
           {/* Gallery Images Upload */}
           <MultiImageUpload
             values={form.images}
@@ -886,6 +942,9 @@ function LookDialog({ look }: { look?: Look }) {
     title: look?.title ?? "",
     description: look?.description ?? "",
     imageUrl: look?.imageUrl ?? "",
+    imagePosX: look?.imagePosX ?? 50,
+    imagePosY: look?.imagePosY ?? 50,
+    imageScale: look?.imageScale ?? 100,
     productIds: look?.products?.map((p) => p.id) ?? [],
   });
   const [search, setSearch] = useState("");
@@ -896,6 +955,9 @@ function LookDialog({ look }: { look?: Look }) {
         title: look?.title ?? "",
         description: look?.description ?? "",
         imageUrl: look?.imageUrl ?? "",
+        imagePosX: look?.imagePosX ?? 50,
+        imagePosY: look?.imagePosY ?? 50,
+        imageScale: look?.imageScale ?? 100,
         productIds: look?.products?.map((p) => p.id) ?? [],
       });
     }
@@ -905,6 +967,14 @@ function LookDialog({ look }: { look?: Look }) {
     {},
     { query: { queryKey: getListProductsQueryKey() } }
   );
+
+  const lookImageInputRef = useRef<HTMLInputElement>(null);
+  const lookCardBase = import.meta.env.BASE_URL.replace(/\/$/, "");
+  const { uploadFile: uploadLookImage, isUploading: isLookImageUploading } = useUpload({
+    basePath: `${lookCardBase}/api/storage`,
+    onSuccess: (res) => setForm((f) => ({ ...f, imageUrl: `${lookCardBase}/api/storage${res.objectPath}` })),
+  });
+  const lookBtnClass = "w-8 h-8 border border-border flex items-center justify-center text-sm hover:bg-accent transition-colors select-none";
 
   const filtered = allProducts?.filter((p) =>
     p.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -926,6 +996,9 @@ function LookDialog({ look }: { look?: Look }) {
       title: form.title,
       description: form.description || undefined,
       imageUrl: form.imageUrl || undefined,
+      imagePosX: form.imagePosX,
+      imagePosY: form.imagePosY,
+      imageScale: form.imageScale,
       productIds: form.productIds,
     };
     if (look) {
@@ -982,8 +1055,70 @@ function LookDialog({ look }: { look?: Look }) {
             <Input required value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} className="border-border" />
           </div>
           <div className="space-y-2">
-            <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Outfit Image URL</label>
-            <Input value={form.imageUrl} onChange={(e) => setForm((f) => ({ ...f, imageUrl: e.target.value }))} placeholder="https://..." className="border-border" />
+            <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Outfit Image</label>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => lookImageInputRef.current?.click()}
+                disabled={isLookImageUploading}
+                className="flex-1 flex items-center justify-center gap-1.5 border border-dashed border-border py-2 text-[10px] tracking-widest uppercase text-muted-foreground hover:border-foreground/40 hover:text-foreground transition-colors disabled:opacity-40"
+              >
+                <Upload className="h-3 w-3" />
+                {form.imageUrl ? "Replace" : "Upload"}
+              </button>
+              {form.imageUrl && (
+                <button
+                  type="button"
+                  onClick={() => setForm((f) => ({ ...f, imageUrl: "" }))}
+                  className="w-9 flex items-center justify-center border border-border text-muted-foreground hover:text-destructive hover:border-destructive/40 transition-colors"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
+            <input
+              ref={lookImageInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              className="hidden"
+              onChange={(e) => { const f = e.target.files?.[0]; if (f) void uploadLookImage(f); e.target.value = ""; }}
+            />
+            {form.imageUrl && (
+              <div className="border border-border p-3 flex flex-col gap-2">
+                <div className="aspect-[3/4] overflow-hidden relative max-h-40 bg-accent">
+                  <img
+                    src={form.imageUrl}
+                    alt=""
+                    className="absolute w-full h-full object-cover"
+                    style={{
+                      objectPosition: `${form.imagePosX}% ${form.imagePosY}%`,
+                      transform: `scale(${form.imageScale / 100})`,
+                      transformOrigin: `${form.imagePosX}% ${form.imagePosY}%`,
+                    }}
+                  />
+                  {isLookImageUploading && (
+                    <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
+                      <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                    </div>
+                  )}
+                </div>
+                <div className="flex flex-col items-center gap-1">
+                  <button type="button" onClick={() => setForm((f) => ({ ...f, imagePosY: Math.max(0, f.imagePosY - 5) }))} className={lookBtnClass} title="Move up">↑</button>
+                  <div className="flex gap-1">
+                    <button type="button" onClick={() => setForm((f) => ({ ...f, imagePosX: Math.max(0, f.imagePosX - 5) }))} className={lookBtnClass} title="Move left">←</button>
+                    <div className="w-8 h-8 border border-border/40 bg-accent/30 flex items-center justify-center"><span className="text-[10px] text-muted-foreground/50">·</span></div>
+                    <button type="button" onClick={() => setForm((f) => ({ ...f, imagePosX: Math.min(100, f.imagePosX + 5) }))} className={lookBtnClass} title="Move right">→</button>
+                  </div>
+                  <button type="button" onClick={() => setForm((f) => ({ ...f, imagePosY: Math.min(100, f.imagePosY + 5) }))} className={lookBtnClass} title="Move down">↓</button>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button type="button" onClick={() => setForm((f) => ({ ...f, imageScale: Math.max(50, f.imageScale - 10) }))} className={lookBtnClass} title="Zoom out">−</button>
+                  <span className="flex-1 text-center text-[9px] tracking-widest text-muted-foreground">{form.imageScale}%</span>
+                  <button type="button" onClick={() => setForm((f) => ({ ...f, imageScale: Math.min(200, f.imageScale + 10) }))} className={lookBtnClass} title="Zoom in">+</button>
+                </div>
+                <p className="text-[9px] text-center text-muted-foreground/60">x {form.imagePosX}% · y {form.imagePosY}%</p>
+              </div>
+            )}
           </div>
           <div className="space-y-2">
             <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Description</label>
@@ -1673,6 +1808,13 @@ function SiteImagesTab() {
     upsertMutation.mutate({ key, data: updated });
   };
 
+  const handleFitToggle = (key: SiteImageKey) => {
+    const current = images?.[key];
+    if (!current) return;
+    const newFit = current.objectFit === "contain" ? "cover" : "contain";
+    upsertMutation.mutate({ key, data: { ...current, objectFit: newFit } });
+  };
+
   const handleDelete = (key: SiteImageKey, label: string) => {
     if (!confirm(`Delete the ${label} image?`)) return;
     deleteMutation.mutate(key, { onSuccess: () => toast({ title: "Image deleted" }) });
@@ -1681,7 +1823,7 @@ function SiteImagesTab() {
   const handleUploaded = (key: SiteImageKey, imageUrl: string) => {
     const current = images?.[key];
     upsertMutation.mutate(
-      { key, data: { imageUrl, posX: current?.posX ?? 50, posY: current?.posY ?? 50, scale: current?.scale ?? 100 } },
+      { key, data: { imageUrl, posX: current?.posX ?? 50, posY: current?.posY ?? 50, scale: current?.scale ?? 100, objectFit: current?.objectFit ?? "cover" } },
       { onSuccess: () => toast({ title: "Image saved" }) }
     );
   };
@@ -1698,6 +1840,7 @@ function SiteImagesTab() {
             onUploaded={(url) => handleUploaded(key, url)}
             onDelete={() => handleDelete(key, label)}
             onPositionChange={(field, delta) => handlePositionChange(key, field, delta)}
+            onFitToggle={() => handleFitToggle(key)}
           />
         ))}
       </div>
@@ -1711,12 +1854,14 @@ function SectionImageCard({
   onUploaded,
   onDelete,
   onPositionChange,
+  onFitToggle,
 }: {
   label: string;
   image?: SiteImage;
   onUploaded: (url: string) => void;
   onDelete: () => void;
   onPositionChange: (field: keyof SiteImage, delta: number) => void;
+  onFitToggle?: () => void;
 }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cardBase = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -1741,8 +1886,9 @@ function SectionImageCard({
           <img
             src={image.imageUrl}
             alt=""
-            className="absolute w-full h-full object-cover"
+            className="absolute w-full h-full"
             style={{
+              objectFit: image.objectFit ?? "cover",
               objectPosition: `${image.posX}% ${image.posY}%`,
               transform: `scale(${image.scale / 100})`,
               transformOrigin: `${image.posX}% ${image.posY}%`,
@@ -1784,6 +1930,15 @@ function SectionImageCard({
 
       {image && (
         <div className="flex flex-col gap-2 pt-2 border-t border-border">
+          <div className="flex items-center gap-2">
+            <p className="text-[9px] tracking-widest uppercase text-muted-foreground flex-1">Fit</p>
+            <button
+              onClick={onFitToggle}
+              className={`px-3 py-1 text-[9px] tracking-widest uppercase border transition-colors ${image.objectFit === "contain" ? "border-foreground bg-foreground text-background" : "border-border"}`}
+            >
+              {image.objectFit === "contain" ? "Contain" : "Cover"}
+            </button>
+          </div>
           <p className="text-[9px] tracking-widest uppercase text-muted-foreground">Position</p>
           <div className="flex flex-col items-center gap-1">
             <button onClick={() => onPositionChange("posY", -5)} className={btnClass} title="Move up">↑</button>

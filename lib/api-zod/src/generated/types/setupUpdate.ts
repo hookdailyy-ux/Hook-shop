@@ -10,5 +10,8 @@ export interface SetupUpdate {
   title?: string;
   description?: string;
   imageUrl?: string;
+  imagePosX?: number;
+  imagePosY?: number;
+  imageScale?: number;
   productIds?: number[];
 }

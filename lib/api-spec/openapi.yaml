@@ -568,6 +568,15 @@ components:
         status:
           type: string
           enum: [active, hidden]
+        imagePosX:
+          type: integer
+        imagePosY:
+          type: integer
+        imageScale:
+          type: integer
+        imageObjectFit:
+          type: string
+          enum: [cover, contain]
         createdAt:
           type: string
 
@@ -618,6 +627,15 @@ components:
         status:
           type: string
           enum: [active, hidden]
+        imagePosX:
+          type: integer
+        imagePosY:
+          type: integer
+        imageScale:
+          type: integer
+        imageObjectFit:
+          type: string
+          enum: [cover, contain]
 
     ProductUpdate:
       type: object
@@ -665,6 +683,15 @@ components:
         status:
           type: string
           enum: [active, hidden]
+        imagePosX:
+          type: integer
+        imagePosY:
+          type: integer
+        imageScale:
+          type: integer
+        imageObjectFit:
+          type: string
+          enum: [cover, contain]
 
     Look:
       type: object
@@ -678,6 +705,12 @@ components:
           type: ["string", "null"]
         imageUrl:
           type: ["string", "null"]
+        imagePosX:
+          type: integer
+        imagePosY:
+          type: integer
+        imageScale:
+          type: integer
         products:
           type: array
           items:
@@ -695,6 +728,12 @@ components:
           type: string
         imageUrl:
           type: string
+        imagePosX:
+          type: integer
+        imagePosY:
+          type: integer
+        imageScale:
+          type: integer
         productIds:
           type: array
           items:
@@ -709,6 +748,12 @@ components:
           type: string
         imageUrl:
           type: string
+        imagePosX:
+          type: integer
+        imagePosY:
+          type: integer
+        imageScale:
+          type: integer
         productIds:
           type: array
           items:
@@ -726,6 +771,12 @@ components:
           type: ["string", "null"]
         imageUrl:
           type: ["string", "null"]
+        imagePosX:
+          type: integer
+        imagePosY:
+          type: integer
+        imageScale:
+          type: integer
         products:
           type: array
           items:
@@ -743,6 +794,12 @@ components:
           type: string
         imageUrl:
           type: string
+        imagePosX:
+          type: integer
+        imagePosY:
+          type: integer
+        imageScale:
+          type: integer
         productIds:
           type: array
           items:
@@ -757,6 +814,12 @@ components:
           type: string
         imageUrl:
           type: string
+        imagePosX:
+          type: integer
+        imagePosY:
+          type: integer
+        imageScale:
+          type: integer
         productIds:
           type: array
           items:

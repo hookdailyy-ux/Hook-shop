@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.2.0
  */
 import type { ProductCategory } from './productCategory';
+import type { ProductImageObjectFit } from './productImageObjectFit';
 import type { ProductSource } from './productSource';
 import type { ProductStatus } from './productStatus';
 
@@ -35,5 +36,9 @@ export interface Product {
   featured?: boolean;
   trending?: boolean;
   status: ProductStatus;
+  imagePosX?: number;
+  imagePosY?: number;
+  imageScale?: number;
+  imageObjectFit?: ProductImageObjectFit;
   createdAt: string;
 }

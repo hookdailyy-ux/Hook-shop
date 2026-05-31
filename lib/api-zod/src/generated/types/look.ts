@@ -14,6 +14,9 @@ export interface Look {
   description?: string | null;
   /** @nullable */
   imageUrl?: string | null;
+  imagePosX?: number;
+  imagePosY?: number;
+  imageScale?: number;
   products?: Product[];
   createdAt: string;
 }

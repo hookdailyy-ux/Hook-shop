@@ -97,6 +97,10 @@ export const ListProductsResponseItem = zod.object({
   "featured": zod.boolean().optional(),
   "trending": zod.boolean().optional(),
   "status": zod.enum(['active', 'hidden']),
+  "imagePosX": zod.number().optional(),
+  "imagePosY": zod.number().optional(),
+  "imageScale": zod.number().optional(),
+  "imageObjectFit": zod.enum(['cover', 'contain']).optional(),
   "createdAt": zod.string()
 })
 export const ListProductsResponse = zod.array(ListProductsResponseItem)
@@ -122,7 +126,11 @@ export const CreateProductBody = zod.object({
   "sizes": zod.array(zod.string()).optional(),
   "featured": zod.boolean().optional(),
   "trending": zod.boolean().optional(),
-  "status": zod.enum(['active', 'hidden']).optional()
+  "status": zod.enum(['active', 'hidden']).optional(),
+  "imagePosX": zod.number().optional(),
+  "imagePosY": zod.number().optional(),
+  "imageScale": zod.number().optional(),
+  "imageObjectFit": zod.enum(['cover', 'contain']).optional()
 })
 
 
@@ -152,6 +160,10 @@ export const GetProductResponse = zod.object({
   "featured": zod.boolean().optional(),
   "trending": zod.boolean().optional(),
   "status": zod.enum(['active', 'hidden']),
+  "imagePosX": zod.number().optional(),
+  "imagePosY": zod.number().optional(),
+  "imageScale": zod.number().optional(),
+  "imageObjectFit": zod.enum(['cover', 'contain']).optional(),
   "createdAt": zod.string()
 })
 
@@ -180,7 +192,11 @@ export const UpdateProductBody = zod.object({
   "sizes": zod.array(zod.string()).optional(),
   "featured": zod.boolean().optional(),
   "trending": zod.boolean().optional(),
-  "status": zod.enum(['active', 'hidden']).optional()
+  "status": zod.enum(['active', 'hidden']).optional(),
+  "imagePosX": zod.number().optional(),
+  "imagePosY": zod.number().optional(),
+  "imageScale": zod.number().optional(),
+  "imageObjectFit": zod.enum(['cover', 'contain']).optional()
 })
 
 export const UpdateProductResponse = zod.object({
@@ -202,6 +218,10 @@ export const UpdateProductResponse = zod.object({
   "featured": zod.boolean().optional(),
   "trending": zod.boolean().optional(),
   "status": zod.enum(['active', 'hidden']),
+  "imagePosX": zod.number().optional(),
+  "imagePosY": zod.number().optional(),
+  "imageScale": zod.number().optional(),
+  "imageObjectFit": zod.enum(['cover', 'contain']).optional(),
   "createdAt": zod.string()
 })
 
@@ -226,6 +246,9 @@ export const ListLooksResponseItem = zod.object({
   "title": zod.string(),
   "description": zod.string().nullish(),
   "imageUrl": zod.string().nullish(),
+  "imagePosX": zod.number().optional(),
+  "imagePosY": zod.number().optional(),
+  "imageScale": zod.number().optional(),
   "products": zod.array(zod.object({
   "id": zod.number(),
   "title": zod.string(),
@@ -245,6 +268,10 @@ export const ListLooksResponseItem = zod.object({
   "featured": zod.boolean().optional(),
   "trending": zod.boolean().optional(),
   "status": zod.enum(['active', 'hidden']),
+  "imagePosX": zod.number().optional(),
+  "imagePosY": zod.number().optional(),
+  "imageScale": zod.number().optional(),
+  "imageObjectFit": zod.enum(['cover', 'contain']).optional(),
   "createdAt": zod.string()
 })).optional(),
   "createdAt": zod.string()
@@ -259,6 +286,9 @@ export const CreateLookBody = zod.object({
   "title": zod.string(),
   "description": zod.string().optional(),
   "imageUrl": zod.string().optional(),
+  "imagePosX": zod.number().optional(),
+  "imagePosY": zod.number().optional(),
+  "imageScale": zod.number().optional(),
   "productIds": zod.array(zod.number()).optional()
 })
 
@@ -275,6 +305,9 @@ export const GetLookResponse = zod.object({
   "title": zod.string(),
   "description": zod.string().nullish(),
   "imageUrl": zod.string().nullish(),
+  "imagePosX": zod.number().optional(),
+  "imagePosY": zod.number().optional(),
+  "imageScale": zod.number().optional(),
   "products": zod.array(zod.object({
   "id": zod.number(),
   "title": zod.string(),
@@ -294,6 +327,10 @@ export const GetLookResponse = zod.object({
   "featured": zod.boolean().optional(),
   "trending": zod.boolean().optional(),
   "status": zod.enum(['active', 'hidden']),
+  "imagePosX": zod.number().optional(),
+  "imagePosY": zod.number().optional(),
+  "imageScale": zod.number().optional(),
+  "imageObjectFit": zod.enum(['cover', 'contain']).optional(),
   "createdAt": zod.string()
 })).optional(),
   "createdAt": zod.string()
@@ -311,6 +348,9 @@ export const UpdateLookBody = zod.object({
   "title": zod.string().optional(),
   "description": zod.string().optional(),
   "imageUrl": zod.string().optional(),
+  "imagePosX": zod.number().optional(),
+  "imagePosY": zod.number().optional(),
+  "imageScale": zod.number().optional(),
   "productIds": zod.array(zod.number()).optional()
 })
 
@@ -319,6 +359,9 @@ export const UpdateLookResponse = zod.object({
   "title": zod.string(),
   "description": zod.string().nullish(),
   "imageUrl": zod.string().nullish(),
+  "imagePosX": zod.number().optional(),
+  "imagePosY": zod.number().optional(),
+  "imageScale": zod.number().optional(),
   "products": zod.array(zod.object({
   "id": zod.number(),
   "title": zod.string(),
@@ -338,6 +381,10 @@ export const UpdateLookResponse = zod.object({
   "featured": zod.boolean().optional(),
   "trending": zod.boolean().optional(),
   "status": zod.enum(['active', 'hidden']),
+  "imagePosX": zod.number().optional(),
+  "imagePosY": zod.number().optional(),
+  "imageScale": zod.number().optional(),
+  "imageObjectFit": zod.enum(['cover', 'contain']).optional(),
   "createdAt": zod.string()
 })).optional(),
   "createdAt": zod.string()
@@ -364,6 +411,9 @@ export const ListSetupsResponseItem = zod.object({
   "title": zod.string(),
   "description": zod.string().nullish(),
   "imageUrl": zod.string().nullish(),
+  "imagePosX": zod.number().optional(),
+  "imagePosY": zod.number().optional(),
+  "imageScale": zod.number().optional(),
   "products": zod.array(zod.object({
   "id": zod.number(),
   "title": zod.string(),
@@ -383,6 +433,10 @@ export const ListSetupsResponseItem = zod.object({
   "featured": zod.boolean().optional(),
   "trending": zod.boolean().optional(),
   "status": zod.enum(['active', 'hidden']),
+  "imagePosX": zod.number().optional(),
+  "imagePosY": zod.number().optional(),
+  "imageScale": zod.number().optional(),
+  "imageObjectFit": zod.enum(['cover', 'contain']).optional(),
   "createdAt": zod.string()
 })).optional(),
   "createdAt": zod.string()
@@ -397,6 +451,9 @@ export const CreateSetupBody = zod.object({
   "title": zod.string(),
   "description": zod.string().optional(),
   "imageUrl": zod.string().optional(),
+  "imagePosX": zod.number().optional(),
+  "imagePosY": zod.number().optional(),
+  "imageScale": zod.number().optional(),
   "productIds": zod.array(zod.number()).optional()
 })
 
@@ -413,6 +470,9 @@ export const GetSetupResponse = zod.object({
   "title": zod.string(),
   "description": zod.string().nullish(),
   "imageUrl": zod.string().nullish(),
+  "imagePosX": zod.number().optional(),
+  "imagePosY": zod.number().optional(),
+  "imageScale": zod.number().optional(),
   "products": zod.array(zod.object({
   "id": zod.number(),
   "title": zod.string(),
@@ -432,6 +492,10 @@ export const GetSetupResponse = zod.object({
   "featured": zod.boolean().optional(),
   "trending": zod.boolean().optional(),
   "status": zod.enum(['active', 'hidden']),
+  "imagePosX": zod.number().optional(),
+  "imagePosY": zod.number().optional(),
+  "imageScale": zod.number().optional(),
+  "imageObjectFit": zod.enum(['cover', 'contain']).optional(),
   "createdAt": zod.string()
 })).optional(),
   "createdAt": zod.string()
@@ -449,6 +513,9 @@ export const UpdateSetupBody = zod.object({
   "title": zod.string().optional(),
   "description": zod.string().optional(),
   "imageUrl": zod.string().optional(),
+  "imagePosX": zod.number().optional(),
+  "imagePosY": zod.number().optional(),
+  "imageScale": zod.number().optional(),
   "productIds": zod.array(zod.number()).optional()
 })
 
@@ -457,6 +524,9 @@ export const UpdateSetupResponse = zod.object({
   "title": zod.string(),
   "description": zod.string().nullish(),
   "imageUrl": zod.string().nullish(),
+  "imagePosX": zod.number().optional(),
+  "imagePosY": zod.number().optional(),
+  "imageScale": zod.number().optional(),
   "products": zod.array(zod.object({
   "id": zod.number(),
   "title": zod.string(),
@@ -476,6 +546,10 @@ export const UpdateSetupResponse = zod.object({
   "featured": zod.boolean().optional(),
   "trending": zod.boolean().optional(),
   "status": zod.enum(['active', 'hidden']),
+  "imagePosX": zod.number().optional(),
+  "imagePosY": zod.number().optional(),
+  "imageScale": zod.number().optional(),
+  "imageObjectFit": zod.enum(['cover', 'contain']).optional(),
   "createdAt": zod.string()
 })).optional(),
   "createdAt": zod.string()
@@ -538,6 +612,10 @@ export const ListAdminProductsResponseItem = zod.object({
   "featured": zod.boolean().optional(),
   "trending": zod.boolean().optional(),
   "status": zod.enum(['active', 'hidden']),
+  "imagePosX": zod.number().optional(),
+  "imagePosY": zod.number().optional(),
+  "imageScale": zod.number().optional(),
+  "imageObjectFit": zod.enum(['cover', 'contain']).optional(),
   "createdAt": zod.string()
 })
 export const ListAdminProductsResponse = zod.array(ListAdminProductsResponseItem)
