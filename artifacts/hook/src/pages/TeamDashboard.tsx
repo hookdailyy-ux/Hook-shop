@@ -11,6 +11,7 @@ import { MyOrders } from "@/components/MyOrders";
 import { MyAnalytics } from "@/components/MyAnalytics";
 import { MyRewards } from "@/components/MyRewards";
 import { SharedBaskets } from "@/components/SharedBaskets";
+import { ScrollableTabBar } from "@/components/ScrollableTabBar";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -62,29 +63,34 @@ export default function TeamDashboard() {
       {/* Header */}
       <div className="border-b border-border sticky top-0 z-30 bg-background/95 backdrop-blur-sm">
         <div className="container mx-auto px-4 sm:px-6">
-          <div className="no-scrollbar flex items-center gap-0 overflow-x-auto">
-            <div className="shrink-0 pr-6 py-4 border-r border-border mr-4 hidden md:flex items-center gap-2">
+          <div className="flex items-center gap-0">
+            {/* HOOK logo — pinned left, desktop only */}
+            <div className="shrink-0 pr-6 py-4 border-r border-border mr-0 hidden md:flex items-center gap-2">
               <Link href="/" className="font-serif text-lg font-light tracking-wide hover:opacity-70 transition-opacity" title="Back to website">HOOK</Link>
               <span className="text-[9px] tracking-widest uppercase border border-border px-1.5 py-0.5 text-muted-foreground">
                 Workspace
               </span>
             </div>
 
-            {NAV.map(({ id, label }) => (
-              <button
-                key={id}
-                onClick={() => handleSetActivePage(id)}
-                className={`shrink-0 px-4 py-4 text-[11px] tracking-widest uppercase border-b-2 transition-colors whitespace-nowrap ${
-                  activePage === id
-                    ? "border-foreground text-foreground"
-                    : "border-transparent text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {label.replace("My ", "")}
-              </button>
-            ))}
+            {/* Scrollable nav tabs */}
+            <ScrollableTabBar>
+              {NAV.map(({ id, label }) => (
+                <button
+                  key={id}
+                  onClick={() => handleSetActivePage(id)}
+                  className={`shrink-0 px-4 py-4 text-[11px] tracking-widest uppercase border-b-2 transition-colors whitespace-nowrap ${
+                    activePage === id
+                      ? "border-foreground text-foreground"
+                      : "border-transparent text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {label.replace("My ", "")}
+                </button>
+              ))}
+            </ScrollableTabBar>
 
-            <div className="ml-auto shrink-0 flex items-center gap-3 pl-4">
+            {/* Member info + Logout — pinned right */}
+            <div className="shrink-0 flex items-center gap-3 pl-2 border-l border-border">
               <div className="hidden md:flex items-center gap-2">
                 <span className="h-2 w-2 rounded-full bg-green-500 shrink-0" />
                 <span className="text-xs text-muted-foreground">{member.displayName ?? member.fullName}</span>

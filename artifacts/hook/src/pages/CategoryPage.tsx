@@ -6,6 +6,7 @@ import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useSiteImages } from "@/hooks/useSiteImages";
 import type { SiteImageKey } from "@/hooks/useSiteImages";
 import { useTranslation } from "react-i18next";
+import { ScrollableTabBar } from "@/components/ScrollableTabBar";
 
 // To add a new SHEIN-powered section, set showDiscoverMore: true below.
 // The "Explore More via SHEIN" button only appears when showDiscoverMore is true
@@ -122,10 +123,10 @@ export default function CategoryPage({ category }: CategoryPageProps) {
       {subcategories && subcategories.length > 0 && (
         <div className="border-b border-border sticky top-14 md:top-16 z-30 bg-background/95 backdrop-blur-sm">
           <div className="container mx-auto px-4 sm:px-6">
-            <div className="no-scrollbar flex gap-0 overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+            <ScrollableTabBar>
               <button
                 onClick={() => setActiveSub(null)}
-                className={`shrink-0 px-5 py-4 text-xs tracking-widest uppercase border-b-2 transition-colors ${
+                className={`shrink-0 whitespace-nowrap px-5 py-4 text-xs tracking-widest uppercase border-b-2 transition-colors ${
                   !activeSub
                     ? "border-foreground text-foreground"
                     : "border-transparent text-muted-foreground hover:text-foreground"
@@ -138,7 +139,7 @@ export default function CategoryPage({ category }: CategoryPageProps) {
                 <button
                   key={sub.id}
                   onClick={() => setActiveSub(activeSub === sub.name ? null : sub.name)}
-                  className={`shrink-0 px-5 py-4 text-xs tracking-widest uppercase border-b-2 transition-colors ${
+                  className={`shrink-0 whitespace-nowrap px-5 py-4 text-xs tracking-widest uppercase border-b-2 transition-colors ${
                     activeSub === sub.name
                       ? "border-foreground text-foreground"
                       : "border-transparent text-muted-foreground hover:text-foreground"
@@ -148,7 +149,7 @@ export default function CategoryPage({ category }: CategoryPageProps) {
                   {sub.name}
                 </button>
               ))}
-            </div>
+            </ScrollableTabBar>
           </div>
         </div>
       )}

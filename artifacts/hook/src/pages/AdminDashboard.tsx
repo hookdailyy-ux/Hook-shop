@@ -52,6 +52,7 @@ import { AdminOrders } from "@/components/AdminOrders";
 import { AdminRewards } from "@/components/AdminRewards";
 import { AdminAnalytics } from "@/components/AdminAnalytics";
 import { NewsletterTab } from "@/components/NewsletterTab";
+import { ScrollableTabBar } from "@/components/ScrollableTabBar";
 
 type Tab = "dashboard" | "products" | "looks" | "categories" | "settings" | "images" | "team" | "orders" | "rewards" | "analytics" | "newsletter";
 
@@ -78,9 +79,9 @@ export default function AdminDashboard() {
     <div className="min-h-screen pb-32" style={{ background: "hsl(var(--background))" }}>
       <div className="border-b border-border sticky top-0 z-30 bg-background/95 backdrop-blur-sm">
         <div className="container mx-auto px-4 sm:px-6">
-          <div className="no-scrollbar flex items-center gap-0 overflow-x-auto">
-            {/* Admin label + Logout — left side */}
-            <div className="shrink-0 border-r border-border pr-4 mr-4 flex flex-col justify-center py-2">
+          <div className="flex items-center gap-0">
+            {/* Admin label + Logout — pinned left */}
+            <div className="shrink-0 border-r border-border pr-4 mr-0 flex flex-col justify-center py-2">
               <span className="font-serif text-lg font-light tracking-wide text-foreground leading-tight">Admin</span>
               <button
                 onClick={() => { void handleLogout(); }}
@@ -90,20 +91,23 @@ export default function AdminDashboard() {
                 Logout
               </button>
             </div>
-            {(["dashboard", "products", "looks", "categories", "settings", "images", "team", "orders", "rewards", "analytics", "newsletter"] as Tab[]).map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`shrink-0 whitespace-nowrap px-4 py-4 text-xs tracking-widest uppercase border-b-2 transition-colors ${
-                  activeTab === tab
-                    ? "border-foreground text-foreground"
-                    : "border-transparent text-muted-foreground hover:text-foreground"
-                }`}
-                data-testid={`tab-${tab}`}
-              >
-                {tab}
-              </button>
-            ))}
+            {/* Scrollable tabs */}
+            <ScrollableTabBar>
+              {(["dashboard", "products", "looks", "categories", "settings", "images", "team", "orders", "rewards", "analytics", "newsletter"] as Tab[]).map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`shrink-0 whitespace-nowrap px-4 py-4 text-xs tracking-widest uppercase border-b-2 transition-colors ${
+                    activeTab === tab
+                      ? "border-foreground text-foreground"
+                      : "border-transparent text-muted-foreground hover:text-foreground"
+                  }`}
+                  data-testid={`tab-${tab}`}
+                >
+                  {tab}
+                </button>
+              ))}
+            </ScrollableTabBar>
           </div>
         </div>
       </div>
