@@ -47,8 +47,9 @@ import { useSiteImages, useUpsertSiteImage, useDeleteSiteImage } from "@/hooks/u
 import type { SiteImage, SiteImageKey } from "@/hooks/useSiteImages";
 import { useAdminAuth } from "@/contexts/AdminAuthContext";
 import { useLocation } from "wouter";
+import { TeamTab } from "@/components/TeamTab";
 
-type Tab = "dashboard" | "products" | "looks" | "categories" | "settings" | "images";
+type Tab = "dashboard" | "products" | "looks" | "categories" | "settings" | "images" | "team";
 
 const CATEGORIES = [
   { value: "women", label: "Women" },
@@ -76,7 +77,7 @@ export default function AdminDashboard() {
             <h1 className="font-serif text-lg font-light tracking-wide shrink-0 pr-8 py-4 border-r border-border mr-4 hidden md:block">
               Admin
             </h1>
-            {(["dashboard", "products", "looks", "categories", "settings", "images"] as Tab[]).map((tab) => (
+            {(["dashboard", "products", "looks", "categories", "settings", "images", "team"] as Tab[]).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -111,6 +112,7 @@ export default function AdminDashboard() {
         {activeTab === "categories" && <CategoriesTab />}
         {activeTab === "settings" && <SettingsTab />}
         {activeTab === "images" && <SiteImagesTab />}
+        {activeTab === "team" && <TeamTab />}
       </div>
     </div>
   );

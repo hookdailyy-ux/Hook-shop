@@ -11,6 +11,7 @@ import siteSettingsRouter from "./site-settings";
 import siteImagesRouter from "./site-images";
 import categoriesRouter from "./categories";
 import storageRouter from "./storage";
+import teamRouter from "./team";
 
 const router: IRouter = Router();
 
@@ -26,5 +27,6 @@ router.use(newsletterRouter);
 router.use(adminRouter);
 router.use(subcategoriesRouter);
 router.use(storageRouter);
+router.use(teamRouter);
 
 export default router;
