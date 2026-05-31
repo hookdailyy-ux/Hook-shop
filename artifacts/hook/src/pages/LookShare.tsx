@@ -3,6 +3,7 @@ import { Link, useParams } from "wouter";
 import { Layers, ShoppingBag, Link2, Check, Share2, Eye, Package } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AddToBasketModal } from "@/components/AddToBasketModal";
+import { ImageGallery } from "@/components/ImageGallery";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -237,47 +238,63 @@ function LookProductCard({
   product: PublicLookProduct;
   onAddToBasket: (p: PublicLookProduct) => void;
 }) {
+  const [galleryOpen, setGalleryOpen] = useState(false);
+  const galleryImages = product.imageUrl ? [product.imageUrl] : [];
+
   return (
-    <div className="group flex flex-col gap-3">
-      <div className="relative overflow-hidden bg-accent/30">
-        <div className="aspect-[3/4]">
-          {product.imageUrl ? (
-            <img
-              src={product.imageUrl}
-              alt={product.title}
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-              loading="lazy"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <ShoppingBag className="h-8 w-8 text-muted-foreground/20" strokeWidth={1} />
-            </div>
-          )}
+    <>
+      <div className="group flex flex-col gap-3">
+        <div className="relative overflow-hidden bg-accent/30">
+          <div
+            className={`aspect-[3/4] ${galleryImages.length > 0 ? "cursor-zoom-in" : ""}`}
+            onClick={() => galleryImages.length > 0 && setGalleryOpen(true)}
+          >
+            {product.imageUrl ? (
+              <img
+                src={product.imageUrl}
+                alt={product.title}
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                loading="lazy"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <ShoppingBag className="h-8 w-8 text-muted-foreground/20" strokeWidth={1} />
+              </div>
+            )}
+          </div>
+          <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 hidden md:block">
+            <button
+              onClick={(e) => { e.stopPropagation(); onAddToBasket(product); }}
+              className="w-full bg-background/90 text-foreground text-[10px] tracking-widest uppercase py-3 backdrop-blur-sm border border-border/50 hover:bg-foreground hover:text-background transition-colors"
+            >
+              Add To Basket
+            </button>
+          </div>
         </div>
-        <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 hidden md:block">
+        <div className="flex flex-col gap-1 px-0.5">
+          {product.brand && (
+            <p className="text-[10px] font-medium tracking-widest uppercase text-muted-foreground">
+              {product.brand}
+            </p>
+          )}
+          <p className="text-sm leading-snug line-clamp-2">{product.title}</p>
+          {product.hookPrice && <p className="text-sm font-medium mt-0.5">{product.hookPrice}</p>}
           <button
             onClick={() => onAddToBasket(product)}
-            className="w-full bg-background/90 text-foreground text-[10px] tracking-widest uppercase py-3 backdrop-blur-sm border border-border/50 hover:bg-foreground hover:text-background transition-colors"
+            className="mt-2 w-full text-[10px] tracking-widest uppercase py-3 border border-foreground bg-foreground text-background hover:bg-background hover:text-foreground transition-colors md:hidden"
           >
             Add To Basket
           </button>
         </div>
       </div>
-      <div className="flex flex-col gap-1 px-0.5">
-        {product.brand && (
-          <p className="text-[10px] font-medium tracking-widest uppercase text-muted-foreground">
-            {product.brand}
-          </p>
-        )}
-        <p className="text-sm leading-snug line-clamp-2">{product.title}</p>
-        {product.hookPrice && <p className="text-sm font-medium mt-0.5">{product.hookPrice}</p>}
-        <button
-          onClick={() => onAddToBasket(product)}
-          className="mt-2 w-full text-[10px] tracking-widest uppercase py-3 border border-foreground bg-foreground text-background hover:bg-background hover:text-foreground transition-colors md:hidden"
-        >
-          Add To Basket
-        </button>
-      </div>
-    </div>
+
+      {galleryOpen && (
+        <ImageGallery
+          images={galleryImages}
+          startIndex={0}
+          onClose={() => setGalleryOpen(false)}
+        />
+      )}
+    </>
   );
 }

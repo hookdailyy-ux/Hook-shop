@@ -4,6 +4,7 @@ import { useGetProduct, useListProducts, getGetProductQueryKey, getListProductsQ
 import { PlaceholderImage } from "@/components/PlaceholderImage";
 import { ProductCard } from "@/components/ProductCard";
 import { HeartButton } from "@/components/HeartButton";
+import { ImageGallery } from "@/components/ImageGallery";
 
 const COLOR_MAP: Record<string, string> = {
   black: "#1a1a1a",
@@ -49,6 +50,7 @@ export default function ProductDetail() {
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
+  const [galleryOpen, setGalleryOpen] = useState(false);
 
   const { data: product, isLoading } = useGetProduct(id, {
     query: { enabled: !!id, queryKey: getGetProductQueryKey(id) },
@@ -159,7 +161,11 @@ export default function ProductDetail() {
               )}
 
               {/* Main image */}
-              <div className="relative flex-1 aspect-[3/4] bg-accent overflow-hidden">
+              <div
+                className={`relative flex-1 aspect-[3/4] bg-accent overflow-hidden ${hasImages ? "cursor-zoom-in" : ""}`}
+                onClick={() => hasImages && setGalleryOpen(true)}
+                title={hasImages ? "Click to view full gallery" : undefined}
+              >
                 {hasImages ? (
                   <img
                     src={allImages[selectedImage]}
@@ -170,7 +176,7 @@ export default function ProductDetail() {
                   <PlaceholderImage aspectRatio="portrait" />
                 )}
                 {/* Heart button */}
-                <div className="absolute top-3 right-3 z-10">
+                <div className="absolute top-3 right-3 z-10" onClick={(e) => e.stopPropagation()}>
                   <HeartButton
                     item={{
                       id: product.id,
@@ -327,6 +333,14 @@ export default function ProductDetail() {
           </div>
         )}
       </div>
+
+      {galleryOpen && (
+        <ImageGallery
+          images={allImages}
+          startIndex={selectedImage}
+          onClose={() => setGalleryOpen(false)}
+        />
+      )}
     </div>
   );
 }
