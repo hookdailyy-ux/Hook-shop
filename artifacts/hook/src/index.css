@@ -268,3 +268,12 @@
     inset: -1px;
   }
 }
+
+/* Hide scrollbar across all browsers while keeping scroll functionality */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

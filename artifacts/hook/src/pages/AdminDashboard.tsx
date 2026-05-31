@@ -78,7 +78,7 @@ export default function AdminDashboard() {
     <div className="min-h-screen pb-32" style={{ background: "hsl(var(--background))" }}>
       <div className="border-b border-border sticky top-0 z-30 bg-background/95 backdrop-blur-sm">
         <div className="container mx-auto px-4 sm:px-6">
-          <div className="flex items-center gap-0 overflow-x-auto" style={{ scrollbarWidth: "none" }}>
+          <div className="no-scrollbar flex items-center gap-0 overflow-x-auto">
             {/* Admin label + Logout — left side */}
             <div className="shrink-0 border-r border-border pr-4 mr-4 flex flex-col justify-center py-2">
               <span className="font-serif text-lg font-light tracking-wide text-foreground leading-tight">Admin</span>
@@ -94,7 +94,7 @@ export default function AdminDashboard() {
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`shrink-0 px-4 py-4 text-xs tracking-widest uppercase border-b-2 transition-colors ${
+                className={`shrink-0 whitespace-nowrap px-4 py-4 text-xs tracking-widest uppercase border-b-2 transition-colors ${
                   activeTab === tab
                     ? "border-foreground text-foreground"
                     : "border-transparent text-muted-foreground hover:text-foreground"

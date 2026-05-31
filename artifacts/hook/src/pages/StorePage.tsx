@@ -377,10 +377,7 @@ export default function StorePage() {
             </div>
 
             {/* ── STATS BAR ─────────────────────────────────────────────────── */}
-            <div
-              className="flex items-center gap-0 border-t border-b border-border mb-10 overflow-x-auto"
-              style={{ scrollbarWidth: "none" }}
-            >
+            <div className="no-scrollbar flex items-center gap-0 border-t border-b border-border mb-10 overflow-x-auto">
               {[
                 { label: "Products", value: stats.products.toLocaleString(), icon: Package },
                 { label: "Collections", value: stats.collections.toLocaleString(), icon: FolderOpen },

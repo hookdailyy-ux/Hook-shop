@@ -122,10 +122,7 @@ export default function CategoryPage({ category }: CategoryPageProps) {
       {subcategories && subcategories.length > 0 && (
         <div className="border-b border-border sticky top-14 md:top-16 z-30 bg-background/95 backdrop-blur-sm">
           <div className="container mx-auto px-4 sm:px-6">
-            <div
-              className="flex gap-0 overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0"
-              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-            >
+            <div className="no-scrollbar flex gap-0 overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
               <button
                 onClick={() => setActiveSub(null)}
                 className={`shrink-0 px-5 py-4 text-xs tracking-widest uppercase border-b-2 transition-colors ${

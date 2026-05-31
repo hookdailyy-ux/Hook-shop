@@ -62,7 +62,7 @@ export default function TeamDashboard() {
       {/* Header */}
       <div className="border-b border-border sticky top-0 z-30 bg-background/95 backdrop-blur-sm">
         <div className="container mx-auto px-4 sm:px-6">
-          <div className="flex items-center gap-0 overflow-x-auto" style={{ scrollbarWidth: "none" }}>
+          <div className="no-scrollbar flex items-center gap-0 overflow-x-auto">
             <div className="shrink-0 pr-6 py-4 border-r border-border mr-4 hidden md:flex items-center gap-2">
               <Link href="/" className="font-serif text-lg font-light tracking-wide hover:opacity-70 transition-opacity" title="Back to website">HOOK</Link>
               <span className="text-[9px] tracking-widest uppercase border border-border px-1.5 py-0.5 text-muted-foreground">
