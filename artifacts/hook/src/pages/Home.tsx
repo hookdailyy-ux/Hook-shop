@@ -71,7 +71,7 @@ export default function Home() {
           >
             {t("hero.title1")}<br />{t("hero.title2")}
           </h1>
-          <p className={`text-sm md:text-base tracking-widest uppercase max-w-xs md:max-w-sm leading-relaxed ${heroImage ? "text-white/80" : "text-[#6b5e4e]"}`}>
+          <p className={`text-[11px] tracking-[0.3em] uppercase font-medium max-w-xs md:max-w-sm leading-relaxed ${heroImage ? "text-white/60" : "text-[#8b7355]/70"}`}>
             {t("hero.subtitle")}
           </p>
           <Link
