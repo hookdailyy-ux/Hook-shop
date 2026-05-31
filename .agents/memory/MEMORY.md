@@ -1,1 +1,3 @@
 - [Express route ordering](express-route-ordering.md) — literal `/products/catalog` must come before `/products/:id` in the same router file to avoid `NaN` ID lookups.
+- [Express 5 req.params types](express5-params.md) — req.params values are `string | string[]`; always wrap with `String(req.params.x)` before passing to `parseInt` or Drizzle `eq()`.
+- [DB lib rebuild rule](db-lib-rebuild.md) — After adding schema columns, run `pnpm run typecheck:libs` to rebuild lib declarations so api-server sees new columns; migration is separate (`pnpm --filter @workspace/db run push`).

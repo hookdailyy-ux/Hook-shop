@@ -8,6 +8,11 @@ export interface TeamMemberInfo {
   whatsapp: string;
   status: string;
   createdAt: string;
+  // Store profile fields
+  displayName: string | null;
+  bio: string | null;
+  profilePhotoUrl: string | null;
+  coverImageUrl: string | null;
 }
 
 interface MeResponse {

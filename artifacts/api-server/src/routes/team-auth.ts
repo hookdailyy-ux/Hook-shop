@@ -53,6 +53,10 @@ router.post("/team/auth/login", async (req, res) => {
         whatsapp: member.whatsapp ?? "",
         status: member.status,
         createdAt: member.createdAt.toISOString(),
+        displayName: member.displayName ?? null,
+        bio: member.bio ?? null,
+        profilePhotoUrl: member.profilePhotoUrl ?? null,
+        coverImageUrl: member.coverImageUrl ?? null,
       },
     });
   } catch (err) {
@@ -95,6 +99,10 @@ router.get("/team/auth/me", async (req, res) => {
         whatsapp: member.whatsapp ?? "",
         status: member.status,
         createdAt: member.createdAt.toISOString(),
+        displayName: member.displayName ?? null,
+        bio: member.bio ?? null,
+        profilePhotoUrl: member.profilePhotoUrl ?? null,
+        coverImageUrl: member.coverImageUrl ?? null,
       },
     });
   } catch (err) {
@@ -108,6 +116,71 @@ router.post("/team/auth/logout", (req, res) => {
     res.json({ ok: true });
   });
 });
+
+// ─── PROFILE ─────────────────────────────────────────────────────────────────
+
+router.get("/team/profile", async (req, res) => {
+  const memberId = req.session?.teamMemberId;
+  if (!memberId) { res.status(401).json({ error: "Unauthorized" }); return; }
+  try {
+    const [member] = await db.select().from(teamMembersTable).where(eq(teamMembersTable.id, memberId)).limit(1);
+    if (!member) { res.status(404).json({ error: "Not found" }); return; }
+    res.json({
+      id: member.id,
+      fullName: member.fullName,
+      username: member.username,
+      whatsapp: member.whatsapp ?? "",
+      displayName: member.displayName ?? null,
+      bio: member.bio ?? null,
+      profilePhotoUrl: member.profilePhotoUrl ?? null,
+      coverImageUrl: member.coverImageUrl ?? null,
+    });
+  } catch (err) {
+    req.log.error({ err }, "Failed to get team profile");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.put("/team/profile", async (req, res) => {
+  const memberId = req.session?.teamMemberId;
+  if (!memberId) { res.status(401).json({ error: "Unauthorized" }); return; }
+  try {
+    const schema = z.object({
+      displayName: z.string().max(80).nullable().optional(),
+      bio: z.string().max(500).nullable().optional(),
+      profilePhotoUrl: z.string().nullable().optional(),
+      coverImageUrl: z.string().nullable().optional(),
+      whatsapp: z.string().max(30).nullable().optional(),
+    });
+    const data = schema.parse(req.body);
+    const [updated] = await db
+      .update(teamMembersTable)
+      .set({
+        ...(data.displayName !== undefined ? { displayName: data.displayName } : {}),
+        ...(data.bio !== undefined ? { bio: data.bio } : {}),
+        ...(data.profilePhotoUrl !== undefined ? { profilePhotoUrl: data.profilePhotoUrl } : {}),
+        ...(data.coverImageUrl !== undefined ? { coverImageUrl: data.coverImageUrl } : {}),
+        ...(data.whatsapp !== undefined ? { whatsapp: data.whatsapp } : {}),
+      })
+      .where(eq(teamMembersTable.id, memberId))
+      .returning();
+    res.json({
+      id: updated.id,
+      fullName: updated.fullName,
+      username: updated.username,
+      whatsapp: updated.whatsapp ?? "",
+      displayName: updated.displayName ?? null,
+      bio: updated.bio ?? null,
+      profilePhotoUrl: updated.profilePhotoUrl ?? null,
+      coverImageUrl: updated.coverImageUrl ?? null,
+    });
+  } catch (err) {
+    req.log.error({ err }, "Failed to update team profile");
+    res.status(400).json({ error: "Invalid input" });
+  }
+});
+
+// ─── PASSWORD ─────────────────────────────────────────────────────────────────
 
 router.put("/team/auth/password", async (req, res) => {
   const memberId = req.session?.teamMemberId;

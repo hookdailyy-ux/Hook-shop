@@ -11,6 +11,11 @@ export const teamMembersTable = pgTable("team_members", {
   forcePasswordChange: boolean("force_password_change").notNull().default(true),
   lastActiveAt: timestamp("last_active_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
+  // Store profile fields
+  displayName: text("display_name"),
+  bio: text("bio"),
+  profilePhotoUrl: text("profile_photo_url"),
+  coverImageUrl: text("cover_image_url"),
 });
 
 export const teamMemberActivityTable = pgTable("team_member_activity", {

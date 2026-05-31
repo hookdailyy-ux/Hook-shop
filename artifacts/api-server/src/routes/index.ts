@@ -14,6 +14,8 @@ import storageRouter from "./storage";
 import teamRouter from "./team";
 import teamAuthRouter from "./team-auth";
 import collectionsRouter from "./collections";
+import teamLooksRouter from "./team-looks";
+import storeRouter from "./store";
 
 const router: IRouter = Router();
 
@@ -32,5 +34,7 @@ router.use(storageRouter);
 router.use(teamRouter);
 router.use(teamAuthRouter);
 router.use(collectionsRouter);
+router.use(teamLooksRouter);
+router.use(storeRouter);
 
 export default router;

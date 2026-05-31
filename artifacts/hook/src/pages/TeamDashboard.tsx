@@ -4,6 +4,9 @@ import { useTeamAuth } from "@/contexts/TeamAuthContext";
 import { LogOut, LayoutDashboard, FolderOpen, Layers, ShoppingBag, Gift, User } from "lucide-react";
 import { MyCollections } from "@/components/MyCollections";
 import { CollectionDetail } from "@/components/CollectionDetail";
+import { MyLooks } from "@/components/MyLooks";
+import { LookDetail } from "@/components/LookDetail";
+import { StoreProfileBuilder } from "@/components/StoreProfileBuilder";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -25,14 +28,18 @@ const NAV: { id: TeamPage; label: string; icon: React.ElementType }[] = [
 ];
 
 export default function TeamDashboard() {
-  const { member, logout } = useTeamAuth();
+  const { member, logout, refetch } = useTeamAuth();
   const [, navigate] = useLocation();
   const [activePage, setActivePage] = useState<TeamPage>("dashboard");
   const [selectedCollectionId, setSelectedCollectionId] = useState<number | null>(null);
+  const [selectedLookId, setSelectedLookId] = useState<number | null>(null);
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
 
   const handleSetActivePage = (page: TeamPage) => {
     setActivePage(page);
     if (page !== "collections") setSelectedCollectionId(null);
+    if (page !== "looks") setSelectedLookId(null);
+    if (page !== "profile") setShowPasswordForm(false);
   };
 
   const handleLogout = async () => {
@@ -47,14 +54,9 @@ export default function TeamDashboard() {
       {/* Header */}
       <div className="border-b border-border sticky top-0 z-30 bg-background/95 backdrop-blur-sm">
         <div className="container mx-auto px-4 sm:px-6">
-          <div
-            className="flex items-center gap-0 overflow-x-auto"
-            style={{ scrollbarWidth: "none" }}
-          >
+          <div className="flex items-center gap-0 overflow-x-auto" style={{ scrollbarWidth: "none" }}>
             <div className="shrink-0 pr-6 py-4 border-r border-border mr-4 hidden md:flex items-center gap-2">
-              <Link href="/" className="font-serif text-lg font-light tracking-wide">
-                HOOK
-              </Link>
+              <Link href="/" className="font-serif text-lg font-light tracking-wide">HOOK</Link>
               <span className="text-[9px] tracking-widest uppercase border border-border px-1.5 py-0.5 text-muted-foreground">
                 Workspace
               </span>
@@ -77,7 +79,7 @@ export default function TeamDashboard() {
             <div className="ml-auto shrink-0 flex items-center gap-3 pl-4">
               <div className="hidden md:flex items-center gap-2">
                 <span className="h-2 w-2 rounded-full bg-green-500 shrink-0" />
-                <span className="text-xs text-muted-foreground">{member.fullName}</span>
+                <span className="text-xs text-muted-foreground">{member.displayName ?? member.fullName}</span>
               </div>
               <button
                 onClick={handleLogout}
@@ -94,7 +96,8 @@ export default function TeamDashboard() {
 
       {/* Content */}
       <div className="container mx-auto px-4 sm:px-6 pt-8 md:pt-10 pb-24">
-        {activePage === "dashboard" && <DashboardPage member={member} />}
+
+        {activePage === "dashboard" && <DashboardPage member={member} onNavigate={handleSetActivePage} />}
 
         {activePage === "collections" && (
           selectedCollectionId !== null ? (
@@ -108,12 +111,16 @@ export default function TeamDashboard() {
         )}
 
         {activePage === "looks" && (
-          <PlaceholderPage
-            title="My Looks"
-            description="Build styled looks from the HOOK catalog. Link them on your socials."
-            comingSoon
-          />
+          selectedLookId !== null ? (
+            <LookDetail
+              lookId={selectedLookId}
+              onBack={() => setSelectedLookId(null)}
+            />
+          ) : (
+            <MyLooks onOpenLook={(id) => setSelectedLookId(id)} />
+          )
         )}
+
         {activePage === "orders" && (
           <PlaceholderPage
             title="My Orders"
@@ -121,6 +128,7 @@ export default function TeamDashboard() {
             comingSoon
           />
         )}
+
         {activePage === "rewards" && (
           <PlaceholderPage
             title="My Rewards"
@@ -128,16 +136,40 @@ export default function TeamDashboard() {
             comingSoon
           />
         )}
-        {activePage === "profile" && <ProfilePage member={member} />}
+
+        {activePage === "profile" && (
+          showPasswordForm ? (
+            <div className="max-w-lg">
+              <button
+                onClick={() => setShowPasswordForm(false)}
+                className="mb-6 text-[10px] tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors"
+              >
+                ← Back to Profile
+              </button>
+              <ChangePasswordForm memberId={member.id} onSuccess={() => { refetch(); setShowPasswordForm(false); }} />
+            </div>
+          ) : (
+            <StoreProfileBuilder
+              member={member}
+              onSaved={refetch}
+            />
+          )
+        )}
       </div>
     </div>
   );
 }
 
-function DashboardPage({ member }: { member: ReturnType<typeof useTeamAuth>["member"] }) {
+function DashboardPage({
+  member,
+  onNavigate,
+}: {
+  member: ReturnType<typeof useTeamAuth>["member"];
+  onNavigate: (page: TeamPage) => void;
+}) {
   if (!member) return null;
 
-  const initials = member.fullName
+  const initials = (member.displayName ?? member.fullName)
     .split(" ")
     .map((n) => n[0])
     .join("")
@@ -148,61 +180,72 @@ function DashboardPage({ member }: { member: ReturnType<typeof useTeamAuth>["mem
     <div>
       <div className="mb-10">
         <div className="flex items-center gap-4 mb-6">
-          <div className="h-14 w-14 border border-border flex items-center justify-center font-serif text-xl font-light bg-accent/30">
-            {initials}
-          </div>
+          {member.profilePhotoUrl ? (
+            <div className="h-14 w-14 border border-border overflow-hidden shrink-0">
+              <img src={member.profilePhotoUrl} alt={member.displayName ?? member.fullName} className="w-full h-full object-cover" />
+            </div>
+          ) : (
+            <div className="h-14 w-14 border border-border flex items-center justify-center font-serif text-xl font-light bg-accent/30 shrink-0">
+              {initials}
+            </div>
+          )}
           <div>
-            <h1 className="font-serif text-2xl font-light">{member.fullName}</h1>
+            <h1 className="font-serif text-2xl font-light">{member.displayName ?? member.fullName}</h1>
             <p className="text-xs text-muted-foreground mt-0.5 font-mono">@{member.username}</p>
           </div>
         </div>
         <p className="text-sm text-muted-foreground max-w-lg leading-relaxed">
-          Welcome to your HOOK workspace. From here you'll manage your collections, looks, and track your performance.
+          Welcome to your HOOK workspace. Manage your collections, looks, and track your performance.
         </p>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
         {[
-          { label: "Collections", value: "0" },
-          { label: "Looks", value: "0" },
-          { label: "Month Orders", value: "$0" },
-          { label: "Rewards", value: "$0" },
-        ].map(({ label, value }) => (
-          <div key={label} className="border border-border p-5">
+          { label: "Collections", value: "—", page: "collections" as TeamPage },
+          { label: "Looks", value: "—", page: "looks" as TeamPage },
+          { label: "Month Orders", value: "$0", page: "orders" as TeamPage },
+          { label: "Rewards", value: "$0", page: "rewards" as TeamPage },
+        ].map(({ label, value, page }) => (
+          <button key={label} onClick={() => onNavigate(page)} className="border border-border p-5 text-left hover:border-foreground/30 transition-colors">
             <p className="text-[10px] tracking-widest uppercase text-muted-foreground mb-2">{label}</p>
             <p className="font-serif text-3xl font-light">{value}</p>
-          </div>
+          </button>
         ))}
       </div>
 
-      <div className="border border-dashed border-border p-8 text-center max-w-lg">
-        <p className="text-[10px] tracking-widest uppercase text-muted-foreground mb-2">
-          Getting Started
-        </p>
-        <p className="text-sm text-muted-foreground leading-relaxed">
-          Head to <strong>Collections</strong> to create your first curated collection and share it with your audience.
-        </p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-lg">
+        <button
+          onClick={() => onNavigate("collections")}
+          className="border border-dashed border-border p-6 text-left hover:border-foreground/30 transition-colors"
+        >
+          <FolderOpen className="h-5 w-5 text-muted-foreground/40 mb-3" strokeWidth={1} />
+          <p className="text-[10px] tracking-widest uppercase text-muted-foreground mb-1">Collections</p>
+          <p className="text-xs text-muted-foreground/70 leading-relaxed">
+            Curate products into themed collections.
+          </p>
+        </button>
+        <button
+          onClick={() => onNavigate("looks")}
+          className="border border-dashed border-border p-6 text-left hover:border-foreground/30 transition-colors"
+        >
+          <Layers className="h-5 w-5 text-muted-foreground/40 mb-3" strokeWidth={1} />
+          <p className="text-[10px] tracking-widest uppercase text-muted-foreground mb-1">Looks</p>
+          <p className="text-xs text-muted-foreground/70 leading-relaxed">
+            Build styled looks from multiple products.
+          </p>
+        </button>
       </div>
     </div>
   );
 }
 
-function PlaceholderPage({
-  title,
-  description,
-  comingSoon,
-}: {
-  title: string;
-  description: string;
-  comingSoon?: boolean;
-}) {
+function PlaceholderPage({ title, description, comingSoon }: { title: string; description: string; comingSoon?: boolean }) {
   return (
     <div>
       <div className="mb-8">
         <h2 className="font-serif text-2xl font-light mb-1">{title}</h2>
         <p className="text-sm text-muted-foreground">{description}</p>
       </div>
-
       <div className="border border-dashed border-border py-24 flex flex-col items-center justify-center text-center max-w-lg">
         {comingSoon && (
           <span className="text-[10px] tracking-widest uppercase border border-border px-3 py-1 text-muted-foreground mb-4">
@@ -217,44 +260,7 @@ function PlaceholderPage({
   );
 }
 
-function ProfilePage({ member }: { member: ReturnType<typeof useTeamAuth>["member"] }) {
-  if (!member) return null;
-  return (
-    <div className="max-w-lg">
-      <div className="mb-8">
-        <h2 className="font-serif text-2xl font-light mb-1">My Profile</h2>
-        <p className="text-sm text-muted-foreground">Your account information.</p>
-      </div>
-
-      <div className="border border-border divide-y divide-border mb-8">
-        {[
-          { label: "Full Name", value: member.fullName },
-          { label: "Username", value: `@${member.username}`, mono: true },
-          { label: "WhatsApp", value: member.whatsapp || "Not set" },
-          {
-            label: "Member Since",
-            value: new Date(member.createdAt).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            }),
-          },
-        ].map(({ label, value, mono }) => (
-          <div key={label} className="flex items-center px-4 py-3 gap-6">
-            <span className="text-[10px] tracking-widest uppercase text-muted-foreground w-28 shrink-0">
-              {label}
-            </span>
-            <span className={`text-sm ${mono ? "font-mono" : ""}`}>{value}</span>
-          </div>
-        ))}
-      </div>
-
-      <ChangePasswordForm memberId={member.id} />
-    </div>
-  );
-}
-
-function ChangePasswordForm({ memberId: _memberId }: { memberId: number }) {
+function ChangePasswordForm({ memberId: _memberId, onSuccess }: { memberId: number; onSuccess?: () => void }) {
   const { refetch } = useTeamAuth();
   const [current, setCurrent] = useState("");
   const [newPass, setNewPass] = useState("");
@@ -267,14 +273,8 @@ function ChangePasswordForm({ memberId: _memberId }: { memberId: number }) {
     e.preventDefault();
     setError(null);
     setSuccess(false);
-    if (newPass !== confirm) {
-      setError("Passwords do not match");
-      return;
-    }
-    if (newPass.length < 6) {
-      setError("Password must be at least 6 characters");
-      return;
-    }
+    if (newPass !== confirm) { setError("Passwords do not match"); return; }
+    if (newPass.length < 6) { setError("Password must be at least 6 characters"); return; }
     setLoading(true);
     try {
       const res = await fetch(`${BASE}/api/team/auth/password`, {
@@ -284,15 +284,11 @@ function ChangePasswordForm({ memberId: _memberId }: { memberId: number }) {
         body: JSON.stringify({ currentPassword: current, newPassword: newPass }),
       });
       const body = (await res.json()) as { ok?: boolean; error?: string };
-      if (!res.ok) {
-        setError(body.error ?? "Failed to change password");
-        return;
-      }
+      if (!res.ok) { setError(body.error ?? "Failed to change password"); return; }
       setSuccess(true);
-      setCurrent("");
-      setNewPass("");
-      setConfirm("");
+      setCurrent(""); setNewPass(""); setConfirm("");
       refetch();
+      onSuccess?.();
     } catch {
       setError("Network error. Please try again.");
     } finally {
@@ -302,59 +298,24 @@ function ChangePasswordForm({ memberId: _memberId }: { memberId: number }) {
 
   return (
     <div>
-      <p className="text-[10px] tracking-widest uppercase text-muted-foreground mb-4">
-        Change Password
-      </p>
+      <p className="text-[10px] tracking-widest uppercase text-muted-foreground mb-4">Change Password</p>
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-1.5">
-          <label className="text-[10px] uppercase tracking-widest text-muted-foreground block">
-            Current Password
-          </label>
-          <input
-            type="password"
-            value={current}
-            onChange={(e) => setCurrent(e.target.value)}
-            required
-            autoComplete="current-password"
-            className="w-full border border-border bg-background px-4 py-3 text-sm outline-none focus:border-foreground transition-colors"
-          />
-        </div>
-        <div className="space-y-1.5">
-          <label className="text-[10px] uppercase tracking-widest text-muted-foreground block">
-            New Password
-          </label>
-          <input
-            type="password"
-            value={newPass}
-            onChange={(e) => setNewPass(e.target.value)}
-            required
-            autoComplete="new-password"
-            className="w-full border border-border bg-background px-4 py-3 text-sm outline-none focus:border-foreground transition-colors"
-          />
-        </div>
-        <div className="space-y-1.5">
-          <label className="text-[10px] uppercase tracking-widest text-muted-foreground block">
-            Confirm New Password
-          </label>
-          <input
-            type="password"
-            value={confirm}
-            onChange={(e) => setConfirm(e.target.value)}
-            required
-            autoComplete="new-password"
-            className="w-full border border-border bg-background px-4 py-3 text-sm outline-none focus:border-foreground transition-colors"
-          />
-        </div>
+        {[
+          { label: "Current Password", value: current, onChange: setCurrent, auto: "current-password" },
+          { label: "New Password", value: newPass, onChange: setNewPass, auto: "new-password" },
+          { label: "Confirm New Password", value: confirm, onChange: setConfirm, auto: "new-password" },
+        ].map(({ label, value, onChange, auto }) => (
+          <div key={label} className="space-y-1.5">
+            <label className="text-[10px] uppercase tracking-widest text-muted-foreground block">{label}</label>
+            <input type="password" value={value} onChange={(e) => onChange(e.target.value)} required autoComplete={auto}
+              className="w-full border border-border bg-background px-4 py-3 text-sm outline-none focus:border-foreground transition-colors" />
+          </div>
+        ))}
         {error && <p className="text-xs text-destructive">{error}</p>}
-        {success && (
-          <p className="text-xs text-green-600 tracking-wide">Password changed successfully.</p>
-        )}
-        <button
-          type="submit"
-          disabled={loading || !current || !newPass || !confirm}
-          className="bg-foreground text-background text-xs tracking-widest uppercase px-6 py-3 hover:opacity-90 transition-opacity disabled:opacity-40"
-        >
-          {loading ? "Saving..." : "Update Password"}
+        {success && <p className="text-xs text-green-600 tracking-wide">Password changed successfully.</p>}
+        <button type="submit" disabled={loading || !current || !newPass || !confirm}
+          className="bg-foreground text-background text-xs tracking-widest uppercase px-6 py-3 hover:opacity-90 transition-opacity disabled:opacity-40">
+          {loading ? "Saving…" : "Update Password"}
         </button>
       </form>
     </div>
