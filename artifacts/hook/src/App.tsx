@@ -22,7 +22,10 @@ import RankingsPage from "@/pages/RankingsPage";
 import { AdminAuthProvider, useAdminAuth } from "@/contexts/AdminAuthContext";
 import { TeamAuthProvider, useTeamAuth } from "@/contexts/TeamAuthContext";
 import { FavoritesProvider } from "@/contexts/FavoritesContext";
+import { BasketProvider } from "@/contexts/BasketContext";
 import { TeamMemberBar } from "@/components/TeamMemberBar";
+import { BasketDrawer, FloatingBasketButton } from "@/components/BasketDrawer";
+import BasketSharePage from "@/pages/BasketSharePage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -93,6 +96,8 @@ function ProtectedTeamChangePassword() {
 function Router() {
   const [location] = useLocation();
   const isTeamWorkspace = location.startsWith("/team");
+  const isAdminWorkspace = location.startsWith("/admin");
+  const showBasket = !isTeamWorkspace && !isAdminWorkspace;
 
   return (
     <>
@@ -133,11 +138,16 @@ function Router() {
               <Route path="/l/:token" component={LookShare} />
               <Route path="/store/:username" component={StorePage} />
               <Route path="/rankings" component={RankingsPage} />
+              <Route path="/basket/:token" component={BasketSharePage} />
               <Route component={NotFound} />
             </Switch>
           </AppLayout>
         </Route>
       </Switch>
+
+      {/* Floating basket button + drawer — visible on public pages only */}
+      {showBasket && <FloatingBasketButton />}
+      {showBasket && <BasketDrawer />}
 
       {/* Floating team member workspace bar — visible on public pages only */}
       {!isTeamWorkspace && <TeamMemberBar />}
@@ -151,12 +161,14 @@ function App() {
       <AdminAuthProvider>
         <TeamAuthProvider>
           <FavoritesProvider>
-            <TooltipProvider>
-              <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-                <Router />
-              </WouterRouter>
-              <Toaster />
-            </TooltipProvider>
+            <BasketProvider>
+              <TooltipProvider>
+                <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+                  <Router />
+                </WouterRouter>
+                <Toaster />
+              </TooltipProvider>
+            </BasketProvider>
           </FavoritesProvider>
         </TeamAuthProvider>
       </AdminAuthProvider>

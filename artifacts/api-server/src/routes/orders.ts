@@ -143,7 +143,7 @@ router.put("/team/orders/:id/status", async (req, res) => {
   try {
     const orderId = parseInt(String(req.params.id));
     const { status } = z.object({
-      status: z.enum(["pending", "confirmed", "processing", "shipped", "delivered", "cancelled"]),
+      status: z.enum(["pending", "pending_review", "approved", "rejected", "paid"]),
     }).parse(req.body);
 
     const [order] = await db
@@ -170,9 +170,12 @@ router.post("/team/orders/:id/proof", async (req, res) => {
   if (!memberId) return;
   try {
     const orderId = parseInt(String(req.params.id));
-    const { imageUrl, proofType } = z.object({
+    const { imageUrl, proofType, platformOrderRef, orderValue, memberNotes } = z.object({
       imageUrl: z.string().min(1),
-      proofType: z.enum(["confirmation", "payment", "delivery", "customer"]).default("confirmation"),
+      proofType: z.string().default("confirmation"),
+      platformOrderRef: z.string().optional().nullable(),
+      orderValue: z.string().optional().nullable(),
+      memberNotes: z.string().optional().nullable(),
     }).parse(req.body);
 
     const [order] = await db
@@ -184,7 +187,7 @@ router.post("/team/orders/:id/proof", async (req, res) => {
     if (!order) { res.status(404).json({ error: "Order not found" }); return; }
 
     const [proof] = await db.insert(orderProofsTable)
-      .values({ orderId, imageUrl, proofType })
+      .values({ orderId, imageUrl, proofType, platformOrderRef, orderValue, memberNotes })
       .returning();
 
     res.status(201).json({ ...proof, createdAt: proof.createdAt.toISOString() });

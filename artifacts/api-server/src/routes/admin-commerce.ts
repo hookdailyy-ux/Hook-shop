@@ -81,7 +81,7 @@ router.put("/admin/orders/:id/status", async (req, res) => {
   try {
     const orderId = parseInt(String(req.params.id));
     const { status } = z.object({
-      status: z.enum(["pending", "confirmed", "processing", "shipped", "delivered", "cancelled"]),
+      status: z.enum(["pending", "pending_review", "approved", "rejected", "paid"]),
     }).parse(req.body);
 
     await db.update(ordersTable)

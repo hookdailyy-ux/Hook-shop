@@ -9,7 +9,6 @@ import {
   Check,
   Share2,
   ShoppingBag,
-  ShoppingCart,
   ExternalLink,
   Eye,
   Heart,
@@ -21,7 +20,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { CheckoutModal, type BasketItem } from "@/components/CheckoutModal";
+import { AddToBasketModal } from "@/components/AddToBasketModal";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -91,8 +90,7 @@ export default function StorePage() {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
-  const [basket, setBasket] = useState<BasketItem[]>([]);
-  const [showCheckout, setShowCheckout] = useState(false);
+  const [addingProduct, setAddingProduct] = useState<StoreFeaturedProduct | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -111,15 +109,6 @@ export default function StorePage() {
     })();
   }, [username]);
 
-  // Load basket from localStorage
-  useEffect(() => {
-    if (!username) return;
-    try {
-      const saved = localStorage.getItem(`hook_basket_${username}`);
-      if (saved) setBasket(JSON.parse(saved) as BasketItem[]);
-    } catch { /* ignore */ }
-  }, [username]);
-
   // Track profile view
   useEffect(() => {
     if (!store) return;
@@ -130,32 +119,14 @@ export default function StorePage() {
     });
   }, [store?.member.id]);
 
-  const saveBasket = (items: BasketItem[]) => {
-    setBasket(items);
-    localStorage.setItem(`hook_basket_${username ?? ""}`, JSON.stringify(items));
-  };
-
-  const addToBasket = (product: StoreFeaturedProduct) => {
-    setBasket((prev) => {
-      const existing = prev.find((i) => i.productId === product.id);
-      const next = existing
-        ? prev.map((i) => i.productId === product.id ? { ...i, quantity: i.quantity + 1 } : i)
-        : [...prev, { productId: product.id, productTitle: product.title, productImageUrl: product.imageUrl, displayPrice: product.displayPrice, quantity: 1, affiliateUrl: product.affiliateUrl, brand: product.brand }];
-      localStorage.setItem(`hook_basket_${username ?? ""}`, JSON.stringify(next));
-      return next;
-    });
+  const handleProductAddToBasket = (product: StoreFeaturedProduct) => {
+    setAddingProduct(product);
     if (store) {
       void fetch(`${BASE}/api/analytics/event`, {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ memberId: store.member.id, entityType: "product", entityId: product.id, eventType: "add_to_basket" }),
       });
     }
-  };
-
-  const removeFromBasket = (productId: number) => saveBasket(basket.filter((i) => i.productId !== productId));
-  const updateBasketQty = (productId: number, qty: number) => {
-    if (qty <= 0) { removeFromBasket(productId); return; }
-    saveBasket(basket.map((i) => i.productId === productId ? { ...i, quantity: qty } : i));
   };
 
   const trackProductClick = (productId: number) => {
@@ -300,7 +271,7 @@ export default function StorePage() {
                   className="inline-flex items-center gap-2 px-5 py-2.5 bg-green-600 text-white text-xs tracking-widest uppercase rounded-full shadow-sm hover:bg-green-700 transition-colors"
                 >
                   <MessageCircle className="h-3.5 w-3.5" />
-                  WhatsApp Me
+                  Message Me
                 </a>
               )}
               <button
@@ -472,7 +443,7 @@ export default function StorePage() {
 
                 <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
                   {featuredProducts.map((p) => (
-                    <ProductCard key={p.id} product={p} onAddToBasket={addToBasket} onTrackClick={() => trackProductClick(p.id)} />
+                    <ProductCard key={p.id} product={p} onAddToBasket={handleProductAddToBasket} onTrackClick={() => trackProductClick(p.id)} />
                   ))}
                 </div>
               </section>
@@ -510,35 +481,27 @@ export default function StorePage() {
         </div>
         {/* end grid */}
 
-        {/* Floating basket bar */}
-        {basket.length > 0 && (
-          <div className="fixed bottom-0 inset-x-0 z-40 bg-background/95 backdrop-blur-sm border-t border-border shadow-xl px-4 py-3">
-            <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-              <div className="flex items-center gap-2">
-                <ShoppingCart className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-medium">{basket.reduce((s, i) => s + i.quantity, 0)} item{basket.reduce((s, i) => s + i.quantity, 0) !== 1 ? "s" : ""} in basket</span>
-              </div>
-              <button onClick={() => setShowCheckout(true)} className="flex items-center gap-2 px-5 py-2.5 bg-foreground text-background text-[10px] tracking-widest uppercase rounded-full hover:opacity-90 transition-opacity shadow-sm">
-                <ShoppingBag className="h-3.5 w-3.5" /> View Basket
-              </button>
-            </div>
-          </div>
-        )}
-
-        {showCheckout && store && (
-          <CheckoutModal
-            basket={basket}
-            memberId={store.member.id}
-            memberUsername={store.member.username}
-            onClose={() => setShowCheckout(false)}
-            onSuccess={() => saveBasket([])}
-            onUpdateQty={updateBasketQty}
-            onRemove={removeFromBasket}
+        {/* Add to basket modal */}
+        {addingProduct && store && (
+          <AddToBasketModal
+            product={{
+              id: addingProduct.id,
+              title: addingProduct.title,
+              imageUrl: addingProduct.imageUrl,
+              displayPrice: addingProduct.displayPrice,
+              affiliateUrl: addingProduct.affiliateUrl,
+              brand: addingProduct.brand,
+            }}
+            sourceMemberId={store.member.id}
+            sourceMemberUsername={store.member.username}
+            sourceMemberName={store.member.displayName ?? store.member.fullName}
+            sourceContext="store"
+            onClose={() => setAddingProduct(null)}
           />
         )}
 
         {/* Footer */}
-        <div className={`border-t border-border pt-8 mt-6 flex items-center justify-between flex-wrap gap-4 ${basket.length > 0 ? "pb-24" : "pb-16"}`}>
+        <div className="border-t border-border pt-8 mt-6 pb-16 flex items-center justify-between flex-wrap gap-4">
           <p className="text-xs text-muted-foreground">
             Curated by <span className="font-medium text-foreground">{displayName}</span>
           </p>
@@ -628,7 +591,7 @@ function AboutSidebarCard({
             className="flex items-center justify-center gap-2.5 w-full py-3 bg-green-600 text-white text-xs tracking-widest uppercase rounded-xl hover:bg-green-700 transition-colors shadow-sm"
           >
             <MessageCircle className="h-4 w-4" />
-            Chat on WhatsApp
+            Message Me
           </a>
         )}
 

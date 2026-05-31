@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { ChevronDown, ChevronUp, Package, Clock, Check, Truck, X, RefreshCw, CheckCircle } from "lucide-react";
+import { ChevronDown, ChevronUp, Package, Clock, Check, X, Upload, DollarSign, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -16,11 +16,10 @@ interface AdminOrder {
 
 const STATUS_INFO: Record<string, { label: string; color: string }> = {
   pending: { label: "Pending", color: "text-amber-700 bg-amber-50 border-amber-200" },
-  confirmed: { label: "Confirmed", color: "text-blue-700 bg-blue-50 border-blue-200" },
-  processing: { label: "Processing", color: "text-violet-700 bg-violet-50 border-violet-200" },
-  shipped: { label: "Shipped", color: "text-orange-700 bg-orange-50 border-orange-200" },
-  delivered: { label: "Delivered", color: "text-green-700 bg-green-50 border-green-200" },
-  cancelled: { label: "Cancelled", color: "text-red-700 bg-red-50 border-red-200" },
+  pending_review: { label: "Pending Review", color: "text-blue-700 bg-blue-50 border-blue-200" },
+  approved: { label: "Approved", color: "text-green-700 bg-green-50 border-green-200" },
+  rejected: { label: "Rejected", color: "text-red-700 bg-red-50 border-red-200" },
+  paid: { label: "Paid", color: "text-emerald-700 bg-emerald-50 border-emerald-200" },
 };
 
 export function AdminOrders() {
@@ -80,7 +79,7 @@ export function AdminOrders() {
     <div>
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center gap-4">
         <div className="flex gap-2 flex-wrap">
-          {["all", "pending", "confirmed", "processing", "shipped", "delivered", "cancelled"].map((s) => (
+          {["all", "pending", "pending_review", "approved", "rejected", "paid"].map((s) => (
             <button key={s} onClick={() => setFilterStatus(s)}
               className={`px-3 py-1.5 text-[10px] tracking-widest uppercase border transition-colors ${filterStatus === s ? "bg-foreground text-background border-foreground" : "border-border text-muted-foreground hover:border-foreground/30"}`}>
               {s}

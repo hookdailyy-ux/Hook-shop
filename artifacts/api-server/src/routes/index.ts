@@ -21,6 +21,7 @@ import analyticsRouter from "./analytics";
 import rewardsRouter from "./rewards";
 import rankingsRouter from "./rankings";
 import adminCommerceRouter from "./admin-commerce";
+import basketShareRouter from "./basket-share";
 
 const router: IRouter = Router();
 
@@ -46,5 +47,6 @@ router.use(analyticsRouter);
 router.use(rewardsRouter);
 router.use(rankingsRouter);
 router.use(adminCommerceRouter);
+router.use(basketShareRouter);
 
 export default router;

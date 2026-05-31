@@ -10,6 +10,7 @@ import {
   Package,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { AddToBasketModal } from "@/components/AddToBasketModal";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -49,6 +50,7 @@ export default function CollectionShare() {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [addingProduct, setAddingProduct] = useState<PublicProduct | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -234,7 +236,7 @@ export default function CollectionShare() {
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-10">
               {collection.products.map((product) => (
-                <CollectionProductCard key={product.id} product={product} />
+                <CollectionProductCard key={product.id} product={product} onAddToBasket={setAddingProduct} />
               ))}
             </div>
           )}
@@ -259,17 +261,39 @@ export default function CollectionShare() {
           </Link>
         </div>
       </div>
+
+      {/* Add to basket modal */}
+      {addingProduct && (
+        <AddToBasketModal
+          product={{
+            id: addingProduct.productId,
+            title: addingProduct.title,
+            imageUrl: addingProduct.imageUrl,
+            displayPrice: addingProduct.displayPrice,
+            affiliateUrl: addingProduct.affiliateUrl,
+            brand: addingProduct.brand,
+          }}
+          sourceMemberId={0}
+          sourceMemberUsername={collection.member.username}
+          sourceMemberName={collection.member.fullName}
+          sourceContext="collection"
+          sourceToken={collection.shareToken}
+          onClose={() => setAddingProduct(null)}
+        />
+      )}
     </div>
   );
 }
 
 // ─── Collection Product Card ──────────────────────────────────────────────────
 
-function CollectionProductCard({ product }: { product: PublicProduct }) {
-  const handleShop = () => {
-    window.open(product.affiliateUrl, "_blank", "noopener,noreferrer");
-  };
-
+function CollectionProductCard({
+  product,
+  onAddToBasket,
+}: {
+  product: PublicProduct;
+  onAddToBasket: (p: PublicProduct) => void;
+}) {
   return (
     <div className="group flex flex-col gap-3">
       {/* Image */}
@@ -284,10 +308,7 @@ function CollectionProductCard({ product }: { product: PublicProduct }) {
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
-              <ShoppingBag
-                className="h-8 w-8 text-muted-foreground/20"
-                strokeWidth={1}
-              />
+              <ShoppingBag className="h-8 w-8 text-muted-foreground/20" strokeWidth={1} />
             </div>
           )}
         </div>
@@ -295,7 +316,7 @@ function CollectionProductCard({ product }: { product: PublicProduct }) {
         {/* Hover overlay button — desktop */}
         <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 hidden md:block">
           <button
-            onClick={handleShop}
+            onClick={() => onAddToBasket(product)}
             className="w-full bg-background/90 text-foreground text-[10px] tracking-widest uppercase py-3 backdrop-blur-sm border border-border/50 hover:bg-foreground hover:text-background transition-colors"
           >
             Add To Basket
@@ -317,7 +338,7 @@ function CollectionProductCard({ product }: { product: PublicProduct }) {
 
         {/* Always-visible button — mobile */}
         <button
-          onClick={handleShop}
+          onClick={() => onAddToBasket(product)}
           className="mt-2 w-full text-[10px] tracking-widest uppercase py-3 border border-foreground bg-foreground text-background hover:bg-background hover:text-foreground transition-colors md:hidden"
         >
           Add To Basket

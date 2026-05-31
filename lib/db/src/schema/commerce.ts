@@ -32,6 +32,9 @@ export const orderProofsTable = pgTable("order_proofs", {
   orderId: integer("order_id").notNull().references(() => ordersTable.id, { onDelete: "cascade" }),
   imageUrl: text("image_url").notNull(),
   proofType: text("proof_type").notNull().default("confirmation"),
+  platformOrderRef: text("platform_order_ref"),
+  orderValue: text("order_value"),
+  memberNotes: text("member_notes"),
   adminReviewed: boolean("admin_reviewed").notNull().default(false),
   adminNote: text("admin_note"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -67,6 +70,16 @@ export const memberBadgesTable = pgTable("member_badges", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+export const sharedBasketsTable = pgTable("shared_baskets", {
+  id: serial("id").primaryKey(),
+  token: text("token").notNull().unique(),
+  memberUsername: text("member_username").notNull(),
+  memberName: text("member_name").notNull(),
+  itemsJson: text("items_json").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export type SharedBasket = typeof sharedBasketsTable.$inferSelect;
 export type Order = typeof ordersTable.$inferSelect;
 export type OrderItem = typeof orderItemsTable.$inferSelect;
 export type OrderProof = typeof orderProofsTable.$inferSelect;
