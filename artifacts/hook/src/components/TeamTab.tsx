@@ -20,7 +20,6 @@ import {
   Plus,
   Eye,
   Pencil,
-  RotateCcw,
   Trash2,
   Wifi,
   WifiOff,
@@ -31,6 +30,8 @@ import {
   FolderOpen,
   Link2,
   Search,
+  KeyRound,
+  Copy,
 } from "lucide-react";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -420,38 +421,38 @@ function MembersView({
                     ${m.estimatedRewards}
                   </td>
                   <td className="py-3.5">
-                    <div className="flex items-center gap-0.5 opacity-60 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center gap-0.5">
                       <button
                         onClick={() => onView(m.id)}
-                        className="p-1.5 hover:bg-accent transition-colors"
+                        className="p-1.5 hover:bg-accent transition-colors text-muted-foreground hover:text-foreground"
                         title="View Details"
                       >
                         <Eye className="h-3.5 w-3.5" />
                       </button>
                       <button
                         onClick={() => onEdit(m)}
-                        className="p-1.5 hover:bg-accent transition-colors"
+                        className="p-1.5 hover:bg-accent transition-colors text-muted-foreground hover:text-foreground"
                         title="Edit"
                       >
                         <Pencil className="h-3.5 w-3.5" />
                       </button>
                       <button
                         onClick={() => onToggleStatus(m)}
-                        className="p-1.5 hover:bg-accent transition-colors"
+                        className="p-1.5 hover:bg-accent transition-colors text-muted-foreground hover:text-foreground"
                         title={m.status === "active" ? "Disable" : "Enable"}
                       >
                         {m.status === "active" ? (
-                          <X className="h-3.5 w-3.5 text-muted-foreground" />
+                          <X className="h-3.5 w-3.5" />
                         ) : (
                           <Check className="h-3.5 w-3.5 text-green-600" />
                         )}
                       </button>
                       <button
                         onClick={() => onResetPassword(m)}
-                        className="p-1.5 hover:bg-accent transition-colors"
+                        className="p-1.5 hover:bg-accent transition-colors text-muted-foreground hover:text-foreground"
                         title="Reset Password"
                       >
-                        <RotateCcw className="h-3.5 w-3.5" />
+                        <KeyRound className="h-3.5 w-3.5" />
                       </button>
                       <button
                         onClick={() => onDelete(m)}
@@ -732,6 +733,13 @@ function EditMemberForm({
   );
 }
 
+function generateTempPassword(): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
+  return Array.from({ length: 10 }, () =>
+    chars[Math.floor(Math.random() * chars.length)]
+  ).join("");
+}
+
 function ResetPasswordForm({
   member,
   onSuccess,
@@ -739,18 +747,16 @@ function ResetPasswordForm({
   member: TeamMember;
   onSuccess: () => void;
 }) {
-  const [password, setPassword] = useState("");
-  const [confirm, setConfirm] = useState("");
+  const [password, setPassword] = useState(() => generateTempPassword());
   const [loading, setLoading] = useState(false);
+  const [confirmed, setConfirmed] = useState(false);
+  const [copiedPassword, setCopiedPassword] = useState("");
+  const [copied, setCopied] = useState(false);
   const { toast } = useToast();
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (password !== confirm) {
-      toast({ title: "Passwords do not match", variant: "destructive" });
-      return;
-    }
-    if (password.length < 6) {
+    if (password.trim().length < 6) {
       toast({ title: "Password must be at least 6 characters", variant: "destructive" });
       return;
     }
@@ -763,7 +769,8 @@ function ResetPasswordForm({
         body: JSON.stringify({ newPassword: password }),
       });
       if (!res.ok) throw new Error("Failed");
-      onSuccess();
+      setCopiedPassword(password);
+      setConfirmed(true);
     } catch {
       toast({ title: "Failed to reset password", variant: "destructive" });
     } finally {
@@ -771,46 +778,107 @@ function ResetPasswordForm({
     }
   };
 
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4 pt-2">
-      <p className="text-xs text-muted-foreground">
-        Resetting password for <strong className="font-medium text-foreground">{member.fullName}</strong>{" "}
-        (@{member.username}). They will be required to change it on next login.
-      </p>
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(copiedPassword);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
-      <div className="space-y-2">
-        <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
-          New Password <span className="text-destructive">*</span>
-        </label>
-        <Input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Min. 6 characters"
-          required
-          className="border-border"
-        />
-      </div>
+  if (confirmed) {
+    return (
+      <div className="pt-2 space-y-5">
+        <div className="flex items-start gap-3 p-4 bg-green-50 border border-green-200">
+          <Check className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
+          <div>
+            <p className="text-xs font-medium text-green-800">Password reset successfully</p>
+            <p className="text-xs text-green-700 mt-0.5">
+              {member.fullName} must change their password on next login.
+            </p>
+          </div>
+        </div>
 
-      <div className="space-y-2">
-        <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
-          Confirm Password <span className="text-destructive">*</span>
-        </label>
-        <Input
-          type="password"
-          value={confirm}
-          onChange={(e) => setConfirm(e.target.value)}
-          placeholder="Repeat password"
-          required
-          className="border-border"
-        />
-      </div>
+        <div>
+          <p className="text-[10px] tracking-widest uppercase text-muted-foreground mb-2">
+            Temporary Password — share this with the member
+          </p>
+          <div className="flex border border-border">
+            <code className="flex-1 px-4 py-3.5 font-mono text-lg tracking-[0.2em] select-all bg-accent/30">
+              {copiedPassword}
+            </code>
+            <button
+              onClick={handleCopy}
+              className="px-4 border-l border-border hover:bg-accent transition-colors"
+              title={copied ? "Copied!" : "Copy password"}
+            >
+              {copied ? (
+                <Check className="h-4 w-4 text-green-600" />
+              ) : (
+                <Copy className="h-4 w-4 text-muted-foreground" />
+              )}
+            </button>
+          </div>
+          <p className="text-[10px] text-muted-foreground mt-2">
+            Send this via WhatsApp or your preferred channel. It expires after first use.
+          </p>
+        </div>
 
-      <div className="pt-1">
-        <Button type="submit" disabled={loading} className="text-xs tracking-widest uppercase">
-          {loading ? "Resetting..." : "Reset Password"}
+        <Button
+          onClick={onSuccess}
+          variant="outline"
+          className="w-full text-xs tracking-widest uppercase"
+        >
+          Done
         </Button>
       </div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-5 pt-2">
+      <div className="flex items-start gap-3 p-4 bg-accent/40 border border-border">
+        <KeyRound className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+        <p className="text-xs text-muted-foreground leading-relaxed">
+          Resetting password for{" "}
+          <strong className="font-medium text-foreground">{member.fullName}</strong>{" "}
+          (@{member.username}). They will be required to change it on next login.
+        </p>
+      </div>
+
+      <div className="space-y-2">
+        <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+          Temporary Password <span className="text-destructive">*</span>
+        </label>
+        <div className="flex border border-border">
+          <input
+            type="text"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            minLength={6}
+            autoComplete="off"
+            spellCheck={false}
+            className="flex-1 px-3 py-2 text-sm font-mono bg-background focus:outline-none tracking-wider"
+          />
+          <button
+            type="button"
+            onClick={() => setPassword(generateTempPassword())}
+            className="px-3 py-2 border-l border-border text-[10px] tracking-widest uppercase text-muted-foreground hover:text-foreground hover:bg-accent transition-colors whitespace-nowrap"
+          >
+            Generate
+          </button>
+        </div>
+        <p className="text-[10px] text-muted-foreground">
+          Min. 6 characters. Type your own or click Generate for a random password.
+        </p>
+      </div>
+
+      <Button
+        type="submit"
+        disabled={loading}
+        className="text-xs tracking-widest uppercase"
+      >
+        {loading ? "Resetting..." : "Reset Password"}
+      </Button>
     </form>
   );
 }
