@@ -17,6 +17,10 @@ function serializeLook(look: typeof teamLooksTable.$inferSelect) {
     teamMemberId: look.teamMemberId,
     title: look.title,
     coverImageUrl: look.coverImageUrl ?? null,
+    coverImagePosX: look.coverImagePosX,
+    coverImagePosY: look.coverImagePosY,
+    coverImageScale: look.coverImageScale,
+    coverImageObjectFit: look.coverImageObjectFit,
     price: look.price ?? null,
     status: look.status,
     shareToken: look.shareToken,
@@ -80,6 +84,10 @@ router.post("/team/looks", requireTeamMember, async (req, res) => {
     const schema = z.object({
       title: z.string().min(1).max(120),
       coverImageUrl: z.string().nullable().optional(),
+      coverImagePosX: z.number().int().min(0).max(100).optional(),
+      coverImagePosY: z.number().int().min(0).max(100).optional(),
+      coverImageScale: z.number().int().min(50).max(200).optional(),
+      coverImageObjectFit: z.enum(["cover", "contain"]).optional(),
       price: z.string().nullable().optional(),
       status: z.enum(["active", "hidden"]).optional(),
     });
@@ -90,6 +98,10 @@ router.post("/team/looks", requireTeamMember, async (req, res) => {
         teamMemberId: memberId,
         title: data.title,
         coverImageUrl: data.coverImageUrl ?? null,
+        coverImagePosX: data.coverImagePosX ?? 50,
+        coverImagePosY: data.coverImagePosY ?? 50,
+        coverImageScale: data.coverImageScale ?? 100,
+        coverImageObjectFit: data.coverImageObjectFit ?? "cover",
         price: data.price ?? null,
         status: data.status ?? "active",
         shareToken: generateShareToken(),
@@ -135,6 +147,10 @@ router.put("/team/looks/:id", requireTeamMember, async (req, res) => {
     const schema = z.object({
       title: z.string().min(1).max(120),
       coverImageUrl: z.string().nullable().optional(),
+      coverImagePosX: z.number().int().min(0).max(100).optional(),
+      coverImagePosY: z.number().int().min(0).max(100).optional(),
+      coverImageScale: z.number().int().min(50).max(200).optional(),
+      coverImageObjectFit: z.enum(["cover", "contain"]).optional(),
       price: z.string().nullable().optional(),
       status: z.enum(["active", "hidden"]).optional(),
     });

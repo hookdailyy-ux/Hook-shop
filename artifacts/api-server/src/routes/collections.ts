@@ -28,6 +28,10 @@ function fmtCollection(
     title: c.title,
     description: c.description ?? "",
     coverImageUrl: c.coverImageUrl ?? null,
+    coverImagePosX: c.coverImagePosX,
+    coverImagePosY: c.coverImagePosY,
+    coverImageScale: c.coverImageScale,
+    coverImageObjectFit: c.coverImageObjectFit,
     status: c.status,
     shareToken: c.shareToken,
     views: c.views,
@@ -73,6 +77,10 @@ const collectionSchema = z.object({
   title: z.string().min(1).max(120),
   description: z.string().optional(),
   coverImageUrl: z.string().optional(),
+  coverImagePosX: z.number().int().min(0).max(100).optional(),
+  coverImagePosY: z.number().int().min(0).max(100).optional(),
+  coverImageScale: z.number().int().min(50).max(200).optional(),
+  coverImageObjectFit: z.enum(["cover", "contain"]).optional(),
   status: z.enum(["active", "hidden"]).default("active"),
 });
 
@@ -110,6 +118,10 @@ router.get("/collections/public/:token", async (req, res) => {
         title: collectionsTable.title,
         description: collectionsTable.description,
         coverImageUrl: collectionsTable.coverImageUrl,
+        coverImagePosX: collectionsTable.coverImagePosX,
+        coverImagePosY: collectionsTable.coverImagePosY,
+        coverImageScale: collectionsTable.coverImageScale,
+        coverImageObjectFit: collectionsTable.coverImageObjectFit,
         status: collectionsTable.status,
         shareToken: collectionsTable.shareToken,
         views: collectionsTable.views,
@@ -169,6 +181,10 @@ router.get("/collections/public/:token", async (req, res) => {
       title: row.title,
       description: row.description ?? "",
       coverImageUrl: row.coverImageUrl ?? null,
+      coverImagePosX: row.coverImagePosX,
+      coverImagePosY: row.coverImagePosY,
+      coverImageScale: row.coverImageScale,
+      coverImageObjectFit: row.coverImageObjectFit,
       shareToken: row.shareToken,
       createdAt: row.createdAt.toISOString(),
       // +1 because we just incremented it above (fire-and-forget)
@@ -218,6 +234,10 @@ router.post("/collections", requireTeamMember, async (req, res) => {
         title: data.title,
         description: data.description ?? null,
         coverImageUrl: data.coverImageUrl || null,
+        coverImagePosX: data.coverImagePosX ?? 50,
+        coverImagePosY: data.coverImagePosY ?? 50,
+        coverImageScale: data.coverImageScale ?? 100,
+        coverImageObjectFit: data.coverImageObjectFit ?? "cover",
         status: data.status,
         shareToken: generateShareToken(),
         views: 0,
@@ -252,6 +272,10 @@ router.put("/collections/:id", requireTeamMember, async (req, res) => {
     if (data.title !== undefined) updates.title = data.title;
     if (data.description !== undefined) updates.description = data.description;
     if (data.coverImageUrl !== undefined) updates.coverImageUrl = data.coverImageUrl || null;
+    if (data.coverImagePosX !== undefined) updates.coverImagePosX = data.coverImagePosX;
+    if (data.coverImagePosY !== undefined) updates.coverImagePosY = data.coverImagePosY;
+    if (data.coverImageScale !== undefined) updates.coverImageScale = data.coverImageScale;
+    if (data.coverImageObjectFit !== undefined) updates.coverImageObjectFit = data.coverImageObjectFit;
     if (data.status !== undefined) updates.status = data.status;
     const [updated] = await db
       .update(collectionsTable)

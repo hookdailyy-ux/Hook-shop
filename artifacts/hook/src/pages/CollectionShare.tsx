@@ -34,6 +34,10 @@ interface PublicCollection {
   title: string;
   description: string;
   coverImageUrl: string | null;
+  coverImagePosX: number;
+  coverImagePosY: number;
+  coverImageScale: number;
+  coverImageObjectFit: string;
   shareToken: string;
   views: number;
   productCount: number;
@@ -146,7 +150,13 @@ export default function CollectionShare() {
           <img
             src={collection.coverImageUrl}
             alt={collection.title}
-            className="w-full h-full object-cover"
+            className="w-full h-full"
+            style={{
+              objectFit: (collection.coverImageObjectFit as "cover" | "contain") || "cover",
+              objectPosition: `${collection.coverImagePosX ?? 50}% ${collection.coverImagePosY ?? 50}%`,
+              transform: `scale(${(collection.coverImageScale ?? 100) / 100})`,
+              transformOrigin: `${collection.coverImagePosX ?? 50}% ${collection.coverImagePosY ?? 50}%`,
+            }}
           />
         </div>
       ) : (

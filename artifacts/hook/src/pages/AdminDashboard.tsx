@@ -51,8 +51,9 @@ import { TeamTab } from "@/components/TeamTab";
 import { AdminOrders } from "@/components/AdminOrders";
 import { AdminRewards } from "@/components/AdminRewards";
 import { AdminAnalytics } from "@/components/AdminAnalytics";
+import { NewsletterTab } from "@/components/NewsletterTab";
 
-type Tab = "dashboard" | "products" | "looks" | "categories" | "settings" | "images" | "team" | "orders" | "rewards" | "analytics";
+type Tab = "dashboard" | "products" | "looks" | "categories" | "settings" | "images" | "team" | "orders" | "rewards" | "analytics" | "newsletter";
 
 const CATEGORIES = [
   { value: "women", label: "Women" },
@@ -89,7 +90,7 @@ export default function AdminDashboard() {
                 Logout
               </button>
             </div>
-            {(["dashboard", "products", "looks", "categories", "settings", "images", "team", "orders", "rewards", "analytics"] as Tab[]).map((tab) => (
+            {(["dashboard", "products", "looks", "categories", "settings", "images", "team", "orders", "rewards", "analytics", "newsletter"] as Tab[]).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -118,6 +119,7 @@ export default function AdminDashboard() {
         {activeTab === "orders" && <AdminOrders />}
         {activeTab === "rewards" && <AdminRewards />}
         {activeTab === "analytics" && <AdminAnalytics />}
+        {activeTab === "newsletter" && <NewsletterTab />}
       </div>
     </div>
   );
@@ -947,6 +949,7 @@ function LookDialog({ look }: { look?: Look }) {
     imagePosX: look?.imagePosX ?? 50,
     imagePosY: look?.imagePosY ?? 50,
     imageScale: look?.imageScale ?? 100,
+    imageObjectFit: (look as any)?.imageObjectFit ?? "cover",
     productIds: look?.products?.map((p) => p.id) ?? [],
   });
   const [search, setSearch] = useState("");
@@ -960,6 +963,7 @@ function LookDialog({ look }: { look?: Look }) {
         imagePosX: look?.imagePosX ?? 50,
         imagePosY: look?.imagePosY ?? 50,
         imageScale: look?.imageScale ?? 100,
+        imageObjectFit: (look as any)?.imageObjectFit ?? "cover",
         productIds: look?.products?.map((p) => p.id) ?? [],
       });
     }
@@ -1001,6 +1005,7 @@ function LookDialog({ look }: { look?: Look }) {
       imagePosX: form.imagePosX,
       imagePosY: form.imagePosY,
       imageScale: form.imageScale,
+      imageObjectFit: form.imageObjectFit,
       productIds: form.productIds,
     };
     if (look) {
@@ -1091,8 +1096,9 @@ function LookDialog({ look }: { look?: Look }) {
                   <img
                     src={form.imageUrl}
                     alt=""
-                    className="absolute w-full h-full object-cover"
+                    className="absolute w-full h-full"
                     style={{
+                      objectFit: form.imageObjectFit as "cover" | "contain",
                       objectPosition: `${form.imagePosX}% ${form.imagePosY}%`,
                       transform: `scale(${form.imageScale / 100})`,
                       transformOrigin: `${form.imagePosX}% ${form.imagePosY}%`,
@@ -1103,6 +1109,16 @@ function LookDialog({ look }: { look?: Look }) {
                       <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                     </div>
                   )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <p className="text-[9px] tracking-widest uppercase text-muted-foreground flex-1">Fit</p>
+                  <button
+                    type="button"
+                    onClick={() => setForm((f) => ({ ...f, imageObjectFit: f.imageObjectFit === "contain" ? "cover" : "contain" }))}
+                    className={`px-3 py-1 text-[9px] tracking-widest uppercase border transition-colors ${form.imageObjectFit === "contain" ? "border-foreground bg-foreground text-background" : "border-border"}`}
+                  >
+                    {form.imageObjectFit === "contain" ? "Contain" : "Cover"}
+                  </button>
                 </div>
                 <div className="flex flex-col items-center gap-1">
                   <button type="button" onClick={() => setForm((f) => ({ ...f, imagePosY: Math.max(0, f.imagePosY - 5) }))} className={lookBtnClass} title="Move up">↑</button>

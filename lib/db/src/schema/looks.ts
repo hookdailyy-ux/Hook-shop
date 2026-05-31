@@ -12,6 +12,7 @@ export const looksTable = pgTable("looks", {
   imagePosX: integer("image_pos_x").notNull().default(50),
   imagePosY: integer("image_pos_y").notNull().default(50),
   imageScale: integer("image_scale").notNull().default(100),
+  imageObjectFit: text("image_object_fit").notNull().default("cover"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -35,6 +36,10 @@ export const teamLooksTable = pgTable("team_looks", {
     .references(() => teamMembersTable.id, { onDelete: "cascade" }),
   title: text("title").notNull(),
   coverImageUrl: text("cover_image_url"),
+  coverImagePosX: integer("cover_image_pos_x").notNull().default(50),
+  coverImagePosY: integer("cover_image_pos_y").notNull().default(50),
+  coverImageScale: integer("cover_image_scale").notNull().default(100),
+  coverImageObjectFit: text("cover_image_object_fit").notNull().default("cover"),
   price: text("price"),
   status: text("status").notNull().default("active"),
   shareToken: text("share_token").notNull().unique(),

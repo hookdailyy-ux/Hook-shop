@@ -44,6 +44,7 @@ router.post("/looks", async (req, res) => {
       imagePosX: z.number().int().min(0).max(100).optional(),
       imagePosY: z.number().int().min(0).max(100).optional(),
       imageScale: z.number().int().min(50).max(200).optional(),
+      imageObjectFit: z.enum(["cover", "contain"]).optional(),
       productIds: z.array(z.number()).optional(),
     });
     const data = schema.parse(req.body);
@@ -54,6 +55,7 @@ router.post("/looks", async (req, res) => {
       imagePosX: data.imagePosX ?? 50,
       imagePosY: data.imagePosY ?? 50,
       imageScale: data.imageScale ?? 100,
+      imageObjectFit: data.imageObjectFit ?? "cover",
     }).returning();
     if (data.productIds && data.productIds.length > 0) {
       await db.insert(lookProductsTable).values(
@@ -90,6 +92,7 @@ router.patch("/looks/:id", async (req, res) => {
       imagePosX: z.number().int().min(0).max(100).optional(),
       imagePosY: z.number().int().min(0).max(100).optional(),
       imageScale: z.number().int().min(50).max(200).optional(),
+      imageObjectFit: z.enum(["cover", "contain"]).optional(),
       productIds: z.array(z.number()).optional(),
     });
     const data = schema.parse(req.body);
@@ -100,6 +103,7 @@ router.patch("/looks/:id", async (req, res) => {
     if (data.imagePosX !== undefined) updateData.imagePosX = data.imagePosX;
     if (data.imagePosY !== undefined) updateData.imagePosY = data.imagePosY;
     if (data.imageScale !== undefined) updateData.imageScale = data.imageScale;
+    if (data.imageObjectFit !== undefined) updateData.imageObjectFit = data.imageObjectFit;
     if (Object.keys(updateData).length > 0) {
       await db.update(looksTable).set(updateData).where(eq(looksTable.id, id));
     }
