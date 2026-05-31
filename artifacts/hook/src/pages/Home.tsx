@@ -67,7 +67,7 @@ export default function Home() {
         <div className="relative z-10 text-center px-6 flex flex-col items-center gap-6 py-20">
           <h1
             className="font-serif font-light leading-none tracking-tight"
-            style={{ fontSize: "clamp(3.5rem, 13vw, 9rem)", color: heroImage ? "#f5f0e8" : "#2a2318" }}
+            style={{ fontSize: "clamp(2rem, 6vw, 4.5rem)", color: heroImage ? "#f5f0e8" : "#2a2318" }}
           >
             {t("hero.title1")}<br />{t("hero.title2")}
           </h1>
