@@ -899,7 +899,7 @@ interface MemberDetail {
   collections: CollectionDetailItem[];
 }
 
-type SortKey = "views" | "collections" | "looks";
+type SortKey = "views" | "collections" | "looks" | "ordered" | "newest";
 
 function memberInitials(name: string): string {
   return name
@@ -1017,7 +1017,8 @@ function MemberSummaryView({
   const sorted = [...filtered].sort((a, b) => {
     if (sort === "views") return b.totalViews - a.totalViews;
     if (sort === "collections") return b.totalCollections - a.totalCollections;
-    return b.totalLooks - a.totalLooks;
+    if (sort === "looks") return b.totalLooks - a.totalLooks;
+    return 0;
   });
 
   const top3 = rankedByViews.slice(0, 3);
@@ -1114,20 +1115,41 @@ function MemberSummaryView({
 
       {/* Sort + Search row */}
       <div className="flex flex-col sm:flex-row gap-3 mb-5">
-        <div className="flex gap-0 border border-border shrink-0">
-          {(["views", "collections", "looks"] as SortKey[]).map((s) => (
-            <button
-              key={s}
-              onClick={() => onSort(s)}
-              className={`px-3 py-2 text-[10px] tracking-widest uppercase transition-colors whitespace-nowrap ${
-                sort === s
-                  ? "bg-foreground text-background"
-                  : "text-muted-foreground hover:text-foreground hover:bg-accent/40"
-              }`}
-            >
-              {s === "views" ? "Most Views" : s === "collections" ? "Most Collections" : "Most Looks"}
-            </button>
-          ))}
+        <div className="flex gap-0 border border-border shrink-0 flex-wrap">
+          {(
+            [
+              { key: "views",       label: "Most Views",       live: true  },
+              { key: "collections", label: "Most Collections", live: true  },
+              { key: "looks",       label: "Most Looks",       live: true  },
+              { key: "ordered",     label: "Most Ordered",     live: false },
+              { key: "newest",      label: "Newest",           live: false },
+            ] as { key: SortKey; label: string; live: boolean }[]
+          ).map(({ key, label, live }) =>
+            live ? (
+              <button
+                key={key}
+                onClick={() => onSort(key)}
+                className={`px-3 py-2 text-[10px] tracking-widest uppercase transition-colors whitespace-nowrap ${
+                  sort === key
+                    ? "bg-foreground text-background"
+                    : "text-muted-foreground hover:text-foreground hover:bg-accent/40"
+                }`}
+              >
+                {label}
+              </button>
+            ) : (
+              <div
+                key={key}
+                className="relative px-3 py-2 text-[10px] tracking-widest uppercase whitespace-nowrap text-muted-foreground/35 select-none cursor-default"
+                title="Coming soon"
+              >
+                {label}
+                <span className="ml-1.5 text-[8px] tracking-widest uppercase text-muted-foreground/40">
+                  Soon
+                </span>
+              </div>
+            )
+          )}
         </div>
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
