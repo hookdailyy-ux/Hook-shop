@@ -11,6 +11,7 @@ export const collectionsTable = pgTable("collections", {
   coverImageUrl: text("cover_image_url"),
   status: text("status").notNull().default("active"),
   shareToken: text("share_token").notNull().unique(),
+  views: integer("views").notNull().default(0),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

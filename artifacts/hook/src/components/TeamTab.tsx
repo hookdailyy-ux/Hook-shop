@@ -30,6 +30,7 @@ import {
   ChevronLeft,
   FolderOpen,
   Link2,
+  Search,
 } from "lucide-react";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -870,118 +871,459 @@ function MemberDetailContent({ member }: { member: TeamMemberDetail }) {
   );
 }
 
-interface AdminCollection {
+// ─── Collections Admin View ───────────────────────────────────────────────────
+
+interface MemberSummary {
+  memberId: number;
+  fullName: string;
+  username: string;
+  totalCollections: number;
+  totalViews: number;
+  totalLooks: number;
+  totalLookViews: number;
+}
+
+interface CollectionDetailItem {
   id: number;
   title: string;
-  description: string;
   coverImageUrl: string | null;
   status: string;
+  views: number;
   shareToken: string;
-  teamMemberId: number;
+  productCount: number;
   createdAt: string;
-  member: { fullName: string; username: string };
+}
+
+interface MemberDetail {
+  member: { id: number; fullName: string; username: string };
+  collections: CollectionDetailItem[];
+}
+
+type SortKey = "views" | "collections" | "looks";
+
+function memberInitials(name: string): string {
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .map((w) => w[0].toUpperCase())
+    .join("")
+    .slice(0, 2);
+}
+
+function fmtNum(n: number): string {
+  return n.toLocaleString();
 }
 
 function CollectionsAdminView() {
-  const [collections, setCollections] = useState<AdminCollection[]>([]);
+  const [subView, setSubView] = useState<"summary" | "detail">("summary");
+  const [members, setMembers] = useState<MemberSummary[]>([]);
+  const [memberDetail, setMemberDetail] = useState<MemberDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [search, setSearch] = useState("");
+  const [sort, setSort] = useState<SortKey>("views");
   const [copied, setCopied] = useState<number | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
     void (async () => {
       try {
-        const res = await fetch(`${BASE}/api/admin/collections`, { credentials: "include" });
+        const res = await fetch(`${BASE}/api/admin/collections/members`, { credentials: "include" });
         if (!res.ok) throw new Error("Failed");
-        setCollections((await res.json()) as AdminCollection[]);
+        setMembers((await res.json()) as MemberSummary[]);
       } catch {
-        toast({ title: "Failed to load collections", variant: "destructive" });
+        toast({ title: "Failed to load collections overview", variant: "destructive" });
       } finally {
         setLoading(false);
       }
     })();
   }, []);
 
-  const copyLink = async (c: AdminCollection) => {
-    const url = `${window.location.origin}${BASE}/c/${c.shareToken}`;
+  const openMember = async (memberId: number) => {
+    setSubView("detail");
+    setDetailLoading(true);
+    setMemberDetail(null);
+    try {
+      const res = await fetch(`${BASE}/api/admin/collections/member/${memberId}`, {
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Failed");
+      setMemberDetail((await res.json()) as MemberDetail);
+    } catch {
+      toast({ title: "Failed to load member collections", variant: "destructive" });
+      setSubView("summary");
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
+  const copyLink = async (shareToken: string, id: number) => {
+    const url = `${window.location.origin}${BASE}/c/${shareToken}`;
     await navigator.clipboard.writeText(url);
-    setCopied(c.id);
+    setCopied(id);
     toast({ title: "Share link copied" });
     setTimeout(() => setCopied(null), 2000);
   };
 
-  if (loading) {
+  if (subView === "detail") {
     return (
-      <div className="py-20 text-center">
-        <p className="text-xs tracking-widest uppercase text-muted-foreground animate-pulse">Loading...</p>
-      </div>
-    );
-  }
-
-  if (collections.length === 0) {
-    return (
-      <div className="py-20 text-center border border-dashed border-border">
-        <FolderOpen className="h-8 w-8 mx-auto mb-4 text-muted-foreground/25" strokeWidth={1.5} />
-        <p className="text-[10px] tracking-widest uppercase text-muted-foreground mb-1">No Collections Yet</p>
-        <p className="text-xs text-muted-foreground">Team members haven't created any collections yet.</p>
-      </div>
+      <MemberDetailView
+        detail={memberDetail}
+        loading={detailLoading}
+        copied={copied}
+        onBack={() => { setSubView("summary"); setMemberDetail(null); }}
+        onCopyLink={copyLink}
+      />
     );
   }
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-5">
-        <p className="text-xs text-muted-foreground">
-          {collections.length} collection{collections.length !== 1 ? "s" : ""} across all members
+    <MemberSummaryView
+      members={members}
+      loading={loading}
+      search={search}
+      sort={sort}
+      onSearch={setSearch}
+      onSort={setSort}
+      onSelectMember={openMember}
+    />
+  );
+}
+
+function MemberSummaryView({
+  members,
+  loading,
+  search,
+  sort,
+  onSearch,
+  onSort,
+  onSelectMember,
+}: {
+  members: MemberSummary[];
+  loading: boolean;
+  search: string;
+  sort: SortKey;
+  onSearch: (s: string) => void;
+  onSort: (s: SortKey) => void;
+  onSelectMember: (id: number) => void;
+}) {
+  const rankedByViews = [...members].sort((a, b) => b.totalViews - a.totalViews);
+
+  const filtered = members.filter(
+    (m) =>
+      m.fullName.toLowerCase().includes(search.toLowerCase()) ||
+      m.username.toLowerCase().includes(search.toLowerCase())
+  );
+  const sorted = [...filtered].sort((a, b) => {
+    if (sort === "views") return b.totalViews - a.totalViews;
+    if (sort === "collections") return b.totalCollections - a.totalCollections;
+    return b.totalLooks - a.totalLooks;
+  });
+
+  const top3 = rankedByViews.slice(0, 3);
+  const medals = ["🥇", "🥈", "🥉"];
+
+  if (loading) {
+    return (
+      <div className="py-24 text-center">
+        <p className="text-xs tracking-widest uppercase text-muted-foreground animate-pulse">
+          Loading...
         </p>
       </div>
+    );
+  }
 
-      <div className="border border-border divide-y divide-border">
-        <div className="grid grid-cols-[auto_1fr_160px_80px_100px] gap-0 px-4 py-2.5 bg-accent/30">
-          <div className="w-10 mr-4" />
-          <p className="text-[10px] tracking-widest uppercase text-muted-foreground">Collection</p>
-          <p className="text-[10px] tracking-widest uppercase text-muted-foreground">Member</p>
-          <p className="text-[10px] tracking-widest uppercase text-muted-foreground">Status</p>
-          <p className="text-[10px] tracking-widest uppercase text-muted-foreground text-right">Share</p>
+  if (members.length === 0) {
+    return (
+      <div className="py-20 text-center border border-dashed border-border">
+        <FolderOpen className="h-8 w-8 mx-auto mb-4 text-muted-foreground/25" strokeWidth={1.5} />
+        <p className="text-[10px] tracking-widest uppercase text-muted-foreground mb-1">
+          No Collections Yet
+        </p>
+        <p className="text-xs text-muted-foreground">
+          Team members haven't created any collections yet.
+        </p>
+      </div>
+    );
+  }
+
+  const totalCollections = members.reduce((s, m) => s + m.totalCollections, 0);
+  const totalViews = members.reduce((s, m) => s + m.totalViews, 0);
+
+  return (
+    <div>
+      {/* Platform stats bar */}
+      <div className="flex gap-8 mb-6 pb-6 border-b border-border">
+        <div>
+          <p className="text-[10px] tracking-widest uppercase text-muted-foreground">Members</p>
+          <p className="text-2xl font-serif font-light mt-0.5">{members.length}</p>
         </div>
+        <div>
+          <p className="text-[10px] tracking-widest uppercase text-muted-foreground">Collections</p>
+          <p className="text-2xl font-serif font-light mt-0.5">{fmtNum(totalCollections)}</p>
+        </div>
+        <div>
+          <p className="text-[10px] tracking-widest uppercase text-muted-foreground">Total Views</p>
+          <p className="text-2xl font-serif font-light mt-0.5">{fmtNum(totalViews)}</p>
+        </div>
+      </div>
 
-        {collections.map((c) => (
-          <div
-            key={c.id}
-            className="grid grid-cols-[auto_1fr_160px_80px_100px] gap-0 items-center px-4 py-3 hover:bg-accent/20 transition-colors"
-          >
-            <div className="w-10 h-10 mr-4 shrink-0 overflow-hidden bg-accent/40 border border-border">
-              {c.coverImageUrl ? (
-                <img src={c.coverImageUrl} alt={c.title} className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <FolderOpen className="h-4 w-4 text-muted-foreground/30" strokeWidth={1.5} />
+      {/* Top performers ranking */}
+      {top3.length > 0 && (
+        <div className="mb-7">
+          <p className="text-[10px] tracking-widest uppercase text-muted-foreground mb-3">
+            Top Performers · Ranked by Views
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {top3.map((m, i) => (
+              <button
+                key={m.memberId}
+                onClick={() => onSelectMember(m.memberId)}
+                className="text-left border border-border hover:border-foreground/40 p-4 transition-colors group"
+              >
+                <div className="flex items-center gap-2.5 mb-3">
+                  <span className="text-xl leading-none">{medals[i]}</span>
+                  <span className="text-xs font-medium line-clamp-1">{m.fullName}</span>
                 </div>
-              )}
-            </div>
-            <div>
+                <div className="flex gap-4 text-[10px] text-muted-foreground">
+                  <span>
+                    <span className="text-foreground font-medium">{fmtNum(m.totalViews)}</span>{" "}
+                    Views
+                  </span>
+                  <span>
+                    <span className="text-foreground font-medium">{m.totalCollections}</span>{" "}
+                    Collections
+                  </span>
+                </div>
+              </button>
+            ))}
+            {top3.length < 3 &&
+              Array.from({ length: 3 - top3.length }).map((_, i) => (
+                <div
+                  key={`empty-${i}`}
+                  className="border border-dashed border-border p-4 flex items-center justify-center"
+                >
+                  <p className="text-[10px] text-muted-foreground/40 tracking-widest uppercase">
+                    {medals[top3.length + i]} —
+                  </p>
+                </div>
+              ))}
+          </div>
+        </div>
+      )}
+
+      {/* Sort + Search row */}
+      <div className="flex flex-col sm:flex-row gap-3 mb-5">
+        <div className="flex gap-0 border border-border shrink-0">
+          {(["views", "collections", "looks"] as SortKey[]).map((s) => (
+            <button
+              key={s}
+              onClick={() => onSort(s)}
+              className={`px-3 py-2 text-[10px] tracking-widest uppercase transition-colors whitespace-nowrap ${
+                sort === s
+                  ? "bg-foreground text-background"
+                  : "text-muted-foreground hover:text-foreground hover:bg-accent/40"
+              }`}
+            >
+              {s === "views" ? "Most Views" : s === "collections" ? "Most Collections" : "Most Looks"}
+            </button>
+          ))}
+        </div>
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+          <input
+            value={search}
+            onChange={(e) => onSearch(e.target.value)}
+            placeholder="Search team member..."
+            className="w-full pl-9 pr-3 py-2 text-xs border border-border bg-background placeholder:text-muted-foreground/50 focus:outline-none focus:border-foreground/40 transition-colors"
+          />
+        </div>
+      </div>
+
+      {/* Member list */}
+      {sorted.length === 0 ? (
+        <div className="py-10 text-center text-xs text-muted-foreground border border-dashed border-border">
+          No members match "{search}"
+        </div>
+      ) : (
+        <div className="border border-border divide-y divide-border">
+          {sorted.map((m) => (
+            <button
+              key={m.memberId}
+              onClick={() => onSelectMember(m.memberId)}
+              className="w-full flex items-center gap-4 px-4 py-3.5 hover:bg-accent/20 transition-colors text-left group"
+            >
+              <div className="shrink-0 h-9 w-9 border border-border bg-accent/40 flex items-center justify-center">
+                <span className="text-[11px] tracking-wide font-medium text-muted-foreground group-hover:text-foreground transition-colors">
+                  {memberInitials(m.fullName)}
+                </span>
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-medium line-clamp-1">{m.fullName}</p>
+                <p className="text-[10px] text-muted-foreground">@{m.username}</p>
+              </div>
+              <div className="flex gap-5 shrink-0">
+                <div className="text-right">
+                  <p className="text-xs font-medium">{m.totalCollections}</p>
+                  <p className="text-[9px] uppercase tracking-widest text-muted-foreground">
+                    Collections
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs font-medium">{m.totalLooks}</p>
+                  <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Looks</p>
+                </div>
+                <div className="text-right min-w-[56px]">
+                  <p className="text-xs font-medium">{fmtNum(m.totalViews)}</p>
+                  <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Views</p>
+                </div>
+              </div>
+              <ChevronLeft className="h-3.5 w-3.5 text-muted-foreground rotate-180 shrink-0" />
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function MemberDetailView({
+  detail,
+  loading,
+  copied,
+  onBack,
+  onCopyLink,
+}: {
+  detail: MemberDetail | null;
+  loading: boolean;
+  copied: number | null;
+  onBack: () => void;
+  onCopyLink: (shareToken: string, id: number) => Promise<void>;
+}) {
+  return (
+    <div>
+      <button
+        onClick={onBack}
+        className="flex items-center gap-1.5 text-xs tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors mb-6"
+      >
+        <ChevronLeft className="h-3 w-3" />
+        Back to Overview
+      </button>
+
+      {loading || !detail ? (
+        <div className="py-24 text-center">
+          <p className="text-xs tracking-widest uppercase text-muted-foreground animate-pulse">
+            Loading...
+          </p>
+        </div>
+      ) : (
+        <CollectionDetailContent
+          detail={detail}
+          copied={copied}
+          onCopyLink={onCopyLink}
+        />
+      )}
+    </div>
+  );
+}
+
+function CollectionDetailContent({
+  detail,
+  copied,
+  onCopyLink,
+}: {
+  detail: MemberDetail;
+  copied: number | null;
+  onCopyLink: (shareToken: string, id: number) => Promise<void>;
+}) {
+  const { member, collections } = detail;
+  const totalViews = collections.reduce((s, c) => s + c.views, 0);
+
+  return (
+    <div>
+      {/* Member header */}
+      <div className="flex items-center gap-4 mb-6 pb-6 border-b border-border">
+        <div className="h-12 w-12 border border-border bg-accent/40 flex items-center justify-center shrink-0">
+          <span className="text-sm font-medium text-muted-foreground">
+            {memberInitials(member.fullName)}
+          </span>
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="font-serif text-xl font-light">
+            {member.fullName}'s Collections
+          </h3>
+          <p className="text-xs text-muted-foreground">@{member.username}</p>
+        </div>
+        <div className="flex gap-6 text-right shrink-0">
+          <div>
+            <p className="text-xl font-serif font-light">{collections.length}</p>
+            <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Collections</p>
+          </div>
+          <div>
+            <p className="text-xl font-serif font-light">{fmtNum(totalViews)}</p>
+            <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Total Views</p>
+          </div>
+        </div>
+      </div>
+
+      {collections.length === 0 ? (
+        <div className="py-16 text-center border border-dashed border-border">
+          <FolderOpen className="h-7 w-7 mx-auto mb-3 text-muted-foreground/25" strokeWidth={1.5} />
+          <p className="text-xs text-muted-foreground">This member has no collections yet.</p>
+        </div>
+      ) : (
+        <div className="border border-border divide-y divide-border">
+          <div className="grid grid-cols-[36px_1fr_72px_64px_72px_36px] gap-3 px-4 py-2.5 bg-accent/30">
+            <div />
+            <p className="text-[10px] tracking-widest uppercase text-muted-foreground">Collection</p>
+            <p className="text-[10px] tracking-widest uppercase text-muted-foreground text-right">
+              Products
+            </p>
+            <p className="text-[10px] tracking-widest uppercase text-muted-foreground text-right">
+              Views
+            </p>
+            <p className="text-[10px] tracking-widest uppercase text-muted-foreground">Status</p>
+            <div />
+          </div>
+
+          {collections.map((c) => (
+            <div
+              key={c.id}
+              className="grid grid-cols-[36px_1fr_72px_64px_72px_36px] gap-3 items-center px-4 py-3 hover:bg-accent/20 transition-colors"
+            >
+              <div className="h-9 w-9 overflow-hidden bg-accent/40 border border-border">
+                {c.coverImageUrl ? (
+                  <img
+                    src={c.coverImageUrl}
+                    alt={c.title}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <FolderOpen className="h-3.5 w-3.5 text-muted-foreground/30" strokeWidth={1.5} />
+                  </div>
+                )}
+              </div>
+
               <p className="text-xs font-medium line-clamp-1">{c.title}</p>
-              {c.description && (
-                <p className="text-[10px] text-muted-foreground line-clamp-1 mt-0.5">{c.description}</p>
-              )}
-            </div>
-            <div>
-              <p className="text-xs">{c.member.fullName}</p>
-              <p className="text-[10px] text-muted-foreground">@{c.member.username}</p>
-            </div>
-            <div>
-              <span className={`text-[9px] tracking-widest uppercase px-1.5 py-0.5 ${
-                c.status === "active"
-                  ? "bg-green-50 text-green-700 border border-green-200"
-                  : "bg-accent text-muted-foreground border border-border"
-              }`}>
+
+              <p className="text-xs text-muted-foreground text-right">{c.productCount}</p>
+
+              <p className="text-xs font-medium text-right">{fmtNum(c.views)}</p>
+
+              <span
+                className={`text-[9px] tracking-widest uppercase px-1.5 py-0.5 w-fit ${
+                  c.status === "active"
+                    ? "bg-green-50 text-green-700 border border-green-200"
+                    : "bg-accent text-muted-foreground border border-border"
+                }`}
+              >
                 {c.status}
               </span>
-            </div>
-            <div className="flex justify-end">
+
               <button
-                onClick={() => void copyLink(c)}
-                className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-accent/40 transition-colors"
+                onClick={() => void onCopyLink(c.shareToken, c.id)}
+                className="p-1 text-muted-foreground hover:text-foreground hover:bg-accent/40 transition-colors justify-self-end"
                 title="Copy share link"
               >
                 {copied === c.id ? (
@@ -991,9 +1333,9 @@ function CollectionsAdminView() {
                 )}
               </button>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

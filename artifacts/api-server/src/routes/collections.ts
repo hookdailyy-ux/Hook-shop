@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db, collectionsTable, teamMembersTable } from "@workspace/db";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and, sql } from "drizzle-orm";
 import { randomBytes } from "crypto";
 import { z } from "zod";
 import { requireAdmin } from "../middlewares/requireAdmin";
@@ -21,6 +21,7 @@ function fmt(c: typeof collectionsTable.$inferSelect) {
     coverImageUrl: c.coverImageUrl ?? null,
     status: c.status,
     shareToken: c.shareToken,
+    views: c.views,
     createdAt: c.createdAt.toISOString(),
     updatedAt: c.updatedAt.toISOString(),
   };
@@ -32,6 +33,8 @@ const collectionSchema = z.object({
   coverImageUrl: z.string().optional(),
   status: z.enum(["active", "hidden"]).default("active"),
 });
+
+// ─── PUBLIC ──────────────────────────────────────────────────────────────────
 
 router.get("/collections/public/:token", async (req, res) => {
   try {
@@ -56,6 +59,13 @@ router.get("/collections/public/:token", async (req, res) => {
       res.status(404).json({ error: "Collection not found" });
       return;
     }
+
+    // Increment view count (fire-and-forget)
+    void db
+      .update(collectionsTable)
+      .set({ views: sql`${collectionsTable.views} + 1` })
+      .where(eq(collectionsTable.shareToken, String(req.params.token)));
+
     res.json({
       id: row.id,
       title: row.title,
@@ -70,6 +80,8 @@ router.get("/collections/public/:token", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+// ─── TEAM MEMBER ─────────────────────────────────────────────────────────────
 
 router.get("/collections", requireTeamMember, async (req, res) => {
   try {
@@ -97,6 +109,7 @@ router.post("/collections", requireTeamMember, async (req, res) => {
         coverImageUrl: data.coverImageUrl || null,
         status: data.status,
         shareToken: generateShareToken(),
+        views: 0,
       })
       .returning();
     res.status(201).json(fmt(collection));
@@ -160,6 +173,102 @@ router.delete("/collections/:id", requireTeamMember, async (req, res) => {
   }
 });
 
+// ─── ADMIN ───────────────────────────────────────────────────────────────────
+
+/**
+ * GET /api/admin/collections/members
+ * Returns per-member summary: total collections + total views (for ranking).
+ */
+router.get("/admin/collections/members", requireAdmin, async (req, res) => {
+  try {
+    const rows = await db
+      .select({
+        memberId: teamMembersTable.id,
+        fullName: teamMembersTable.fullName,
+        username: teamMembersTable.username,
+        totalCollections: sql<number>`CAST(COUNT(${collectionsTable.id}) AS INTEGER)`,
+        totalViews: sql<number>`CAST(COALESCE(SUM(${collectionsTable.views}), 0) AS INTEGER)`,
+      })
+      .from(teamMembersTable)
+      .leftJoin(collectionsTable, eq(collectionsTable.teamMemberId, teamMembersTable.id))
+      .groupBy(teamMembersTable.id, teamMembersTable.fullName, teamMembersTable.username)
+      .orderBy(desc(sql`COALESCE(SUM(${collectionsTable.views}), 0)`));
+
+    res.json(
+      rows.map((r) => ({
+        memberId: r.memberId,
+        fullName: r.fullName,
+        username: r.username,
+        totalCollections: r.totalCollections,
+        totalViews: r.totalViews,
+        totalLooks: 0,
+        totalLookViews: 0,
+      }))
+    );
+  } catch (err) {
+    req.log.error({ err }, "Failed to get member collection summaries");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+/**
+ * GET /api/admin/collections/member/:memberId
+ * Returns all collections for a specific team member (admin view).
+ */
+router.get("/admin/collections/member/:memberId", requireAdmin, async (req, res) => {
+  try {
+    const memberId = parseInt(String(req.params.memberId), 10);
+    if (isNaN(memberId)) { res.status(400).json({ error: "Invalid ID" }); return; }
+
+    const [member] = await db
+      .select({
+        id: teamMembersTable.id,
+        fullName: teamMembersTable.fullName,
+        username: teamMembersTable.username,
+      })
+      .from(teamMembersTable)
+      .where(eq(teamMembersTable.id, memberId))
+      .limit(1);
+
+    if (!member) { res.status(404).json({ error: "Member not found" }); return; }
+
+    const collections = await db
+      .select({
+        id: collectionsTable.id,
+        title: collectionsTable.title,
+        coverImageUrl: collectionsTable.coverImageUrl,
+        status: collectionsTable.status,
+        views: collectionsTable.views,
+        shareToken: collectionsTable.shareToken,
+        createdAt: collectionsTable.createdAt,
+      })
+      .from(collectionsTable)
+      .where(eq(collectionsTable.teamMemberId, memberId))
+      .orderBy(desc(collectionsTable.views));
+
+    res.json({
+      member: { id: member.id, fullName: member.fullName, username: member.username },
+      collections: collections.map((c) => ({
+        id: c.id,
+        title: c.title,
+        coverImageUrl: c.coverImageUrl ?? null,
+        status: c.status,
+        views: c.views,
+        shareToken: c.shareToken,
+        productCount: 0,
+        createdAt: c.createdAt.toISOString(),
+      })),
+    });
+  } catch (err) {
+    req.log.error({ err }, "Failed to get member collections detail");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+/**
+ * GET /api/admin/collections
+ * Returns flat list of all collections with member info.
+ */
 router.get("/admin/collections", requireAdmin, async (req, res) => {
   try {
     const rows = await db
@@ -170,6 +279,7 @@ router.get("/admin/collections", requireAdmin, async (req, res) => {
         coverImageUrl: collectionsTable.coverImageUrl,
         status: collectionsTable.status,
         shareToken: collectionsTable.shareToken,
+        views: collectionsTable.views,
         teamMemberId: collectionsTable.teamMemberId,
         createdAt: collectionsTable.createdAt,
         memberFullName: teamMembersTable.fullName,
@@ -186,6 +296,7 @@ router.get("/admin/collections", requireAdmin, async (req, res) => {
         coverImageUrl: c.coverImageUrl ?? null,
         status: c.status,
         shareToken: c.shareToken,
+        views: c.views,
         teamMemberId: c.teamMemberId,
         createdAt: c.createdAt.toISOString(),
         member: { fullName: c.memberFullName, username: c.memberUsername },
