@@ -7,3 +7,4 @@ export * from "./settings";
 export * from "./team";
 export * from "./collections";
 export * from "./categories";
+export * from "./commerce";

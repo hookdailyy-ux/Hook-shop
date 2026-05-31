@@ -9,6 +9,8 @@ import {
   Check,
   Share2,
   ShoppingBag,
+  ShoppingCart,
+  ExternalLink,
   Eye,
   Heart,
   Tag,
@@ -19,6 +21,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { CheckoutModal, type BasketItem } from "@/components/CheckoutModal";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -88,6 +91,8 @@ export default function StorePage() {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [basket, setBasket] = useState<BasketItem[]>([]);
+  const [showCheckout, setShowCheckout] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -105,6 +110,61 @@ export default function StorePage() {
       }
     })();
   }, [username]);
+
+  // Load basket from localStorage
+  useEffect(() => {
+    if (!username) return;
+    try {
+      const saved = localStorage.getItem(`hook_basket_${username}`);
+      if (saved) setBasket(JSON.parse(saved) as BasketItem[]);
+    } catch { /* ignore */ }
+  }, [username]);
+
+  // Track profile view
+  useEffect(() => {
+    if (!store) return;
+    void fetch(`${BASE}/api/analytics/event`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ memberId: store.member.id, entityType: "profile", entityId: store.member.id, eventType: "view" }),
+    });
+  }, [store?.member.id]);
+
+  const saveBasket = (items: BasketItem[]) => {
+    setBasket(items);
+    localStorage.setItem(`hook_basket_${username ?? ""}`, JSON.stringify(items));
+  };
+
+  const addToBasket = (product: StoreFeaturedProduct) => {
+    setBasket((prev) => {
+      const existing = prev.find((i) => i.productId === product.id);
+      const next = existing
+        ? prev.map((i) => i.productId === product.id ? { ...i, quantity: i.quantity + 1 } : i)
+        : [...prev, { productId: product.id, productTitle: product.title, productImageUrl: product.imageUrl, displayPrice: product.displayPrice, quantity: 1, affiliateUrl: product.affiliateUrl, brand: product.brand }];
+      localStorage.setItem(`hook_basket_${username ?? ""}`, JSON.stringify(next));
+      return next;
+    });
+    if (store) {
+      void fetch(`${BASE}/api/analytics/event`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ memberId: store.member.id, entityType: "product", entityId: product.id, eventType: "add_to_basket" }),
+      });
+    }
+  };
+
+  const removeFromBasket = (productId: number) => saveBasket(basket.filter((i) => i.productId !== productId));
+  const updateBasketQty = (productId: number, qty: number) => {
+    if (qty <= 0) { removeFromBasket(productId); return; }
+    saveBasket(basket.map((i) => i.productId === productId ? { ...i, quantity: qty } : i));
+  };
+
+  const trackProductClick = (productId: number) => {
+    if (!store) return;
+    void fetch(`${BASE}/api/analytics/event`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ memberId: store.member.id, entityType: "product", entityId: productId, eventType: "click" }),
+    });
+  };
 
   const storeUrl = useCallback(
     () => `${window.location.origin}${BASE}/store/${username}`,
@@ -412,7 +472,7 @@ export default function StorePage() {
 
                 <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
                   {featuredProducts.map((p) => (
-                    <ProductCard key={p.id} product={p} />
+                    <ProductCard key={p.id} product={p} onAddToBasket={addToBasket} onTrackClick={() => trackProductClick(p.id)} />
                   ))}
                 </div>
               </section>
@@ -450,8 +510,35 @@ export default function StorePage() {
         </div>
         {/* end grid */}
 
+        {/* Floating basket bar */}
+        {basket.length > 0 && (
+          <div className="fixed bottom-0 inset-x-0 z-40 bg-background/95 backdrop-blur-sm border-t border-border shadow-xl px-4 py-3">
+            <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+              <div className="flex items-center gap-2">
+                <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">{basket.reduce((s, i) => s + i.quantity, 0)} item{basket.reduce((s, i) => s + i.quantity, 0) !== 1 ? "s" : ""} in basket</span>
+              </div>
+              <button onClick={() => setShowCheckout(true)} className="flex items-center gap-2 px-5 py-2.5 bg-foreground text-background text-[10px] tracking-widest uppercase rounded-full hover:opacity-90 transition-opacity shadow-sm">
+                <ShoppingBag className="h-3.5 w-3.5" /> View Basket
+              </button>
+            </div>
+          </div>
+        )}
+
+        {showCheckout && store && (
+          <CheckoutModal
+            basket={basket}
+            memberId={store.member.id}
+            memberUsername={store.member.username}
+            onClose={() => setShowCheckout(false)}
+            onSuccess={() => saveBasket([])}
+            onUpdateQty={updateBasketQty}
+            onRemove={removeFromBasket}
+          />
+        )}
+
         {/* Footer */}
-        <div className="border-t border-border pt-8 pb-16 mt-6 flex items-center justify-between flex-wrap gap-4">
+        <div className={`border-t border-border pt-8 mt-6 flex items-center justify-between flex-wrap gap-4 ${basket.length > 0 ? "pb-24" : "pb-16"}`}>
           <p className="text-xs text-muted-foreground">
             Curated by <span className="font-medium text-foreground">{displayName}</span>
           </p>
@@ -577,7 +664,11 @@ function AboutSidebarCard({
 
 // ─── Product Card ─────────────────────────────────────────────────────────────
 
-function ProductCard({ product }: { product: StoreFeaturedProduct }) {
+function ProductCard({ product, onAddToBasket, onTrackClick }: {
+  product: StoreFeaturedProduct;
+  onAddToBasket: (p: StoreFeaturedProduct) => void;
+  onTrackClick: () => void;
+}) {
   return (
     <div className="group bg-white dark:bg-stone-900 rounded-2xl overflow-hidden shadow-sm border border-border/50 hover:shadow-md transition-all duration-300 flex flex-col">
       <div className="aspect-[3/4] overflow-hidden bg-stone-100 dark:bg-stone-800 relative">
@@ -593,13 +684,13 @@ function ProductCard({ product }: { product: StoreFeaturedProduct }) {
             <ShoppingBag className="h-8 w-8 text-muted-foreground/20" strokeWidth={1} />
           </div>
         )}
-        {/* Hover overlay - desktop */}
+        {/* Hover overlay */}
         <div className="absolute inset-x-0 bottom-0 p-3 translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 hidden md:block">
           <button
-            onClick={() => window.open(product.affiliateUrl, "_blank", "noopener,noreferrer")}
+            onClick={() => onAddToBasket(product)}
             className="w-full py-2.5 bg-white/95 text-foreground text-[10px] tracking-widest uppercase rounded-xl shadow-sm hover:bg-foreground hover:text-background transition-colors backdrop-blur-sm"
           >
-            Shop Now
+            Add to Basket
           </button>
         </div>
       </div>
@@ -612,13 +703,21 @@ function ProductCard({ product }: { product: StoreFeaturedProduct }) {
         {product.displayPrice && (
           <p className="text-sm font-semibold">{product.displayPrice}</p>
         )}
-        {/* Mobile shop button */}
-        <button
-          onClick={() => window.open(product.affiliateUrl, "_blank", "noopener,noreferrer")}
-          className="mt-1 w-full py-2.5 bg-foreground text-background text-[10px] tracking-widest uppercase rounded-xl hover:opacity-90 transition-opacity md:hidden"
-        >
-          Shop Now
-        </button>
+        <div className="flex gap-2 mt-1">
+          <button
+            onClick={() => onAddToBasket(product)}
+            className="flex-1 py-2.5 bg-foreground text-background text-[10px] tracking-widest uppercase rounded-xl hover:opacity-90 transition-opacity"
+          >
+            Add to Basket
+          </button>
+          <button
+            onClick={() => { onTrackClick(); window.open(product.affiliateUrl, "_blank", "noopener,noreferrer"); }}
+            className="px-3 py-2.5 border border-border rounded-xl text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors"
+            title="Shop directly"
+          >
+            <ExternalLink className="h-3.5 w-3.5" />
+          </button>
+        </div>
       </div>
     </div>
   );

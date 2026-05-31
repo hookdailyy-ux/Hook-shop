@@ -16,6 +16,11 @@ import teamAuthRouter from "./team-auth";
 import collectionsRouter from "./collections";
 import teamLooksRouter from "./team-looks";
 import storeRouter from "./store";
+import ordersRouter from "./orders";
+import analyticsRouter from "./analytics";
+import rewardsRouter from "./rewards";
+import rankingsRouter from "./rankings";
+import adminCommerceRouter from "./admin-commerce";
 
 const router: IRouter = Router();
 
@@ -36,5 +41,10 @@ router.use(teamAuthRouter);
 router.use(collectionsRouter);
 router.use(teamLooksRouter);
 router.use(storeRouter);
+router.use(ordersRouter);
+router.use(analyticsRouter);
+router.use(rewardsRouter);
+router.use(rankingsRouter);
+router.use(adminCommerceRouter);
 
 export default router;

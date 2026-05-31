@@ -18,6 +18,7 @@ import TeamDashboard from "@/pages/TeamDashboard";
 import CollectionShare from "@/pages/CollectionShare";
 import LookShare from "@/pages/LookShare";
 import StorePage from "@/pages/StorePage";
+import RankingsPage from "@/pages/RankingsPage";
 import { AdminAuthProvider, useAdminAuth } from "@/contexts/AdminAuthContext";
 import { TeamAuthProvider, useTeamAuth } from "@/contexts/TeamAuthContext";
 import { FavoritesProvider } from "@/contexts/FavoritesContext";
@@ -131,6 +132,7 @@ function Router() {
               <Route path="/c/:token" component={CollectionShare} />
               <Route path="/l/:token" component={LookShare} />
               <Route path="/store/:username" component={StorePage} />
+              <Route path="/rankings" component={RankingsPage} />
               <Route component={NotFound} />
             </Switch>
           </AppLayout>

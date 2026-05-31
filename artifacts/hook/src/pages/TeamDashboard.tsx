@@ -1,12 +1,15 @@
 import { useState, type FormEvent } from "react";
 import { Link, useLocation } from "wouter";
 import { useTeamAuth } from "@/contexts/TeamAuthContext";
-import { LogOut, LayoutDashboard, FolderOpen, Layers, ShoppingBag, Gift, User } from "lucide-react";
+import { LogOut, LayoutDashboard, FolderOpen, Layers, ShoppingBag, Gift, User, BarChart3 } from "lucide-react";
 import { MyCollections } from "@/components/MyCollections";
 import { CollectionDetail } from "@/components/CollectionDetail";
 import { MyLooks } from "@/components/MyLooks";
 import { LookDetail } from "@/components/LookDetail";
 import { StoreProfileBuilder } from "@/components/StoreProfileBuilder";
+import { MyOrders } from "@/components/MyOrders";
+import { MyAnalytics } from "@/components/MyAnalytics";
+import { MyRewards } from "@/components/MyRewards";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -15,6 +18,7 @@ type TeamPage =
   | "collections"
   | "looks"
   | "orders"
+  | "analytics"
   | "rewards"
   | "profile";
 
@@ -23,6 +27,7 @@ const NAV: { id: TeamPage; label: string; icon: React.ElementType }[] = [
   { id: "collections", label: "My Collections", icon: FolderOpen },
   { id: "looks", label: "My Looks", icon: Layers },
   { id: "orders", label: "My Orders", icon: ShoppingBag },
+  { id: "analytics", label: "Analytics", icon: BarChart3 },
   { id: "rewards", label: "My Rewards", icon: Gift },
   { id: "profile", label: "My Profile", icon: User },
 ];
@@ -121,21 +126,11 @@ export default function TeamDashboard() {
           )
         )}
 
-        {activePage === "orders" && (
-          <PlaceholderPage
-            title="My Orders"
-            description="Track orders placed through your shared links."
-            comingSoon
-          />
-        )}
+        {activePage === "orders" && <MyOrders />}
 
-        {activePage === "rewards" && (
-          <PlaceholderPage
-            title="My Rewards"
-            description="Track your earnings and rewards from affiliate activity."
-            comingSoon
-          />
-        )}
+        {activePage === "analytics" && <MyAnalytics />}
+
+        {activePage === "rewards" && <MyRewards />}
 
         {activePage === "profile" && (
           showPasswordForm ? (
