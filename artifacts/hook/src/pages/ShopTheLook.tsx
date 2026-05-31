@@ -1,5 +1,6 @@
 import { useListLooks } from "@workspace/api-client-react";
 import { useSiteImages } from "@/hooks/useSiteImages";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { LookCard } from "@/components/LookCard";
 
 function LookSkeleton() {
@@ -36,7 +37,9 @@ function LookSkeleton() {
 export default function ShopTheLook() {
   const { data: looks, isLoading } = useListLooks();
   const { data: siteImages } = useSiteImages();
+  const { data: siteSettings } = useSiteSettings();
   const sectionImage = siteImages?.look;
+  const discoverMoreUrl = siteSettings?.discoverMoreUrl;
 
   return (
     <div className="pb-24">
@@ -58,9 +61,21 @@ export default function ShopTheLook() {
       <div className="container mx-auto px-4 sm:px-6 pt-10 pb-8 md:pt-14 md:pb-12 border-b border-border mb-12">
         <p className="text-[10px] tracking-[0.35em] uppercase text-muted-foreground mb-2">Editorial</p>
         <h1 className="font-serif text-4xl md:text-6xl font-light mb-2">Shop The Look</h1>
-        <p className="text-xs tracking-widest uppercase text-muted-foreground max-w-sm leading-relaxed">
+        <p className="text-xs tracking-widest uppercase text-muted-foreground max-w-sm leading-relaxed mb-5">
           Complete the ensemble. Each piece handpicked, every look intentional.
         </p>
+        {discoverMoreUrl && (
+          <a
+            href={discoverMoreUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-[10px] tracking-[0.25em] uppercase border border-foreground/60 px-6 py-2.5 text-foreground/80 hover:bg-foreground hover:text-background transition-colors"
+            data-testid="button-discover-more-look"
+          >
+            <span>✨</span>
+            <span>Explore More via SHEIN</span>
+          </a>
+        )}
       </div>
 
       <div className="container mx-auto px-4 sm:px-6">

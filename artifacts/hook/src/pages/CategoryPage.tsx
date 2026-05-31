@@ -6,6 +6,9 @@ import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useSiteImages } from "@/hooks/useSiteImages";
 import type { SiteImageKey } from "@/hooks/useSiteImages";
 
+// To add a new SHEIN-powered section, set showDiscoverMore: true below.
+// The "Explore More via SHEIN" button only appears when showDiscoverMore is true
+// AND the admin has configured a SHEIN Referral URL in Settings.
 const CATEGORY_DETAILS: Record<string, { title: string; description: string; showDiscoverMore?: boolean }> = {
   women: {
     title: "Women",
@@ -20,7 +23,7 @@ const CATEGORY_DETAILS: Record<string, { title: string; description: string; sho
   electronics: {
     title: "Electronics",
     description: "Design-forward technology. Form meets function.",
-    showDiscoverMore: false,
+    showDiscoverMore: false, // Electronics is powered by Amazon, not SHEIN
   },
   home: {
     title: "Home Essentials",
@@ -98,10 +101,11 @@ export default function CategoryPage({ category }: CategoryPageProps) {
             href={discoverMoreUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-block text-[10px] tracking-[0.25em] uppercase border border-foreground/60 px-6 py-2.5 text-foreground/80 hover:bg-foreground hover:text-background transition-colors"
+            className="inline-flex items-center gap-2 text-[10px] tracking-[0.25em] uppercase border border-foreground/60 px-6 py-2.5 text-foreground/80 hover:bg-foreground hover:text-background transition-colors"
             data-testid="button-discover-more"
           >
-            Discover More
+            <span>✨</span>
+            <span>Explore More via SHEIN</span>
           </a>
         )}
       </div>

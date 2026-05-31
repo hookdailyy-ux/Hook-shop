@@ -1245,12 +1245,19 @@ function SettingsTab() {
         <p className="text-xs text-muted-foreground tracking-wide">Manage links and admin credentials.</p>
       </div>
 
-      {/* Discover More link */}
+      {/* SHEIN Referral Link */}
       <div className="border border-border p-6">
-        <h3 className="text-xs tracking-widest uppercase font-medium mb-2">Discover More Link</h3>
-        <p className="text-[10px] text-muted-foreground tracking-wide mb-5 leading-relaxed">
-          This link appears as a "Discover More" button on Fashion, Accessories, and Home Essentials category pages. Paste your SHEIN referral link here.
+        <h3 className="text-xs tracking-widest uppercase font-medium mb-2">✨ Explore More via SHEIN</h3>
+        <p className="text-[10px] text-muted-foreground tracking-wide mb-2 leading-relaxed">
+          Paste your SHEIN referral link here. An <strong>"✨ Explore More via SHEIN"</strong> button will appear on all SHEIN-powered sections:
         </p>
+        <ul className="text-[10px] text-muted-foreground mb-5 space-y-1 pl-3 leading-relaxed list-disc">
+          <li>Women</li>
+          <li>Men</li>
+          <li>Shop The Look</li>
+          <li>Women Accessories &amp; Men Accessories</li>
+          <li>Home Essentials</li>
+        </ul>
         <form onSubmit={handleDiscoverSave} className="space-y-4">
           <div className="space-y-2">
             <label className="text-[10px] uppercase tracking-widest text-muted-foreground">SHEIN Referral URL</label>
