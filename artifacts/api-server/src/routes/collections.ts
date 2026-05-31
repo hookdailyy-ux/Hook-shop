@@ -22,6 +22,7 @@ function fmt(c: typeof collectionsTable.$inferSelect) {
     status: c.status,
     shareToken: c.shareToken,
     views: c.views,
+    productCount: 0, // placeholder until Products feature ships
     createdAt: c.createdAt.toISOString(),
     updatedAt: c.updatedAt.toISOString(),
   };

@@ -38,6 +38,8 @@ interface Collection {
   coverImageUrl: string | null;
   status: string;
   shareToken: string;
+  views: number;
+  productCount: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -130,6 +132,27 @@ export function MyCollections() {
     }
   };
 
+  const handleToggleStatus = async (c: Collection) => {
+    const newStatus = c.status === "active" ? "hidden" : "active";
+    try {
+      const res = await fetch(`${BASE}/api/collections/${c.id}`, {
+        method: "PUT",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: c.title,
+          description: c.description,
+          coverImageUrl: c.coverImageUrl ?? "",
+          status: newStatus,
+        }),
+      });
+      if (!res.ok) throw new Error("Failed");
+      void load();
+    } catch {
+      toast({ title: "Failed to update status", variant: "destructive" });
+    }
+  };
+
   const copyLink = async (c: Collection) => {
     try {
       await navigator.clipboard.writeText(shareUrl(c.shareToken));
@@ -186,7 +209,7 @@ export function MyCollections() {
           </Button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {collections.map((c) => (
             <CollectionCard
               key={c.id}
@@ -195,6 +218,7 @@ export function MyCollections() {
               onEdit={() => setEditCollection(c)}
               onDelete={() => void handleDelete(c)}
               onCopyLink={() => void copyLink(c)}
+              onToggleStatus={() => void handleToggleStatus(c)}
             />
           ))}
         </div>
@@ -234,16 +258,19 @@ function CollectionCard({
   onEdit,
   onDelete,
   onCopyLink,
+  onToggleStatus,
 }: {
   collection: Collection;
   isCopied: boolean;
   onEdit: () => void;
   onDelete: () => void;
   onCopyLink: () => void;
+  onToggleStatus: () => void;
 }) {
   return (
-    <div className="group border border-border hover:border-foreground/30 transition-colors">
-      <div className="aspect-[4/3] bg-accent/30 overflow-hidden relative">
+    <div className="group border border-border hover:border-foreground/30 transition-colors flex flex-col">
+      {/* Cover image */}
+      <div className="aspect-[4/3] bg-accent/30 overflow-hidden relative shrink-0">
         {c.coverImageUrl ? (
           <img
             src={c.coverImageUrl}
@@ -252,12 +279,11 @@ function CollectionCard({
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <FolderOpen
-              className="h-10 w-10 text-muted-foreground/20"
-              strokeWidth={1}
-            />
+            <FolderOpen className="h-10 w-10 text-muted-foreground/20" strokeWidth={1} />
           </div>
         )}
+
+        {/* Status badge */}
         <div className="absolute top-3 left-3">
           <span
             className={`text-[9px] tracking-widest uppercase px-2 py-1 flex items-center gap-1.5 ${
@@ -271,22 +297,44 @@ function CollectionCard({
             ) : (
               <EyeOff className="h-2.5 w-2.5" />
             )}
-            {c.status}
+            {c.status === "active" ? "Active" : "Hidden"}
           </span>
         </div>
       </div>
 
-      <div className="p-4">
-        <h3 className="font-serif text-lg font-light leading-tight mb-1 line-clamp-1">
+      {/* Card body */}
+      <div className="p-4 flex flex-col flex-1">
+        {/* Title */}
+        <h3 className="font-serif text-lg font-light leading-tight line-clamp-1 mb-1">
           {c.title}
         </h3>
+
+        {/* Description */}
         {c.description && (
-          <p className="text-xs text-muted-foreground line-clamp-2 mb-3 leading-relaxed">
+          <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed mb-3">
             {c.description}
           </p>
         )}
 
-        <div className="flex items-center gap-1 mt-3 pt-3 border-t border-border/60">
+        {/* Stats row */}
+        <div className="flex items-center gap-3 mt-auto pt-3">
+          {c.productCount === 0 ? (
+            <p className="text-[10px] text-muted-foreground/60 italic flex-1">
+              No products added yet
+            </p>
+          ) : (
+            <p className="text-[10px] text-muted-foreground flex-1">
+              {c.productCount} product{c.productCount !== 1 ? "s" : ""}
+            </p>
+          )}
+          <p className="text-[10px] text-muted-foreground shrink-0">
+            {c.views.toLocaleString()} view{c.views !== 1 ? "s" : ""}
+          </p>
+        </div>
+
+        {/* Action row */}
+        <div className="flex items-center gap-0 mt-3 pt-3 border-t border-border/60">
+          {/* Share — takes most space */}
           <button
             onClick={onCopyLink}
             className="flex items-center gap-1.5 text-[10px] tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors px-2 py-1.5 hover:bg-accent/40 flex-1"
@@ -304,17 +352,38 @@ function CollectionCard({
               </>
             )}
           </button>
+
+          {/* Edit */}
           <button
             onClick={onEdit}
             className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-accent/40 transition-colors"
-            title="Edit"
+            title="Edit collection"
           >
             <Pencil className="h-3.5 w-3.5" />
           </button>
+
+          {/* Toggle Active / Hidden */}
+          <button
+            onClick={onToggleStatus}
+            className={`p-1.5 hover:bg-accent/40 transition-colors ${
+              c.status === "active"
+                ? "text-green-600 hover:text-muted-foreground"
+                : "text-muted-foreground hover:text-green-600"
+            }`}
+            title={c.status === "active" ? "Hide collection" : "Make active"}
+          >
+            {c.status === "active" ? (
+              <Eye className="h-3.5 w-3.5" />
+            ) : (
+              <EyeOff className="h-3.5 w-3.5" />
+            )}
+          </button>
+
+          {/* Delete */}
           <button
             onClick={onDelete}
             className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-accent/40 transition-colors"
-            title="Delete"
+            title="Delete collection"
           >
             <Trash2 className="h-3.5 w-3.5" />
           </button>
@@ -408,6 +477,9 @@ function CollectionFormDialog({
           <div className="space-y-2">
             <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
               Description
+              <span className="ml-1.5 text-muted-foreground/50 normal-case tracking-normal">
+                optional
+              </span>
             </label>
             <Textarea
               value={form.description}

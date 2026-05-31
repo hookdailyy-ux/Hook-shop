@@ -274,6 +274,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
             <div className="flex items-center gap-6">
               <a href="#" className="text-[10px] text-muted-foreground/60 hover:text-muted-foreground transition-colors tracking-widest uppercase">Privacy</a>
               <a href="#" className="text-[10px] text-muted-foreground/60 hover:text-muted-foreground transition-colors tracking-widest uppercase">Terms</a>
+              <Link href="/team/login" className="text-[10px] text-muted-foreground/30 hover:text-muted-foreground/60 transition-colors tracking-wide">
+                Team
+              </Link>
               <Link href="/admin" className="text-[10px] text-muted-foreground/30 hover:text-muted-foreground/60 transition-colors tracking-wide" data-testid="link-admin-footer">
                 Admin
               </Link>
