@@ -32,6 +32,7 @@ import {
   Search,
   KeyRound,
   Copy,
+  RotateCcw,
 } from "lucide-react";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");

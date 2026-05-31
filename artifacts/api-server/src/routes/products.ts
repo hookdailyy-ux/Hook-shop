@@ -1,7 +1,8 @@
 import { Router, type IRouter } from "express";
 import { db, productsTable } from "@workspace/db";
-import { eq, and, ne } from "drizzle-orm";
+import { eq, and, ne, asc } from "drizzle-orm";
 import { z } from "zod";
+import { requireTeamMember } from "../middlewares/requireTeamMember";
 
 const router: IRouter = Router();
 
@@ -86,6 +87,44 @@ router.post("/products", async (req, res) => {
   } catch (err) {
     req.log.error({ err }, "Failed to create product");
     res.status(400).json({ error: "Invalid input" });
+  }
+});
+
+/**
+ * GET /api/products/catalog
+ * Slim product list for team members to browse when adding to collections.
+ * Must be registered BEFORE /products/:id to avoid "catalog" being parsed as an ID.
+ */
+router.get("/products/catalog", requireTeamMember, async (req, res) => {
+  try {
+    const rows = await db
+      .select({
+        id: productsTable.id,
+        title: productsTable.title,
+        price: productsTable.price,
+        imageUrl: productsTable.imageUrl,
+        brand: productsTable.brand,
+        category: productsTable.category,
+        subcategory: productsTable.subcategory,
+      })
+      .from(productsTable)
+      .where(eq(productsTable.status, "active"))
+      .orderBy(asc(productsTable.title));
+
+    res.json(
+      rows.map((p) => ({
+        id: p.id,
+        title: p.title,
+        price: p.price ?? null,
+        imageUrl: p.imageUrl ?? null,
+        brand: p.brand ?? null,
+        category: p.category,
+        subcategory: p.subcategory ?? null,
+      })),
+    );
+  } catch (err) {
+    req.log.error({ err }, "Failed to get product catalog");
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 

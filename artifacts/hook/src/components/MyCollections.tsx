@@ -26,6 +26,7 @@ import {
   FolderOpen,
   Eye,
   EyeOff,
+  ChevronRight,
 } from "lucide-react";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -62,7 +63,11 @@ function shareUrl(token: string): string {
   return `${window.location.origin}${BASE}/c/${token}`;
 }
 
-export function MyCollections() {
+export function MyCollections({
+  onOpenCollection,
+}: {
+  onOpenCollection?: (id: number) => void;
+}) {
   const [collections, setCollections] = useState<Collection[]>([]);
   const [loading, setLoading] = useState(true);
   const [createOpen, setCreateOpen] = useState(false);
@@ -215,6 +220,7 @@ export function MyCollections() {
               key={c.id}
               collection={c}
               isCopied={copiedId === c.id}
+              onOpen={onOpenCollection ? () => onOpenCollection(c.id) : undefined}
               onEdit={() => setEditCollection(c)}
               onDelete={() => void handleDelete(c)}
               onCopyLink={() => void copyLink(c)}
@@ -255,6 +261,7 @@ export function MyCollections() {
 function CollectionCard({
   collection: c,
   isCopied,
+  onOpen,
   onEdit,
   onDelete,
   onCopyLink,
@@ -262,62 +269,79 @@ function CollectionCard({
 }: {
   collection: Collection;
   isCopied: boolean;
+  onOpen?: () => void;
   onEdit: () => void;
   onDelete: () => void;
   onCopyLink: () => void;
   onToggleStatus: () => void;
 }) {
   return (
-    <div className="group border border-border hover:border-foreground/30 transition-colors flex flex-col">
-      {/* Cover image */}
-      <div className="aspect-[4/3] bg-accent/30 overflow-hidden relative shrink-0">
-        {c.coverImageUrl ? (
-          <img
-            src={c.coverImageUrl}
-            alt={c.title}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <FolderOpen className="h-10 w-10 text-muted-foreground/20" strokeWidth={1} />
+    <div className="group border border-border hover:border-foreground/20 transition-colors flex flex-col">
+      {/* Clickable top section — cover + title + description */}
+      <button
+        className="text-left w-full focus:outline-none"
+        onClick={onOpen}
+        disabled={!onOpen}
+      >
+        {/* Cover image */}
+        <div className="aspect-[4/3] bg-accent/30 overflow-hidden relative">
+          {c.coverImageUrl ? (
+            <img
+              src={c.coverImageUrl}
+              alt={c.title}
+              className="w-full h-full object-cover group-hover:scale-[1.01] transition-transform duration-300"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <FolderOpen className="h-10 w-10 text-muted-foreground/20" strokeWidth={1} />
+            </div>
+          )}
+
+          {/* Status badge */}
+          <div className="absolute top-3 left-3">
+            <span
+              className={`text-[9px] tracking-widest uppercase px-2 py-1 flex items-center gap-1.5 ${
+                c.status === "active"
+                  ? "bg-background/90 text-green-700"
+                  : "bg-background/90 text-muted-foreground"
+              }`}
+            >
+              {c.status === "active" ? (
+                <Eye className="h-2.5 w-2.5" />
+              ) : (
+                <EyeOff className="h-2.5 w-2.5" />
+              )}
+              {c.status === "active" ? "Active" : "Hidden"}
+            </span>
           </div>
-        )}
 
-        {/* Status badge */}
-        <div className="absolute top-3 left-3">
-          <span
-            className={`text-[9px] tracking-widest uppercase px-2 py-1 flex items-center gap-1.5 ${
-              c.status === "active"
-                ? "bg-background/90 text-green-700"
-                : "bg-background/90 text-muted-foreground"
-            }`}
-          >
-            {c.status === "active" ? (
-              <Eye className="h-2.5 w-2.5" />
-            ) : (
-              <EyeOff className="h-2.5 w-2.5" />
-            )}
-            {c.status === "active" ? "Active" : "Hidden"}
-          </span>
+          {/* Open chevron indicator */}
+          {onOpen && (
+            <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+              <span className="bg-background/90 text-foreground p-1.5 flex items-center">
+                <ChevronRight className="h-3 w-3" />
+              </span>
+            </div>
+          )}
         </div>
-      </div>
 
-      {/* Card body */}
-      <div className="p-4 flex flex-col flex-1">
-        {/* Title */}
-        <h3 className="font-serif text-lg font-light leading-tight line-clamp-1 mb-1">
-          {c.title}
-        </h3>
+        {/* Title + description */}
+        <div className="px-4 pt-4 pb-2">
+          <h3 className="font-serif text-lg font-light leading-tight line-clamp-1 mb-1">
+            {c.title}
+          </h3>
+          {c.description && (
+            <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+              {c.description}
+            </p>
+          )}
+        </div>
+      </button>
 
-        {/* Description */}
-        {c.description && (
-          <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed mb-3">
-            {c.description}
-          </p>
-        )}
-
+      {/* Bottom section — non-clickable */}
+      <div className="px-4 pb-4 flex flex-col flex-1">
         {/* Stats row */}
-        <div className="flex items-center gap-3 mt-auto pt-3">
+        <div className="flex items-center gap-3 py-3">
           {c.productCount === 0 ? (
             <p className="text-[10px] text-muted-foreground/60 italic flex-1">
               No products added yet
@@ -333,8 +357,8 @@ function CollectionCard({
         </div>
 
         {/* Action row */}
-        <div className="flex items-center gap-0 mt-3 pt-3 border-t border-border/60">
-          {/* Share — takes most space */}
+        <div className="flex items-center gap-0 pt-3 border-t border-border/60">
+          {/* Share */}
           <button
             onClick={onCopyLink}
             className="flex items-center gap-1.5 text-[10px] tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors px-2 py-1.5 hover:bg-accent/40 flex-1"
@@ -459,7 +483,6 @@ function CollectionFormDialog({
               onChange={(e) => set("title", e.target.value)}
               placeholder="Summer Essentials 2025"
               required
-              className="border-border"
               autoFocus
             />
           </div>
@@ -486,7 +509,7 @@ function CollectionFormDialog({
               onChange={(e) => set("description", e.target.value)}
               placeholder="A curated selection of..."
               rows={3}
-              className="border-border resize-none"
+              className="resize-none"
             />
           </div>
 
@@ -498,7 +521,7 @@ function CollectionFormDialog({
               value={form.status}
               onValueChange={(v) => set("status", v)}
             >
-              <SelectTrigger className="border-border">
+              <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

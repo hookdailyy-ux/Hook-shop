@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import { useTeamAuth } from "@/contexts/TeamAuthContext";
 import { LogOut, LayoutDashboard, FolderOpen, Layers, ShoppingBag, Gift, User } from "lucide-react";
 import { MyCollections } from "@/components/MyCollections";
+import { CollectionDetail } from "@/components/CollectionDetail";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -27,6 +28,12 @@ export default function TeamDashboard() {
   const { member, logout } = useTeamAuth();
   const [, navigate] = useLocation();
   const [activePage, setActivePage] = useState<TeamPage>("dashboard");
+  const [selectedCollectionId, setSelectedCollectionId] = useState<number | null>(null);
+
+  const handleSetActivePage = (page: TeamPage) => {
+    setActivePage(page);
+    if (page !== "collections") setSelectedCollectionId(null);
+  };
 
   const handleLogout = async () => {
     await logout();
@@ -56,7 +63,7 @@ export default function TeamDashboard() {
             {NAV.map(({ id, label }) => (
               <button
                 key={id}
-                onClick={() => setActivePage(id)}
+                onClick={() => handleSetActivePage(id)}
                 className={`shrink-0 px-4 py-4 text-[11px] tracking-widest uppercase border-b-2 transition-colors whitespace-nowrap ${
                   activePage === id
                     ? "border-foreground text-foreground"
@@ -88,10 +95,39 @@ export default function TeamDashboard() {
       {/* Content */}
       <div className="container mx-auto px-4 sm:px-6 pt-8 md:pt-10 pb-24">
         {activePage === "dashboard" && <DashboardPage member={member} />}
-        {activePage === "collections" && <MyCollections />}
-        {activePage === "looks" && <PlaceholderPage title="My Looks" description="Build styled looks from the HOOK catalog. Link them on your socials." comingSoon />}
-        {activePage === "orders" && <PlaceholderPage title="My Orders" description="Track orders placed through your shared links." comingSoon />}
-        {activePage === "rewards" && <PlaceholderPage title="My Rewards" description="Track your earnings and rewards from affiliate activity." comingSoon />}
+
+        {activePage === "collections" && (
+          selectedCollectionId !== null ? (
+            <CollectionDetail
+              collectionId={selectedCollectionId}
+              onBack={() => setSelectedCollectionId(null)}
+            />
+          ) : (
+            <MyCollections onOpenCollection={(id) => setSelectedCollectionId(id)} />
+          )
+        )}
+
+        {activePage === "looks" && (
+          <PlaceholderPage
+            title="My Looks"
+            description="Build styled looks from the HOOK catalog. Link them on your socials."
+            comingSoon
+          />
+        )}
+        {activePage === "orders" && (
+          <PlaceholderPage
+            title="My Orders"
+            description="Track orders placed through your shared links."
+            comingSoon
+          />
+        )}
+        {activePage === "rewards" && (
+          <PlaceholderPage
+            title="My Rewards"
+            description="Track your earnings and rewards from affiliate activity."
+            comingSoon
+          />
+        )}
         {activePage === "profile" && <ProfilePage member={member} />}
       </div>
     </div>
@@ -144,8 +180,7 @@ function DashboardPage({ member }: { member: ReturnType<typeof useTeamAuth>["mem
           Getting Started
         </p>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          Collections and Looks are coming soon. Once available, you'll be able to curate
-          products and share them directly with your audience.
+          Head to <strong>Collections</strong> to create your first curated collection and share it with your audience.
         </p>
       </div>
     </div>
