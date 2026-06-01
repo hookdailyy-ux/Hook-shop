@@ -588,6 +588,7 @@ function ProductDialog({ product }: { product?: Product }) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const isElectronics = form.category === "electronics";
     const payload = {
       ...form,
       source: form.source as "SHEIN" | "Amazon",
@@ -603,6 +604,9 @@ function ProductDialog({ product }: { product?: Product }) {
       amazonUrl: form.amazonUrl || undefined,
       amazonPrice: form.amazonPrice || undefined,
       externalId: form.externalId || undefined,
+      affiliateUrl: isElectronics
+        ? (form.noonUrl || form.amazonUrl || form.affiliateUrl || "")
+        : form.affiliateUrl,
     };
     if (product) {
       updateMutation.mutate(
@@ -677,19 +681,21 @@ function ProductDialog({ product }: { product?: Product }) {
 
           {/* Source + Status */}
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Product Source *</label>
-              <Select value={form.source} onValueChange={set("source")}>
-                <SelectTrigger className="border-border" data-testid="select-product-source">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="SHEIN">SHEIN</SelectItem>
-                  <SelectItem value="Amazon">Amazon</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
+            {form.category !== "electronics" && (
+              <div className="space-y-2">
+                <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Product Source *</label>
+                <Select value={form.source} onValueChange={set("source")}>
+                  <SelectTrigger className="border-border" data-testid="select-product-source">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="SHEIN">SHEIN</SelectItem>
+                    <SelectItem value="Amazon">Amazon</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            <div className={form.category === "electronics" ? "col-span-2 space-y-2" : "space-y-2"}>
               <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Status</label>
               <Select value={form.status} onValueChange={set("status")}>
                 <SelectTrigger className="border-border" data-testid="select-product-status">
@@ -734,30 +740,34 @@ function ProductDialog({ product }: { product?: Product }) {
             </div>
           </div>
 
-          {/* Price */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Price</label>
-              <Input value={form.price} onChange={(e) => set("price")(e.target.value)} placeholder="$89" className="border-border" />
+          {/* Price — hidden for electronics (uses noon/amazon prices instead) */}
+          {form.category !== "electronics" && (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Price</label>
+                <Input value={form.price} onChange={(e) => set("price")(e.target.value)} placeholder="$89" className="border-border" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Original Price</label>
+                <Input value={form.originalPrice} onChange={(e) => set("originalPrice")(e.target.value)} placeholder="$120" className="border-border" />
+              </div>
             </div>
-            <div className="space-y-2">
-              <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Original Price</label>
-              <Input value={form.originalPrice} onChange={(e) => set("originalPrice")(e.target.value)} placeholder="$120" className="border-border" />
-            </div>
-          </div>
+          )}
 
-          {/* Product Link */}
-          <div className="space-y-2">
-            <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Product Link *</label>
-            <Input
-              required
-              value={form.affiliateUrl}
-              onChange={(e) => set("affiliateUrl")(e.target.value)}
-              placeholder={form.source === "Amazon" ? "https://amzn.to/..." : "https://shein.com/..."}
-              className="border-border"
-              data-testid="input-affiliate-url"
-            />
-          </div>
+          {/* Product Link — hidden for electronics (uses noon/amazon URLs instead) */}
+          {form.category !== "electronics" && (
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Product Link *</label>
+              <Input
+                required
+                value={form.affiliateUrl}
+                onChange={(e) => set("affiliateUrl")(e.target.value)}
+                placeholder={form.source === "Amazon" ? "https://amzn.to/..." : "https://shein.com/..."}
+                className="border-border"
+                data-testid="input-affiliate-url"
+              />
+            </div>
+          )}
 
           {/* Electronics: Noon + Amazon Store Links */}
           {form.category === "electronics" && (
@@ -810,20 +820,22 @@ function ProductDialog({ product }: { product?: Product }) {
             </div>
           )}
 
-          {/* External Product ID */}
-          <div className="space-y-2">
-            <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
-              {form.source === "Amazon" ? "Amazon ASIN" : "SHEIN SKU"}{" "}
-              <span className="normal-case tracking-normal font-normal opacity-60">(optional)</span>
-            </label>
-            <Input
-              value={form.externalId}
-              onChange={(e) => set("externalId")(e.target.value)}
-              placeholder={form.source === "Amazon" ? "e.g. B08N5WRWNW" : "e.g. sw2205185848"}
-              className="border-border"
-              data-testid="input-external-id"
-            />
-          </div>
+          {/* External Product ID — hidden for electronics */}
+          {form.category !== "electronics" && (
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                {form.source === "Amazon" ? "Amazon ASIN" : "SHEIN SKU"}{" "}
+                <span className="normal-case tracking-normal font-normal opacity-60">(optional)</span>
+              </label>
+              <Input
+                value={form.externalId}
+                onChange={(e) => set("externalId")(e.target.value)}
+                placeholder={form.source === "Amazon" ? "e.g. B08N5WRWNW" : "e.g. sw2205185848"}
+                className="border-border"
+                data-testid="input-external-id"
+              />
+            </div>
+          )}
 
           {/* Description */}
           <div className="space-y-2">

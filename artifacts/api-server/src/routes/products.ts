@@ -52,7 +52,7 @@ router.post("/products", async (req, res) => {
       originalPrice: z.string().optional(),
       imageUrl: z.string().optional(),
       images: z.array(z.string()).optional(),
-      affiliateUrl: z.string().min(1),
+      affiliateUrl: z.string().default(""),
       brand: z.string().optional(),
       material: z.string().optional(),
       externalId: z.string().optional(),
