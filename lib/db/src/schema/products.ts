@@ -26,6 +26,8 @@ export const productsTable = pgTable("products", {
   imagePosY: integer("image_pos_y").notNull().default(50),
   imageScale: integer("image_scale").notNull().default(100),
   imageObjectFit: text("image_object_fit").notNull().default("cover"),
+  noonUrl: text("noon_url"),
+  amazonUrl: text("amazon_url"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

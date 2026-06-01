@@ -65,6 +65,8 @@ router.post("/products", async (req, res) => {
       imagePosY: z.number().int().min(0).max(100).optional(),
       imageScale: z.number().int().min(50).max(200).optional(),
       imageObjectFit: z.enum(["cover", "contain"]).optional(),
+      noonUrl: z.string().optional(),
+      amazonUrl: z.string().optional(),
     });
     const data = schema.parse(req.body);
     const [product] = await db.insert(productsTable).values({
@@ -90,6 +92,8 @@ router.post("/products", async (req, res) => {
       imagePosY: data.imagePosY ?? 50,
       imageScale: data.imageScale ?? 100,
       imageObjectFit: data.imageObjectFit ?? "cover",
+      noonUrl: data.noonUrl ?? null,
+      amazonUrl: data.amazonUrl ?? null,
     }).returning();
     res.status(201).json(serializeProduct(product));
   } catch (err) {
@@ -174,6 +178,8 @@ router.patch("/products/:id", async (req, res) => {
       imagePosY: z.number().int().min(0).max(100).optional(),
       imageScale: z.number().int().min(50).max(200).optional(),
       imageObjectFit: z.enum(["cover", "contain"]).optional(),
+      noonUrl: z.string().optional(),
+      amazonUrl: z.string().optional(),
     });
     const data = schema.parse(req.body);
     const [product] = await db.update(productsTable).set(data).where(eq(productsTable.id, id)).returning();

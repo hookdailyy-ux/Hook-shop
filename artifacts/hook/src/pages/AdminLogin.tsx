@@ -2,11 +2,13 @@ import { useState, FormEvent } from "react";
 import { useLocation, Redirect } from "wouter";
 import { useAdminAuth } from "@/contexts/AdminAuthContext";
 import { Link } from "wouter";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function AdminLogin() {
   const { login, authenticated, isLoading } = useAdminAuth();
   const [, navigate] = useLocation();
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -49,16 +51,27 @@ export default function AdminLogin() {
               <label className="text-[10px] uppercase tracking-widest text-muted-foreground block">
                 Password
               </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                autoFocus
-                required
-                placeholder="Enter admin password"
-                className="w-full border border-border bg-background px-4 py-3 text-sm outline-none focus:border-foreground transition-colors placeholder:text-muted-foreground/50"
-                data-testid="input-admin-password"
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoFocus
+                  required
+                  placeholder="Enter admin password"
+                  className="w-full border border-border bg-background px-4 pr-11 py-3 text-sm outline-none focus:border-foreground transition-colors placeholder:text-muted-foreground/50"
+                  data-testid="input-admin-password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  tabIndex={-1}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
 
             {error && (

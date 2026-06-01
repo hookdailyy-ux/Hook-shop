@@ -577,6 +577,10 @@ components:
         imageObjectFit:
           type: string
           enum: [cover, contain]
+        noonUrl:
+          type: ["string", "null"]
+        amazonUrl:
+          type: ["string", "null"]
         createdAt:
           type: string
 
@@ -636,6 +640,10 @@ components:
         imageObjectFit:
           type: string
           enum: [cover, contain]
+        noonUrl:
+          type: string
+        amazonUrl:
+          type: string
 
     ProductUpdate:
       type: object
@@ -692,6 +700,10 @@ components:
         imageObjectFit:
           type: string
           enum: [cover, contain]
+        noonUrl:
+          type: string
+        amazonUrl:
+          type: string
 
     Look:
       type: object

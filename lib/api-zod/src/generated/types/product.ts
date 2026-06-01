@@ -40,5 +40,9 @@ export interface Product {
   imagePosY?: number;
   imageScale?: number;
   imageObjectFit?: ProductImageObjectFit;
+  /** @nullable */
+  noonUrl?: string | null;
+  /** @nullable */
+  amazonUrl?: string | null;
   createdAt: string;
 }

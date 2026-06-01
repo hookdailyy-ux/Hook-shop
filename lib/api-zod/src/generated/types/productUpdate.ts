@@ -32,4 +32,6 @@ export interface ProductUpdate {
   imagePosY?: number;
   imageScale?: number;
   imageObjectFit?: ProductUpdateImageObjectFit;
+  noonUrl?: string;
+  amazonUrl?: string;
 }

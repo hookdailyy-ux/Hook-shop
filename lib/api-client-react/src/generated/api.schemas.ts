@@ -105,6 +105,10 @@ export interface Product {
   imagePosY?: number;
   imageScale?: number;
   imageObjectFit?: ProductImageObjectFit;
+  /** @nullable */
+  noonUrl?: string | null;
+  /** @nullable */
+  amazonUrl?: string | null;
   createdAt: string;
 }
 
@@ -165,6 +169,8 @@ export interface ProductInput {
   imagePosY?: number;
   imageScale?: number;
   imageObjectFit?: ProductInputImageObjectFit;
+  noonUrl?: string;
+  amazonUrl?: string;
 }
 
 export type ProductUpdateSource = typeof ProductUpdateSource[keyof typeof ProductUpdateSource];
@@ -224,6 +230,8 @@ export interface ProductUpdate {
   imagePosY?: number;
   imageScale?: number;
   imageObjectFit?: ProductUpdateImageObjectFit;
+  noonUrl?: string;
+  amazonUrl?: string;
 }
 
 export interface Look {

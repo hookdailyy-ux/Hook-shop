@@ -32,4 +32,6 @@ export interface ProductInput {
   imagePosY?: number;
   imageScale?: number;
   imageObjectFit?: ProductInputImageObjectFit;
+  noonUrl?: string;
+  amazonUrl?: string;
 }

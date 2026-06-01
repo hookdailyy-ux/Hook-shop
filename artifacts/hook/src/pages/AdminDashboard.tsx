@@ -518,6 +518,8 @@ type ProductFormData = {
   price: string;
   originalPrice: string;
   affiliateUrl: string;
+  noonUrl: string;
+  amazonUrl: string;
   externalId: string;
   imageUrl: string;
   images: string[];
@@ -534,6 +536,7 @@ type ProductFormData = {
 
 function ProductDialog({ product }: { product?: Product }) {
   const [open, setOpen] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const createMutation = useCreateProduct();
@@ -549,6 +552,8 @@ function ProductDialog({ product }: { product?: Product }) {
     price: product?.price ?? "",
     originalPrice: product?.originalPrice ?? "",
     affiliateUrl: product?.affiliateUrl ?? "",
+    noonUrl: (product as any)?.noonUrl ?? "",
+    amazonUrl: (product as any)?.amazonUrl ?? "",
     externalId: (product as any)?.externalId ?? "",
     imageUrl: product?.imageUrl ?? "",
     images: Array.isArray(product?.images) ? (product.images as string[]) : [],
@@ -589,6 +594,8 @@ function ProductDialog({ product }: { product?: Product }) {
       price: form.price || undefined,
       originalPrice: form.originalPrice || undefined,
       imageUrl: form.imageUrl || undefined,
+      noonUrl: form.noonUrl || undefined,
+      amazonUrl: form.amazonUrl || undefined,
       externalId: form.externalId || undefined,
     };
     if (product) {
@@ -624,6 +631,7 @@ function ProductDialog({ product }: { product?: Product }) {
   const isPending = createMutation.isPending || updateMutation.isPending;
 
   return (
+    <>
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {product ? (
@@ -745,6 +753,33 @@ function ProductDialog({ product }: { product?: Product }) {
             />
           </div>
 
+          {/* Electronics: Noon + Amazon URLs */}
+          {form.category === "electronics" && (
+            <div className="border border-border/60 p-4 space-y-4">
+              <p className="text-[9px] tracking-widest uppercase text-muted-foreground">Electronics Store Links</p>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Noon URL</label>
+                  <Input
+                    value={form.noonUrl}
+                    onChange={(e) => set("noonUrl")(e.target.value)}
+                    placeholder="https://noon.com/..."
+                    className="border-border"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Amazon URL</label>
+                  <Input
+                    value={form.amazonUrl}
+                    onChange={(e) => set("amazonUrl")(e.target.value)}
+                    placeholder="https://amzn.to/..."
+                    className="border-border"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* External Product ID */}
           <div className="space-y-2">
             <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
@@ -846,7 +881,16 @@ function ProductDialog({ product }: { product?: Product }) {
             </div>
           </div>
 
-          <div className="flex justify-end pt-2">
+          <div className="flex items-center justify-between pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setPreviewOpen(true)}
+              className="text-xs tracking-widest uppercase border-border gap-2"
+            >
+              <Eye className="h-3.5 w-3.5" />
+              Preview
+            </Button>
             <Button type="submit" disabled={isPending} className="text-xs tracking-widest uppercase" data-testid="button-save-product">
               {isPending ? "Saving..." : "Save Product"}
             </Button>
@@ -854,6 +898,107 @@ function ProductDialog({ product }: { product?: Product }) {
         </form>
       </DialogContent>
     </Dialog>
+
+    {/* Full-screen product preview overlay */}
+    {previewOpen && (
+      <div className="fixed inset-0 z-[300] bg-background overflow-auto">
+        <div className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b border-border px-6 py-3 flex items-center justify-between">
+          <p className="text-[10px] tracking-widest uppercase text-muted-foreground">Product Preview</p>
+          <button
+            onClick={() => setPreviewOpen(false)}
+            className="text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+        <div className="container mx-auto px-4 sm:px-6 py-10 max-w-4xl">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16">
+            {/* Image */}
+            <div className="aspect-[3/4] bg-accent overflow-hidden relative">
+              {form.imageUrl ? (
+                <img
+                  src={form.imageUrl}
+                  alt={form.title}
+                  className="absolute w-full h-full"
+                  style={{
+                    objectFit: form.imageObjectFit,
+                    objectPosition: `${form.imagePosX}% ${form.imagePosY}%`,
+                    transform: `scale(${form.imageScale / 100})`,
+                    transformOrigin: `${form.imagePosX}% ${form.imagePosY}%`,
+                  }}
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <p className="text-[10px] tracking-widest uppercase text-muted-foreground">No image</p>
+                </div>
+              )}
+            </div>
+            {/* Info */}
+            <div className="flex flex-col">
+              {form.brand && (
+                <p className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground mb-3">
+                  {form.brand}
+                </p>
+              )}
+              <h1 className="font-serif text-3xl md:text-4xl font-light leading-tight mb-4">
+                {form.title || "Product Title"}
+              </h1>
+              {(form.price || form.originalPrice) && (
+                <div className="flex items-baseline gap-3 mb-6">
+                  {form.price && <p className="text-xl font-medium">{form.price}</p>}
+                  {form.originalPrice && (
+                    <p className="text-sm text-muted-foreground line-through">{form.originalPrice}</p>
+                  )}
+                </div>
+              )}
+              {form.description && (
+                <p className="text-sm text-muted-foreground leading-relaxed mb-7">{form.description}</p>
+              )}
+              {/* CTA preview */}
+              <div className="mt-auto pt-4">
+                {form.category === "electronics" && (form.noonUrl || form.amazonUrl) ? (
+                  <div className="flex gap-3">
+                    {form.noonUrl && (
+                      <div className="flex-1 flex flex-col items-center gap-2">
+                        <p className="text-[9px] tracking-[0.2em] uppercase text-muted-foreground">Delivered by Noon</p>
+                        <span className="w-full text-center bg-foreground text-background text-xs tracking-widest uppercase py-4 block">
+                          Noon
+                        </span>
+                      </div>
+                    )}
+                    {form.amazonUrl && (
+                      <div className="flex-1 flex flex-col items-center gap-2">
+                        <p className="text-[9px] tracking-[0.2em] uppercase text-muted-foreground">Delivered by Amazon</p>
+                        <span className="w-full text-center border border-foreground text-foreground text-xs tracking-widest uppercase py-4 block">
+                          Amazon
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <span className="w-full text-center bg-foreground text-background text-xs tracking-widest uppercase py-5 block">
+                    Order Now
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+          {form.images.length > 0 && (
+            <div className="mt-10">
+              <p className="text-[10px] tracking-widest uppercase text-muted-foreground mb-4">Gallery</p>
+              <div className="flex gap-3 overflow-x-auto">
+                {[form.imageUrl, ...form.images].filter(Boolean).map((img, i) => (
+                  <div key={i} className="shrink-0 w-24 aspect-[3/4] bg-accent overflow-hidden">
+                    <img src={img} alt="" className="w-full h-full object-cover" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    )}
+    </>
   );
 }
 
@@ -941,6 +1086,7 @@ function LooksTab() {
 
 function LookDialog({ look }: { look?: Look }) {
   const [open, setOpen] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const createMutation = useCreateLook();
@@ -1043,6 +1189,7 @@ function LookDialog({ look }: { look?: Look }) {
   const isPending = createMutation.isPending || updateMutation.isPending;
 
   return (
+    <>
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {look ? (
@@ -1182,7 +1329,16 @@ function LookDialog({ look }: { look?: Look }) {
             </div>
           </div>
 
-          <div className="flex justify-end pt-2">
+          <div className="flex items-center justify-between pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setPreviewOpen(true)}
+              className="text-xs tracking-widest uppercase border-border gap-2"
+            >
+              <Eye className="h-3.5 w-3.5" />
+              Preview
+            </Button>
             <Button type="submit" disabled={isPending} className="text-xs tracking-widest uppercase" data-testid="button-save-look">
               {isPending ? "Saving..." : "Save Look"}
             </Button>
@@ -1190,6 +1346,60 @@ function LookDialog({ look }: { look?: Look }) {
         </form>
       </DialogContent>
     </Dialog>
+
+    {/* Full-screen look preview overlay */}
+    {previewOpen && (
+      <div className="fixed inset-0 z-[300] bg-background overflow-auto">
+        <div className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b border-border px-6 py-3 flex items-center justify-between">
+          <p className="text-[10px] tracking-widest uppercase text-muted-foreground">Look Preview</p>
+          <button
+            onClick={() => setPreviewOpen(false)}
+            className="text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+        <div className="container mx-auto px-4 sm:px-6 py-10 max-w-3xl">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+            {/* Look Image */}
+            <div className="aspect-[3/4] bg-accent overflow-hidden relative">
+              {form.imageUrl ? (
+                <img
+                  src={form.imageUrl}
+                  alt={form.title}
+                  className="absolute w-full h-full"
+                  style={{
+                    objectFit: form.imageObjectFit as "cover" | "contain",
+                    objectPosition: `${form.imagePosX}% ${form.imagePosY}%`,
+                    transform: `scale(${form.imageScale / 100})`,
+                    transformOrigin: `${form.imagePosX}% ${form.imagePosY}%`,
+                  }}
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <p className="text-[10px] tracking-widest uppercase text-muted-foreground">No image</p>
+                </div>
+              )}
+            </div>
+            {/* Look Info */}
+            <div className="flex flex-col justify-center">
+              <h1 className="font-serif text-3xl font-light leading-tight mb-4">
+                {form.title || "Look Title"}
+              </h1>
+              {form.description && (
+                <p className="text-sm text-muted-foreground leading-relaxed mb-6">{form.description}</p>
+              )}
+              {form.productIds.length > 0 && (
+                <p className="text-[10px] tracking-widest uppercase text-muted-foreground">
+                  {form.productIds.length} product{form.productIds.length !== 1 ? "s" : ""} in this look
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 }
 

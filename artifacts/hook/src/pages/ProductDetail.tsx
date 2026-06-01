@@ -106,9 +106,14 @@ export default function ProductDetail() {
       : (product.category as string).charAt(0).toUpperCase() + (product.category as string).slice(1);
 
   const deliveryLabel =
-    product.source === "Amazon" || product.category === "electronics"
+    product.source === "Amazon"
       ? t("product.deliveredByAmazon")
       : t("product.deliveredByShein");
+
+  const isElectronics = product.category === "electronics";
+  const noonUrl = product.noonUrl;
+  const amazonUrl = product.amazonUrl;
+  const hasElectronicsBuy = isElectronics && (noonUrl || amazonUrl);
 
   return (
     <div className="pb-32">
@@ -301,19 +306,51 @@ export default function ProductDetail() {
             )}
 
             {/* CTA */}
-            <a
-              href={product.affiliateUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full text-center bg-foreground text-background text-xs tracking-widest uppercase py-5 hover:opacity-90 transition-opacity block"
-              data-testid="button-order-now"
-            >
-              {t("product.orderNow")}
-            </a>
-
-            <p className="text-[10px] text-center text-muted-foreground mt-3 tracking-wide">
-              {deliveryLabel}
-            </p>
+            {hasElectronicsBuy ? (
+              <div className="flex gap-3">
+                {noonUrl && (
+                  <div className="flex-1 flex flex-col items-center gap-2">
+                    <p className="text-[9px] tracking-[0.2em] uppercase text-muted-foreground">Delivered by Noon</p>
+                    <a
+                      href={noonUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full text-center bg-foreground text-background text-xs tracking-widest uppercase py-4 hover:opacity-90 transition-opacity block"
+                    >
+                      Noon
+                    </a>
+                  </div>
+                )}
+                {amazonUrl && (
+                  <div className="flex-1 flex flex-col items-center gap-2">
+                    <p className="text-[9px] tracking-[0.2em] uppercase text-muted-foreground">Delivered by Amazon</p>
+                    <a
+                      href={amazonUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full text-center border border-foreground text-foreground text-xs tracking-widest uppercase py-4 hover:opacity-90 transition-opacity block"
+                    >
+                      Amazon
+                    </a>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <>
+                <a
+                  href={product.affiliateUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full text-center bg-foreground text-background text-xs tracking-widest uppercase py-5 hover:opacity-90 transition-opacity block"
+                  data-testid="button-order-now"
+                >
+                  {t("product.orderNow")}
+                </a>
+                <p className="text-[10px] text-center text-muted-foreground mt-3 tracking-wide">
+                  {deliveryLabel}
+                </p>
+              </>
+            )}
 
             {product.subcategory && (
               <div className="mt-8 pt-6 border-t border-border">
