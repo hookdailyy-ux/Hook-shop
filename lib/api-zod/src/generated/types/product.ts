@@ -43,6 +43,10 @@ export interface Product {
   /** @nullable */
   noonUrl?: string | null;
   /** @nullable */
+  noonPrice?: string | null;
+  /** @nullable */
   amazonUrl?: string | null;
+  /** @nullable */
+  amazonPrice?: string | null;
   createdAt: string;
 }

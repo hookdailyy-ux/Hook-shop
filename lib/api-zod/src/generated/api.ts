@@ -102,7 +102,9 @@ export const ListProductsResponseItem = zod.object({
   "imageScale": zod.number().optional(),
   "imageObjectFit": zod.enum(['cover', 'contain']).optional(),
   "noonUrl": zod.string().nullish(),
+  "noonPrice": zod.string().nullish(),
   "amazonUrl": zod.string().nullish(),
+  "amazonPrice": zod.string().nullish(),
   "createdAt": zod.string()
 })
 export const ListProductsResponse = zod.array(ListProductsResponseItem)
@@ -134,7 +136,9 @@ export const CreateProductBody = zod.object({
   "imageScale": zod.number().optional(),
   "imageObjectFit": zod.enum(['cover', 'contain']).optional(),
   "noonUrl": zod.string().optional(),
-  "amazonUrl": zod.string().optional()
+  "noonPrice": zod.string().optional(),
+  "amazonUrl": zod.string().optional(),
+  "amazonPrice": zod.string().optional()
 })
 
 
@@ -169,7 +173,9 @@ export const GetProductResponse = zod.object({
   "imageScale": zod.number().optional(),
   "imageObjectFit": zod.enum(['cover', 'contain']).optional(),
   "noonUrl": zod.string().nullish(),
+  "noonPrice": zod.string().nullish(),
   "amazonUrl": zod.string().nullish(),
+  "amazonPrice": zod.string().nullish(),
   "createdAt": zod.string()
 })
 
@@ -204,7 +210,9 @@ export const UpdateProductBody = zod.object({
   "imageScale": zod.number().optional(),
   "imageObjectFit": zod.enum(['cover', 'contain']).optional(),
   "noonUrl": zod.string().optional(),
-  "amazonUrl": zod.string().optional()
+  "noonPrice": zod.string().optional(),
+  "amazonUrl": zod.string().optional(),
+  "amazonPrice": zod.string().optional()
 })
 
 export const UpdateProductResponse = zod.object({
@@ -231,7 +239,9 @@ export const UpdateProductResponse = zod.object({
   "imageScale": zod.number().optional(),
   "imageObjectFit": zod.enum(['cover', 'contain']).optional(),
   "noonUrl": zod.string().nullish(),
+  "noonPrice": zod.string().nullish(),
   "amazonUrl": zod.string().nullish(),
+  "amazonPrice": zod.string().nullish(),
   "createdAt": zod.string()
 })
 
@@ -283,7 +293,9 @@ export const ListLooksResponseItem = zod.object({
   "imageScale": zod.number().optional(),
   "imageObjectFit": zod.enum(['cover', 'contain']).optional(),
   "noonUrl": zod.string().nullish(),
+  "noonPrice": zod.string().nullish(),
   "amazonUrl": zod.string().nullish(),
+  "amazonPrice": zod.string().nullish(),
   "createdAt": zod.string()
 })).optional(),
   "createdAt": zod.string()
@@ -344,7 +356,9 @@ export const GetLookResponse = zod.object({
   "imageScale": zod.number().optional(),
   "imageObjectFit": zod.enum(['cover', 'contain']).optional(),
   "noonUrl": zod.string().nullish(),
+  "noonPrice": zod.string().nullish(),
   "amazonUrl": zod.string().nullish(),
+  "amazonPrice": zod.string().nullish(),
   "createdAt": zod.string()
 })).optional(),
   "createdAt": zod.string()
@@ -400,7 +414,9 @@ export const UpdateLookResponse = zod.object({
   "imageScale": zod.number().optional(),
   "imageObjectFit": zod.enum(['cover', 'contain']).optional(),
   "noonUrl": zod.string().nullish(),
+  "noonPrice": zod.string().nullish(),
   "amazonUrl": zod.string().nullish(),
+  "amazonPrice": zod.string().nullish(),
   "createdAt": zod.string()
 })).optional(),
   "createdAt": zod.string()
@@ -454,7 +470,9 @@ export const ListSetupsResponseItem = zod.object({
   "imageScale": zod.number().optional(),
   "imageObjectFit": zod.enum(['cover', 'contain']).optional(),
   "noonUrl": zod.string().nullish(),
+  "noonPrice": zod.string().nullish(),
   "amazonUrl": zod.string().nullish(),
+  "amazonPrice": zod.string().nullish(),
   "createdAt": zod.string()
 })).optional(),
   "createdAt": zod.string()
@@ -515,7 +533,9 @@ export const GetSetupResponse = zod.object({
   "imageScale": zod.number().optional(),
   "imageObjectFit": zod.enum(['cover', 'contain']).optional(),
   "noonUrl": zod.string().nullish(),
+  "noonPrice": zod.string().nullish(),
   "amazonUrl": zod.string().nullish(),
+  "amazonPrice": zod.string().nullish(),
   "createdAt": zod.string()
 })).optional(),
   "createdAt": zod.string()
@@ -571,7 +591,9 @@ export const UpdateSetupResponse = zod.object({
   "imageScale": zod.number().optional(),
   "imageObjectFit": zod.enum(['cover', 'contain']).optional(),
   "noonUrl": zod.string().nullish(),
+  "noonPrice": zod.string().nullish(),
   "amazonUrl": zod.string().nullish(),
+  "amazonPrice": zod.string().nullish(),
   "createdAt": zod.string()
 })).optional(),
   "createdAt": zod.string()
@@ -639,7 +661,9 @@ export const ListAdminProductsResponseItem = zod.object({
   "imageScale": zod.number().optional(),
   "imageObjectFit": zod.enum(['cover', 'contain']).optional(),
   "noonUrl": zod.string().nullish(),
+  "noonPrice": zod.string().nullish(),
   "amazonUrl": zod.string().nullish(),
+  "amazonPrice": zod.string().nullish(),
   "createdAt": zod.string()
 })
 export const ListAdminProductsResponse = zod.array(ListAdminProductsResponseItem)

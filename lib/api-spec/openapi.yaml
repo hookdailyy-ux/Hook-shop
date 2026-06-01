@@ -579,7 +579,11 @@ components:
           enum: [cover, contain]
         noonUrl:
           type: ["string", "null"]
+        noonPrice:
+          type: ["string", "null"]
         amazonUrl:
+          type: ["string", "null"]
+        amazonPrice:
           type: ["string", "null"]
         createdAt:
           type: string
@@ -642,7 +646,11 @@ components:
           enum: [cover, contain]
         noonUrl:
           type: string
+        noonPrice:
+          type: string
         amazonUrl:
+          type: string
+        amazonPrice:
           type: string
 
     ProductUpdate:
@@ -702,7 +710,11 @@ components:
           enum: [cover, contain]
         noonUrl:
           type: string
+        noonPrice:
+          type: string
         amazonUrl:
+          type: string
+        amazonPrice:
           type: string
 
     Look:

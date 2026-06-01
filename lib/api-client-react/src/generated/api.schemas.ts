@@ -108,7 +108,11 @@ export interface Product {
   /** @nullable */
   noonUrl?: string | null;
   /** @nullable */
+  noonPrice?: string | null;
+  /** @nullable */
   amazonUrl?: string | null;
+  /** @nullable */
+  amazonPrice?: string | null;
   createdAt: string;
 }
 
@@ -170,7 +174,9 @@ export interface ProductInput {
   imageScale?: number;
   imageObjectFit?: ProductInputImageObjectFit;
   noonUrl?: string;
+  noonPrice?: string;
   amazonUrl?: string;
+  amazonPrice?: string;
 }
 
 export type ProductUpdateSource = typeof ProductUpdateSource[keyof typeof ProductUpdateSource];
@@ -231,7 +237,9 @@ export interface ProductUpdate {
   imageScale?: number;
   imageObjectFit?: ProductUpdateImageObjectFit;
   noonUrl?: string;
+  noonPrice?: string;
   amazonUrl?: string;
+  amazonPrice?: string;
 }
 
 export interface Look {

@@ -519,7 +519,9 @@ type ProductFormData = {
   originalPrice: string;
   affiliateUrl: string;
   noonUrl: string;
+  noonPrice: string;
   amazonUrl: string;
+  amazonPrice: string;
   externalId: string;
   imageUrl: string;
   images: string[];
@@ -553,7 +555,9 @@ function ProductDialog({ product }: { product?: Product }) {
     originalPrice: product?.originalPrice ?? "",
     affiliateUrl: product?.affiliateUrl ?? "",
     noonUrl: (product as any)?.noonUrl ?? "",
+    noonPrice: (product as any)?.noonPrice ?? "",
     amazonUrl: (product as any)?.amazonUrl ?? "",
+    amazonPrice: (product as any)?.amazonPrice ?? "",
     externalId: (product as any)?.externalId ?? "",
     imageUrl: product?.imageUrl ?? "",
     images: Array.isArray(product?.images) ? (product.images as string[]) : [],
@@ -595,7 +599,9 @@ function ProductDialog({ product }: { product?: Product }) {
       originalPrice: form.originalPrice || undefined,
       imageUrl: form.imageUrl || undefined,
       noonUrl: form.noonUrl || undefined,
+      noonPrice: form.noonPrice || undefined,
       amazonUrl: form.amazonUrl || undefined,
+      amazonPrice: form.amazonPrice || undefined,
       externalId: form.externalId || undefined,
     };
     if (product) {
@@ -753,28 +759,52 @@ function ProductDialog({ product }: { product?: Product }) {
             />
           </div>
 
-          {/* Electronics: Noon + Amazon URLs */}
+          {/* Electronics: Noon + Amazon Store Links */}
           {form.category === "electronics" && (
             <div className="border border-border/60 p-4 space-y-4">
-              <p className="text-[9px] tracking-widest uppercase text-muted-foreground">Electronics Store Links</p>
+              <p className="text-[9px] tracking-widest uppercase text-muted-foreground">Store Comparison</p>
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Noon URL</label>
-                  <Input
-                    value={form.noonUrl}
-                    onChange={(e) => set("noonUrl")(e.target.value)}
-                    placeholder="https://noon.com/..."
-                    className="border-border"
-                  />
+                <div className="space-y-3">
+                  <p className="text-[9px] tracking-widest uppercase text-muted-foreground font-semibold">Noon</p>
+                  <div className="space-y-2">
+                    <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Noon Price</label>
+                    <Input
+                      value={form.noonPrice}
+                      onChange={(e) => set("noonPrice")(e.target.value)}
+                      placeholder="AED 749"
+                      className="border-border"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Noon URL</label>
+                    <Input
+                      value={form.noonUrl}
+                      onChange={(e) => set("noonUrl")(e.target.value)}
+                      placeholder="https://noon.com/..."
+                      className="border-border"
+                    />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Amazon URL</label>
-                  <Input
-                    value={form.amazonUrl}
-                    onChange={(e) => set("amazonUrl")(e.target.value)}
-                    placeholder="https://amzn.to/..."
-                    className="border-border"
-                  />
+                <div className="space-y-3">
+                  <p className="text-[9px] tracking-widest uppercase text-muted-foreground font-semibold">Amazon</p>
+                  <div className="space-y-2">
+                    <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Amazon Price</label>
+                    <Input
+                      value={form.amazonPrice}
+                      onChange={(e) => set("amazonPrice")(e.target.value)}
+                      placeholder="AED 779"
+                      className="border-border"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Amazon URL</label>
+                    <Input
+                      value={form.amazonUrl}
+                      onChange={(e) => set("amazonUrl")(e.target.value)}
+                      placeholder="https://amzn.to/..."
+                      className="border-border"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -957,21 +987,21 @@ function ProductDialog({ product }: { product?: Product }) {
               {/* CTA preview */}
               <div className="mt-auto pt-4">
                 {form.category === "electronics" && (form.noonUrl || form.amazonUrl) ? (
-                  <div className="flex gap-3">
+                  <div className="flex gap-4">
                     {form.noonUrl && (
-                      <div className="flex-1 flex flex-col items-center gap-2">
-                        <p className="text-[9px] tracking-[0.2em] uppercase text-muted-foreground">Delivered by Noon</p>
-                        <span className="w-full text-center bg-foreground text-background text-xs tracking-widest uppercase py-4 block">
-                          Noon
-                        </span>
+                      <div className="flex-1 border border-border p-4 flex flex-col gap-3">
+                        <p className="text-[10px] tracking-widest uppercase font-semibold">Noon</p>
+                        {form.noonPrice && <p className="text-2xl font-medium tracking-tight">{form.noonPrice}</p>}
+                        <span className="w-full text-center bg-foreground text-background text-[10px] tracking-widest uppercase py-3 block">Noon</span>
+                        <p className="text-[9px] tracking-wide text-muted-foreground text-center">Delivered by Noon</p>
                       </div>
                     )}
                     {form.amazonUrl && (
-                      <div className="flex-1 flex flex-col items-center gap-2">
-                        <p className="text-[9px] tracking-[0.2em] uppercase text-muted-foreground">Delivered by Amazon</p>
-                        <span className="w-full text-center border border-foreground text-foreground text-xs tracking-widest uppercase py-4 block">
-                          Amazon
-                        </span>
+                      <div className="flex-1 border border-border p-4 flex flex-col gap-3">
+                        <p className="text-[10px] tracking-widest uppercase font-semibold">Amazon</p>
+                        {form.amazonPrice && <p className="text-2xl font-medium tracking-tight">{form.amazonPrice}</p>}
+                        <span className="w-full text-center border border-foreground text-foreground text-[10px] tracking-widest uppercase py-3 block">Amazon</span>
+                        <p className="text-[9px] tracking-wide text-muted-foreground text-center">Delivered by Amazon</p>
                       </div>
                     )}
                   </div>

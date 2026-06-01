@@ -307,31 +307,39 @@ export default function ProductDetail() {
 
             {/* CTA */}
             {hasElectronicsBuy ? (
-              <div className="flex gap-3">
+              <div className="flex gap-4">
                 {noonUrl && (
-                  <div className="flex-1 flex flex-col items-center gap-2">
-                    <p className="text-[9px] tracking-[0.2em] uppercase text-muted-foreground">Delivered by Noon</p>
+                  <div className="flex-1 border border-border p-4 flex flex-col gap-3">
+                    <p className="text-[10px] tracking-widest uppercase font-semibold">Noon</p>
+                    {product.noonPrice && (
+                      <p className="text-2xl font-medium tracking-tight">{product.noonPrice}</p>
+                    )}
                     <a
                       href={noonUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-full text-center bg-foreground text-background text-xs tracking-widest uppercase py-4 hover:opacity-90 transition-opacity block"
+                      className="w-full text-center bg-foreground text-background text-[10px] tracking-widest uppercase py-3 hover:opacity-90 transition-opacity block"
                     >
                       Noon
                     </a>
+                    <p className="text-[9px] tracking-wide text-muted-foreground text-center">Delivered by Noon</p>
                   </div>
                 )}
                 {amazonUrl && (
-                  <div className="flex-1 flex flex-col items-center gap-2">
-                    <p className="text-[9px] tracking-[0.2em] uppercase text-muted-foreground">Delivered by Amazon</p>
+                  <div className="flex-1 border border-border p-4 flex flex-col gap-3">
+                    <p className="text-[10px] tracking-widest uppercase font-semibold">Amazon</p>
+                    {product.amazonPrice && (
+                      <p className="text-2xl font-medium tracking-tight">{product.amazonPrice}</p>
+                    )}
                     <a
                       href={amazonUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-full text-center border border-foreground text-foreground text-xs tracking-widest uppercase py-4 hover:opacity-90 transition-opacity block"
+                      className="w-full text-center border border-foreground text-foreground text-[10px] tracking-widest uppercase py-3 hover:opacity-90 transition-opacity block"
                     >
                       Amazon
                     </a>
+                    <p className="text-[9px] tracking-wide text-muted-foreground text-center">Delivered by Amazon</p>
                   </div>
                 )}
               </div>
