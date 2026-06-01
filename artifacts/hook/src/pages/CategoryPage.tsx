@@ -22,6 +22,11 @@ const CATEGORY_META: Record<string, { titleKey: string; descKey: string; showDis
     descKey: "category.men.description",
     showDiscoverMore: true,
   },
+  couples: {
+    titleKey: "category.couples.title",
+    descKey: "category.couples.description",
+    showDiscoverMore: true,
+  },
   "kids": {
     titleKey: "category.kids.title",
     descKey: "category.kids.description",
@@ -76,43 +81,66 @@ export default function CategoryPage({ category }: CategoryPageProps) {
   const title = meta ? t(meta.titleKey) : category.charAt(0).toUpperCase() + category.slice(1);
   const description = meta ? t(meta.descKey) : "";
   const showDiscoverMore = (meta?.showDiscoverMore ?? false) && !!siteSettings?.discoverMoreUrl;
+  const hasImage = !!categoryImage?.imageUrl;
 
   return (
     <div className="pb-32">
-      {categoryImage?.imageUrl && (
-        <div className="w-full h-52 md:h-80 overflow-hidden relative">
-          <img
-            src={categoryImage.imageUrl}
-            alt=""
-            className="absolute w-full h-full"
-            style={{
-              objectFit: categoryImage.objectFit ?? "cover",
-              objectPosition: `${categoryImage.posX}% ${categoryImage.posY}%`,
-              transform: `scale(${categoryImage.scale / 100})`,
-              transformOrigin: `${categoryImage.posX}% ${categoryImage.posY}%`,
-            }}
-          />
-        </div>
-      )}
-      <div className="container mx-auto px-4 sm:px-6 pt-12 pb-10 md:pt-16 md:pb-14 border-b border-border">
-        <h1 className="font-serif text-4xl md:text-6xl font-light mb-3">{title}</h1>
-        {description && (
-          <p className="text-xs tracking-widest uppercase text-muted-foreground max-w-md leading-relaxed mb-5">
-            {description}
-          </p>
+      {/* ── Unified hero: image + text in one section ── */}
+      <div
+        className={`relative w-full overflow-hidden border-b border-border bg-[#e8e0d4] ${
+          hasImage ? "min-h-[220px] md:min-h-[340px]" : ""
+        }`}
+      >
+        {hasImage && (
+          <>
+            <img
+              src={categoryImage!.imageUrl}
+              alt=""
+              className="absolute inset-0 w-full h-full"
+              style={{
+                objectFit: categoryImage!.objectFit ?? "cover",
+                objectPosition: `${categoryImage!.posX}% ${categoryImage!.posY}%`,
+                transform: `scale(${categoryImage!.scale / 100})`,
+                transformOrigin: `${categoryImage!.posX}% ${categoryImage!.posY}%`,
+              }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-black/10" />
+          </>
         )}
-        {showDiscoverMore && (
-          <a
-            href={siteSettings!.discoverMoreUrl!}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-[10px] tracking-[0.25em] uppercase border border-foreground/60 px-6 py-2.5 text-foreground/80 hover:bg-foreground hover:text-background transition-colors"
-            data-testid="button-discover-more"
+        <div className="relative z-10 container mx-auto px-4 sm:px-6 py-12 md:py-20">
+          <h1
+            className={`font-serif text-4xl md:text-6xl font-light mb-3 ${
+              hasImage ? "text-white" : ""
+            }`}
           >
-            <span>✨</span>
-            <span>{t("category.exploreMoreShein")}</span>
-          </a>
-        )}
+            {title}
+          </h1>
+          {description && (
+            <p
+              className={`text-xs tracking-widest uppercase max-w-md leading-relaxed mb-5 ${
+                hasImage ? "text-white/70" : "text-muted-foreground"
+              }`}
+            >
+              {description}
+            </p>
+          )}
+          {showDiscoverMore && (
+            <a
+              href={siteSettings!.discoverMoreUrl!}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`inline-flex items-center gap-2 text-[10px] tracking-[0.25em] uppercase border px-6 py-2.5 transition-colors ${
+                hasImage
+                  ? "border-white/60 text-white/80 hover:bg-white hover:text-foreground"
+                  : "border-foreground/60 text-foreground/80 hover:bg-foreground hover:text-background"
+              }`}
+              data-testid="button-discover-more"
+            >
+              <span>✨</span>
+              <span>{t("category.exploreMoreShein")}</span>
+            </a>
+          )}
+        </div>
       </div>
 
       {subcategories && subcategories.length > 0 && (

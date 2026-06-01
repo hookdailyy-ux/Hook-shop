@@ -5,7 +5,7 @@ import { z } from "zod";
 
 const router: IRouter = Router();
 
-const categoryEnum = ["women", "men", "kids", "electronics", "home", "accessories"] as const;
+const categoryEnum = ["women", "men", "couples", "kids", "electronics", "home", "accessories"] as const;
 
 router.get("/subcategories", async (req, res) => {
   try {

@@ -124,6 +124,7 @@ function Router() {
               <Route path="/shop-the-setup" component={ShopTheSetup} />
               <Route path="/women" component={() => <CategoryPage category="women" />} />
               <Route path="/men" component={() => <CategoryPage category="men" />} />
+              <Route path="/couples" component={() => <CategoryPage category="couples" />} />
               <Route path="/kids" component={() => <CategoryPage category="kids" />} />
               <Route path="/sport" component={() => <Redirect to="/kids" />} />
               <Route path="/women-sport" component={() => <Redirect to="/women" />} />

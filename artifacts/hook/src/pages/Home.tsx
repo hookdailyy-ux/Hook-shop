@@ -111,29 +111,37 @@ export default function Home() {
               View All
             </Link>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5">
-            {latestLooks && latestLooks.length > 0
-              ? latestLooks.slice(0, 4).map((look) => (
-                  <HomeEditorialCard
-                    key={look.id}
-                    title={look.title}
-                    href="/shop-the-look"
-                    imageUrl={look.imageUrl ?? undefined}
-                    label={t("shopTheLook.outfit")}
-                    cta={t("hero.cta")}
-                    favoriteItem={{ id: look.id, type: "look", title: look.title, imageUrl: look.imageUrl }}
-                  />
-                ))
-              : LOOK_PLACEHOLDERS.map((p) => (
-                  <HomeEditorialCard
-                    key={p.id}
-                    title={p.title}
-                    href="/shop-the-look"
-                    label={t("shopTheLook.outfit")}
-                    cta={t("hero.cta")}
-                    favoriteItem={{ id: p.id, type: "look", title: p.title }}
-                  />
-                ))}
+          <div className="no-scrollbar overflow-x-auto -mx-4 px-4 sm:-mx-6 sm:px-6 md:mx-0 md:px-0">
+            <div className="flex gap-3 w-max md:w-auto md:grid md:grid-cols-4 md:gap-5">
+              {(latestLooks && latestLooks.length > 0
+                ? latestLooks.slice(0, 4).map((look) => ({
+                    key: String(look.id),
+                    props: {
+                      title: look.title,
+                      href: "/shop-the-look" as const,
+                      imageUrl: look.imageUrl ?? undefined,
+                      label: t("shopTheLook.outfit"),
+                      cta: t("hero.cta"),
+                      favoriteItem: { id: look.id, type: "look" as const, title: look.title, imageUrl: look.imageUrl },
+                    },
+                  }))
+                : LOOK_PLACEHOLDERS.map((p) => ({
+                    key: String(p.id),
+                    props: {
+                      title: p.title,
+                      href: "/shop-the-look" as const,
+                      imageUrl: undefined,
+                      label: t("shopTheLook.outfit"),
+                      cta: t("hero.cta"),
+                      favoriteItem: { id: p.id, type: "look" as const, title: p.title },
+                    },
+                  }))
+              ).map(({ key, props }) => (
+                <div key={key} className="shrink-0 w-[calc(50vw-22px)] sm:w-[calc(50vw-28px)] md:w-auto md:shrink">
+                  <HomeEditorialCard {...props} />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -150,29 +158,37 @@ export default function Home() {
               View All
             </Link>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5">
-            {latestSetups && latestSetups.length > 0
-              ? latestSetups.slice(0, 4).map((setup) => (
-                  <HomeEditorialCard
-                    key={setup.id}
-                    title={setup.title}
-                    href="/shop-the-setup"
-                    imageUrl={setup.imageUrl ?? undefined}
-                    label={t("shopTheSetup.setup")}
-                    cta={t("home.shopTheSetup")}
-                    favoriteItem={{ id: setup.id, type: "setup", title: setup.title, imageUrl: setup.imageUrl }}
-                  />
-                ))
-              : SETUP_PLACEHOLDERS.map((p) => (
-                  <HomeEditorialCard
-                    key={p.id}
-                    title={p.title}
-                    href="/shop-the-setup"
-                    label={t("shopTheSetup.setup")}
-                    cta={t("home.shopTheSetup")}
-                    favoriteItem={{ id: p.id, type: "setup", title: p.title }}
-                  />
-                ))}
+          <div className="no-scrollbar overflow-x-auto -mx-4 px-4 sm:-mx-6 sm:px-6 md:mx-0 md:px-0">
+            <div className="flex gap-3 w-max md:w-auto md:grid md:grid-cols-4 md:gap-5">
+              {(latestSetups && latestSetups.length > 0
+                ? latestSetups.slice(0, 4).map((setup) => ({
+                    key: String(setup.id),
+                    props: {
+                      title: setup.title,
+                      href: "/shop-the-setup" as const,
+                      imageUrl: setup.imageUrl ?? undefined,
+                      label: t("shopTheSetup.setup"),
+                      cta: t("home.shopTheSetup"),
+                      favoriteItem: { id: setup.id, type: "setup" as const, title: setup.title, imageUrl: setup.imageUrl },
+                    },
+                  }))
+                : SETUP_PLACEHOLDERS.map((p) => ({
+                    key: String(p.id),
+                    props: {
+                      title: p.title,
+                      href: "/shop-the-setup" as const,
+                      imageUrl: undefined,
+                      label: t("shopTheSetup.setup"),
+                      cta: t("home.shopTheSetup"),
+                      favoriteItem: { id: p.id, type: "setup" as const, title: p.title },
+                    },
+                  }))
+              ).map(({ key, props }) => (
+                <div key={key} className="shrink-0 w-[calc(50vw-22px)] sm:w-[calc(50vw-28px)] md:w-auto md:shrink">
+                  <HomeEditorialCard {...props} />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>

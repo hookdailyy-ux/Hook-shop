@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { useFavorites, type FavoriteProduct, type FavoriteLook, type FavoriteSetup } from "@/contexts/FavoritesContext";
 import { HeartButton } from "@/components/HeartButton";
 import { useTranslation } from "react-i18next";
+import { useSiteImages } from "@/hooks/useSiteImages";
 
 function FavoriteProductCard({ item }: { item: FavoriteProduct }) {
   const { t } = useTranslation();
@@ -114,19 +115,51 @@ function FavoriteSetupCard({ item }: { item: FavoriteSetup }) {
 export default function Favorites() {
   const { favorites } = useFavorites();
   const { t } = useTranslation();
+  const { data: siteImages } = useSiteImages();
+  const heroImage = siteImages?.favorites;
+  const hasImage = !!heroImage?.imageUrl;
   const products = favorites.filter((f) => f.type === "product") as FavoriteProduct[];
   const looks = favorites.filter((f) => f.type === "look") as FavoriteLook[];
   const setups = favorites.filter((f) => f.type === "setup") as FavoriteSetup[];
 
   return (
     <div className="pb-32">
-      <div className="container mx-auto px-4 sm:px-6 pt-10 pb-8 md:pt-14 md:pb-12 border-b border-border mb-12">
-        <h1 className="font-serif text-4xl md:text-6xl font-light mb-2">{t("favorites.title")}</h1>
-        <p className="text-xs tracking-widest uppercase text-muted-foreground">
-          {favorites.length === 0
-            ? "Nothing saved yet"
-            : `${favorites.length} saved item${favorites.length !== 1 ? "s" : ""}`}
-        </p>
+      {/* ── Unified hero ── */}
+      <div
+        className={`relative w-full overflow-hidden border-b border-border bg-[#e8e0d4] ${
+          hasImage ? "min-h-[220px] md:min-h-[340px]" : ""
+        }`}
+      >
+        {hasImage && (
+          <>
+            <img
+              src={heroImage!.imageUrl}
+              alt=""
+              className="absolute inset-0 w-full h-full"
+              style={{
+                objectFit: heroImage!.objectFit ?? "cover",
+                objectPosition: `${heroImage!.posX}% ${heroImage!.posY}%`,
+                transform: `scale(${heroImage!.scale / 100})`,
+                transformOrigin: `${heroImage!.posX}% ${heroImage!.posY}%`,
+              }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-black/10" />
+          </>
+        )}
+        <div className="relative z-10 container mx-auto px-4 sm:px-6 py-12 md:py-20">
+          <h1
+            className={`font-serif text-4xl md:text-6xl font-light mb-2 ${hasImage ? "text-white" : ""}`}
+          >
+            {t("favorites.title")}
+          </h1>
+          <p
+            className={`text-xs tracking-widest uppercase ${hasImage ? "text-white/70" : "text-muted-foreground"}`}
+          >
+            {favorites.length === 0
+              ? "Nothing saved yet"
+              : `${favorites.length} saved item${favorites.length !== 1 ? "s" : ""}`}
+          </p>
+        </div>
       </div>
 
       <div className="container mx-auto px-4 sm:px-6">

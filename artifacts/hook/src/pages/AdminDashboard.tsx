@@ -40,7 +40,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { X, Plus, Trash2, Pencil, Loader2, Upload } from "lucide-react";
+import { X, Plus, Trash2, Pencil, Loader2, Upload, Eye } from "lucide-react";
 import { SingleImageUpload, MultiImageUpload } from "@/components/ImageUploadField";
 import { useUpload } from "@workspace/object-storage-web";
 import { useSiteImages, useUpsertSiteImage, useDeleteSiteImage } from "@/hooks/useSiteImages";
@@ -59,6 +59,7 @@ type Tab = "dashboard" | "products" | "looks" | "categories" | "settings" | "ima
 const CATEGORIES = [
   { value: "women", label: "Women" },
   { value: "men", label: "Men" },
+  { value: "couples", label: "Couples" },
   { value: "kids", label: "Kids" },
   { value: "electronics", label: "Electronics" },
   { value: "home", label: "Home Essentials" },
@@ -1807,12 +1808,14 @@ const SITE_IMAGE_SECTIONS: Array<{ key: SiteImageKey; label: string }> = [
   { key: "hero", label: "Home Hero" },
   { key: "women", label: "Women" },
   { key: "men", label: "Men" },
+  { key: "couples", label: "Couples" },
   { key: "kids", label: "Kids" },
   { key: "accessories", label: "Accessories" },
   { key: "home", label: "Home Essentials" },
   { key: "electronics", label: "Electronics" },
   { key: "look", label: "Shop The Look" },
   { key: "setup", label: "Shop The Setup" },
+  { key: "favorites", label: "Favorites" },
 ];
 
 function SiteImagesTab() {
@@ -1852,7 +1855,7 @@ function SiteImagesTab() {
 
   return (
     <div>
-      <p className="text-xs tracking-widest uppercase text-muted-foreground mb-6">8 sections</p>
+      <p className="text-xs tracking-widest uppercase text-muted-foreground mb-6">{SITE_IMAGE_SECTIONS.length} sections</p>
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         {SITE_IMAGE_SECTIONS.map(({ key, label }) => (
           <SectionImageCard
@@ -1898,8 +1901,78 @@ function SectionImageCard({
   };
 
   const btnClass = "w-8 h-8 border border-border flex items-center justify-center text-sm hover:bg-accent transition-colors select-none";
+  const [showPreview, setShowPreview] = useState(false);
 
   return (
+    <>
+      {/* ── Full-screen preview modal ── */}
+      {showPreview && image && (
+        <div className="fixed inset-0 z-[9999] bg-black/95 flex flex-col">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 shrink-0">
+            <div>
+              <p className="text-[9px] tracking-[0.3em] uppercase text-white/40 mb-0.5">Hero Preview</p>
+              <p className="text-sm tracking-widest uppercase text-white font-light">{label}</p>
+            </div>
+            <button
+              onClick={() => setShowPreview(false)}
+              className="p-2 text-white/60 hover:text-white transition-colors"
+              aria-label="Close preview"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+          <div className="flex-1 flex flex-col items-center justify-center gap-8 p-6 overflow-auto">
+            {/* Mobile preview */}
+            <div className="flex flex-col items-center gap-2">
+              <p className="text-[9px] tracking-widest uppercase text-white/30">Mobile</p>
+              <div className="w-72 h-44 relative overflow-hidden bg-[#e8e0d4] shadow-2xl">
+                <img
+                  src={image.imageUrl}
+                  alt=""
+                  className="absolute w-full h-full"
+                  style={{
+                    objectFit: image.objectFit ?? "cover",
+                    objectPosition: `${image.posX}% ${image.posY}%`,
+                    transform: `scale(${image.scale / 100})`,
+                    transformOrigin: `${image.posX}% ${image.posY}%`,
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-black/10" />
+                <div className="absolute inset-0 flex flex-col justify-end px-5 pb-5">
+                  <p className="font-serif text-xl text-white leading-tight">{label}</p>
+                  <p className="text-[9px] tracking-widest uppercase text-white/60 mt-1">Preview</p>
+                </div>
+              </div>
+            </div>
+            {/* Desktop preview */}
+            <div className="flex flex-col items-center gap-2">
+              <p className="text-[9px] tracking-widest uppercase text-white/30">Desktop</p>
+              <div className="w-full max-w-2xl h-52 relative overflow-hidden bg-[#e8e0d4] shadow-2xl">
+                <img
+                  src={image.imageUrl}
+                  alt=""
+                  className="absolute w-full h-full"
+                  style={{
+                    objectFit: image.objectFit ?? "cover",
+                    objectPosition: `${image.posX}% ${image.posY}%`,
+                    transform: `scale(${image.scale / 100})`,
+                    transformOrigin: `${image.posX}% ${image.posY}%`,
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-black/10" />
+                <div className="absolute inset-0 flex flex-col justify-end px-8 pb-8">
+                  <p className="font-serif text-4xl text-white leading-tight">{label}</p>
+                  <p className="text-[10px] tracking-widest uppercase text-white/60 mt-1">Preview</p>
+                </div>
+              </div>
+            </div>
+            <p className="text-[9px] tracking-widest uppercase text-white/30">
+              zoom {image.scale}% · x {image.posX}% · y {image.posY}% · {image.objectFit ?? "cover"}
+            </p>
+          </div>
+        </div>
+      )}
+
     <div className="border border-border p-4 flex flex-col gap-3">
       <p className="text-[10px] tracking-widest uppercase font-medium">{label}</p>
 
@@ -1940,13 +2013,23 @@ function SectionImageCard({
           {image ? "Replace" : "Upload"}
         </button>
         {image && (
-          <button
-            type="button"
-            onClick={onDelete}
-            className="w-9 flex items-center justify-center border border-border text-muted-foreground hover:text-destructive hover:border-destructive/40 transition-colors"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-          </button>
+          <>
+            <button
+              type="button"
+              onClick={() => setShowPreview(true)}
+              className="w-9 flex items-center justify-center border border-border text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors"
+              title="Preview"
+            >
+              <Eye className="h-3.5 w-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={onDelete}
+              className="w-9 flex items-center justify-center border border-border text-muted-foreground hover:text-destructive hover:border-destructive/40 transition-colors"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </button>
+          </>
         )}
       </div>
 
@@ -1992,5 +2075,6 @@ function SectionImageCard({
         onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); e.target.value = ""; }}
       />
     </div>
+    </>
   );
 }

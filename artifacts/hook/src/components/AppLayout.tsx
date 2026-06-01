@@ -101,6 +101,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const clothesItems = [
     { href: "/women", label: t("nav.women") },
     { href: "/men", label: t("nav.men") },
+    { href: "/couples", label: t("nav.couples") },
     { href: "/kids", label: t("nav.kids") },
     { href: "/shop-the-look", label: t("nav.shopTheLook") },
   ];
@@ -114,6 +115,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const isClothesActive =
     location.startsWith("/women") ||
     location.startsWith("/men") ||
+    location.startsWith("/couples") ||
     location.startsWith("/kids") ||
     location.startsWith("/shop-the-look");
 
@@ -140,16 +142,16 @@ export function AppLayout({ children }: { children: ReactNode }) {
             <NavDropdown label={t("nav.fashion")} items={clothesItems} isActive={isClothesActive} />
             <NavDropdown label={t("nav.accessories")} items={accessoriesItems} isActive={isAccessoriesActive} />
             <Link
-              href="/electronics"
-              className={`transition-colors uppercase ${location.startsWith("/electronics") ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`}
-            >
-              {t("nav.electronics")}
-            </Link>
-            <Link
               href="/home-essentials"
               className={`transition-colors uppercase ${location.startsWith("/home-essentials") ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`}
             >
               {t("nav.homeEssentials")}
+            </Link>
+            <Link
+              href="/electronics"
+              className={`transition-colors uppercase ${location.startsWith("/electronics") ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+            >
+              {t("nav.electronics")}
             </Link>
           </nav>
 
@@ -270,8 +272,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
             )}
 
             {[
-              { href: "/electronics", label: t("nav.electronics") },
               { href: "/home-essentials", label: t("nav.homeEssentials") },
+              { href: "/electronics", label: t("nav.electronics") },
             ].map((link) => (
               <Link
                 key={link.href}
