@@ -241,12 +241,14 @@ export default function ProductDetail() {
               {product.title}
             </h1>
 
-            <div className="flex items-baseline gap-3 mb-6">
-              <p className="text-xl font-medium">{product.price || "TBA"}</p>
-              {product.originalPrice && (
-                <p className="text-sm text-muted-foreground line-through">{product.originalPrice}</p>
-              )}
-            </div>
+            {!isElectronics && (
+              <div className="flex items-baseline gap-3 mb-6">
+                <p className="text-xl font-medium">{product.price || "TBA"}</p>
+                {product.originalPrice && (
+                  <p className="text-sm text-muted-foreground line-through">{product.originalPrice}</p>
+                )}
+              </div>
+            )}
 
             {product.description && (
               <p className="text-sm text-muted-foreground leading-relaxed mb-7">
