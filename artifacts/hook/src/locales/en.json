@@ -8,7 +8,7 @@
     "shopTheLook": "Shop The Look",
     "men": "Men",
     "women": "Women",
-    "sport": "Sport",
+    "kids": "Kids",
     "allAccessories": "All Accessories",
     "womenAccessories": "Women Accessories",
     "menAccessories": "Men Accessories"
@@ -51,9 +51,9 @@
       "title": "Home Essentials",
       "description": "Objects for living. Crafted for the modern interior."
     },
-    "sport": {
-      "title": "Sport",
-      "description": "Performance meets style. Activewear and sport essentials for every pursuit."
+    "kids": {
+      "title": "Kids",
+      "description": "Playful, comfortable, and built for every adventure."
     },
     "accessories": {
       "title": "Accessories",

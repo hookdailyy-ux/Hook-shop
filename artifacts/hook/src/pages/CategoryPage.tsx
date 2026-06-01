@@ -22,9 +22,9 @@ const CATEGORY_META: Record<string, { titleKey: string; descKey: string; showDis
     descKey: "category.men.description",
     showDiscoverMore: true,
   },
-  "sport": {
-    titleKey: "category.sport.title",
-    descKey: "category.sport.description",
+  "kids": {
+    titleKey: "category.kids.title",
+    descKey: "category.kids.description",
     showDiscoverMore: true,
   },
   electronics: {

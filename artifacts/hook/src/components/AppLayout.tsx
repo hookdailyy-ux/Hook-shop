@@ -101,7 +101,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const clothesItems = [
     { href: "/women", label: t("nav.women") },
     { href: "/men", label: t("nav.men") },
-    { href: "/sport", label: t("nav.sport") },
+    { href: "/kids", label: t("nav.kids") },
     { href: "/shop-the-look", label: t("nav.shopTheLook") },
   ];
 
@@ -114,7 +114,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const isClothesActive =
     location.startsWith("/women") ||
     location.startsWith("/men") ||
-    location.startsWith("/sport") ||
+    location.startsWith("/kids") ||
     location.startsWith("/shop-the-look");
 
   const isAccessoriesActive = location.startsWith("/accessories");

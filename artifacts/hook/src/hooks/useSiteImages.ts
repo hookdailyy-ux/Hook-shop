@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
-export const SITE_IMAGE_KEYS = ["hero", "women", "men", "sport", "accessories", "home", "electronics", "look", "setup"] as const;
+export const SITE_IMAGE_KEYS = ["hero", "women", "men", "kids", "accessories", "home", "electronics", "look", "setup"] as const;
 export type SiteImageKey = (typeof SITE_IMAGE_KEYS)[number];
 
 export interface SiteImage {

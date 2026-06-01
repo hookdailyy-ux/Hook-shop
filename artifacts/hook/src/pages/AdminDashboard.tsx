@@ -59,7 +59,7 @@ type Tab = "dashboard" | "products" | "looks" | "categories" | "settings" | "ima
 const CATEGORIES = [
   { value: "women", label: "Women" },
   { value: "men", label: "Men" },
-  { value: "sport", label: "Sport" },
+  { value: "kids", label: "Kids" },
   { value: "electronics", label: "Electronics" },
   { value: "home", label: "Home Essentials" },
   { value: "accessories", label: "Accessories" },
@@ -1807,7 +1807,7 @@ const SITE_IMAGE_SECTIONS: Array<{ key: SiteImageKey; label: string }> = [
   { key: "hero", label: "Home Hero" },
   { key: "women", label: "Women" },
   { key: "men", label: "Men" },
-  { key: "sport", label: "Sport" },
+  { key: "kids", label: "Kids" },
   { key: "accessories", label: "Accessories" },
   { key: "home", label: "Home Essentials" },
   { key: "electronics", label: "Electronics" },

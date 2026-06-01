@@ -124,9 +124,10 @@ function Router() {
               <Route path="/shop-the-setup" component={ShopTheSetup} />
               <Route path="/women" component={() => <CategoryPage category="women" />} />
               <Route path="/men" component={() => <CategoryPage category="men" />} />
-              <Route path="/sport" component={() => <CategoryPage category="sport" />} />
-              <Route path="/women-sport" component={() => <Redirect to="/sport" />} />
-              <Route path="/men-sport" component={() => <Redirect to="/sport" />} />
+              <Route path="/kids" component={() => <CategoryPage category="kids" />} />
+              <Route path="/sport" component={() => <Redirect to="/kids" />} />
+              <Route path="/women-sport" component={() => <Redirect to="/women" />} />
+              <Route path="/men-sport" component={() => <Redirect to="/men" />} />
               <Route
                 path="/accessories"
                 component={() => <CategoryPage category="accessories" />}
