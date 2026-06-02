@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import {
   X,
   Minus,
@@ -19,13 +20,8 @@ import {
 import {
   useBasket,
   inferStore,
-  buildBasketKey,
   type BasketItem,
 } from "@/contexts/BasketContext";
-import {
-  useGetProduct,
-  getGetProductQueryKey,
-} from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 
@@ -56,192 +52,19 @@ const STORE_META: Record<string, { label: string; btnClass: string }> = {
   },
 };
 
-// ── Product edit modal ───────────────────────────────────────────────────────
-
-function BasketEditModal({
-  item,
-  onSave,
-  onCancel,
-}: {
-  item: BasketItem;
-  onSave: (size: string | null, color: string | null, qty: number) => void;
-  onCancel: () => void;
-}) {
-  const { data: product, isLoading } = useGetProduct(item.productId, {
-    query: {
-      enabled: !!item.productId,
-      queryKey: getGetProductQueryKey(item.productId),
-    },
-  });
-
-  const [selectedSize, setSelectedSize] = useState<string | null>(item.size);
-  const [selectedColor, setSelectedColor] = useState<string | null>(item.color);
-  const [qty, setQty] = useState(item.quantity);
-
-  const sizes = Array.isArray(product?.sizes) ? (product.sizes as string[]) : [];
-  const colors = Array.isArray(product?.colors) ? (product.colors as string[]) : [];
-  const imageUrl = product?.imageUrl ?? item.productImageUrl;
-
-  return (
-    <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center">
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onCancel} />
-      <div className="relative z-10 w-full sm:max-w-sm bg-background shadow-2xl">
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-          <span className="text-sm font-medium tracking-wide">Edit Item</span>
-          <button
-            onClick={onCancel}
-            className="text-muted-foreground hover:text-foreground transition-colors p-1"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-
-        {isLoading ? (
-          <div className="flex items-center justify-center py-14">
-            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-          </div>
-        ) : (
-          <div className="p-5 space-y-5 max-h-[70vh] overflow-y-auto">
-            {/* Product preview */}
-            <div className="flex gap-3 pb-4 border-b border-border">
-              <div className="w-16 h-20 shrink-0 overflow-hidden bg-stone-100">
-                {imageUrl ? (
-                  <img
-                    src={imageUrl}
-                    alt={item.productTitle}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <ShoppingBag className="h-5 w-5 text-muted-foreground/20" strokeWidth={1} />
-                  </div>
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                {item.brand && (
-                  <p className="text-[9px] tracking-widest uppercase text-muted-foreground">
-                    {item.brand}
-                  </p>
-                )}
-                <p className="text-sm leading-snug line-clamp-2 mt-0.5">
-                  {item.productTitle}
-                </p>
-                {item.displayPrice && (
-                  <p className="text-sm font-semibold mt-1">{item.displayPrice}</p>
-                )}
-              </div>
-            </div>
-
-            {/* Sizes */}
-            {sizes.length > 0 && (
-              <div>
-                <p className="text-[9px] tracking-widest uppercase text-muted-foreground mb-2.5">
-                  Size{selectedSize ? ` — ${selectedSize}` : ""}
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {sizes.map((size) => (
-                    <button
-                      key={size}
-                      onClick={() =>
-                        setSelectedSize(selectedSize === size ? null : size)
-                      }
-                      className={`min-w-[44px] h-9 px-3 text-xs tracking-widest border transition-colors ${
-                        selectedSize === size
-                          ? "bg-foreground text-background border-foreground"
-                          : "bg-background text-foreground border-border hover:border-foreground"
-                      }`}
-                    >
-                      {size}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Colors */}
-            {colors.length > 0 && (
-              <div>
-                <p className="text-[9px] tracking-widest uppercase text-muted-foreground mb-2.5">
-                  Color{selectedColor ? ` — ${selectedColor}` : ""}
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {colors.map((color) => (
-                    <button
-                      key={color}
-                      onClick={() =>
-                        setSelectedColor(selectedColor === color ? null : color)
-                      }
-                      className={`h-9 px-3 text-xs tracking-widest border transition-colors ${
-                        selectedColor === color
-                          ? "bg-foreground text-background border-foreground"
-                          : "bg-background text-foreground border-border hover:border-foreground"
-                      }`}
-                    >
-                      {color}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Quantity */}
-            <div>
-              <p className="text-[9px] tracking-widest uppercase text-muted-foreground mb-2.5">
-                Quantity
-              </p>
-              <div className="flex items-center border border-border w-fit">
-                <button
-                  onClick={() => setQty((q) => Math.max(1, q - 1))}
-                  className="px-3 py-2 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-                >
-                  <Minus className="h-3 w-3" />
-                </button>
-                <span className="text-sm font-medium w-10 text-center">{qty}</span>
-                <button
-                  onClick={() => setQty((q) => q + 1)}
-                  className="px-3 py-2 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-                >
-                  <Plus className="h-3 w-3" />
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Actions */}
-        <div className="px-5 pb-6 pt-4 border-t border-border flex gap-2">
-          <button
-            onClick={() => onSave(selectedSize, selectedColor, qty)}
-            className="flex-1 py-3.5 bg-foreground text-background text-[10px] tracking-widest uppercase hover:opacity-90 transition-opacity"
-          >
-            Update Basket
-          </button>
-          <button
-            onClick={onCancel}
-            className="px-4 py-3.5 border border-border text-[10px] tracking-widest uppercase text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors"
-          >
-            Cancel
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ── Per-item row ─────────────────────────────────────────────────────────────
 
 function BasketItemRow({
   item,
   onRemove,
   onSwitchStore,
-  onOpenEdit,
+  onEdit,
   onUpdateQty,
 }: {
   item: BasketItem;
   onRemove: (key: string) => void;
   onSwitchStore: (item: BasketItem) => void;
-  onOpenEdit: (item: BasketItem) => void;
+  onEdit: (productId: number) => void;
   onUpdateQty: (key: string, qty: number) => void;
 }) {
   const otherStore =
@@ -301,6 +124,7 @@ function BasketItemRow({
 
           {/* Qty + actions */}
           <div className="flex items-center gap-2 mt-2">
+            {/* Quantity stepper */}
             <div className="flex items-center border border-border">
               <button
                 onClick={() => onUpdateQty(item.key, item.quantity - 1)}
@@ -317,8 +141,9 @@ function BasketItemRow({
               </button>
             </div>
 
+            {/* Edit → opens product page */}
             <button
-              onClick={() => onOpenEdit(item)}
+              onClick={() => onEdit(item.productId)}
               className="flex items-center gap-1 text-[9px] tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors"
             >
               <Pencil className="h-2.5 w-2.5" />
@@ -371,14 +196,14 @@ function StoreSection({
   onRemove,
   onUpdateQty,
   onSwitchStore,
-  onOpenEdit,
+  onEdit,
 }: {
   storeName: string;
   items: BasketItem[];
   onRemove: (key: string) => void;
   onUpdateQty: (key: string, qty: number) => void;
   onSwitchStore: (item: BasketItem) => void;
-  onOpenEdit: (item: BasketItem) => void;
+  onEdit: (productId: number) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
 
@@ -436,7 +261,7 @@ function StoreSection({
                 onRemove={onRemove}
                 onUpdateQty={onUpdateQty}
                 onSwitchStore={onSwitchStore}
-                onOpenEdit={onOpenEdit}
+                onEdit={onEdit}
               />
             ))}
           </div>
@@ -463,7 +288,6 @@ export function BasketDrawer() {
     removeItem,
     updateQty,
     updateItemFields,
-    editItem,
     clearBasket,
     totalItems,
     currentMemberUsername,
@@ -472,8 +296,8 @@ export function BasketDrawer() {
 
   const { toast } = useToast();
   const { t } = useTranslation();
+  const [, navigate] = useLocation();
 
-  const [editingItem, setEditingItem] = useState<BasketItem | null>(null);
   const [shareToken, setShareToken] = useState<string | null>(null);
   const [sharing, setSharing] = useState(false);
   const [copiedShare, setCopiedShare] = useState(false);
@@ -481,6 +305,13 @@ export function BasketDrawer() {
   const shareUrl = shareToken
     ? `${window.location.origin}${BASE}/basket/${shareToken}`
     : null;
+
+  // Edit → close basket and navigate to the product page so the user
+  // can pick a different variant and use the real Add to Basket button.
+  const handleEdit = (productId: number) => {
+    closeBasket();
+    navigate(`/product/${productId}`);
+  };
 
   const handleShare = async () => {
     if (!currentMemberUsername || items.length === 0) return;
@@ -538,18 +369,6 @@ export function BasketDrawer() {
         ? parseFloat(newPrice.replace(/[^\d.]/g, "")) || null
         : null,
     });
-  };
-
-  const handleSaveEdit = (
-    newSize: string | null,
-    newColor: string | null,
-    newQty: number
-  ) => {
-    if (!editingItem) return;
-    // editItem looks up by stable `id`, never by key — so changing size/color
-    // cannot possibly create a duplicate item.
-    editItem(editingItem.id, newSize, newColor, newQty);
-    setEditingItem(null);
   };
 
   // Group items by store
@@ -640,7 +459,7 @@ export function BasketDrawer() {
                   onRemove={removeItem}
                   onUpdateQty={updateQty}
                   onSwitchStore={handleSwitchStore}
-                  onOpenEdit={setEditingItem}
+                  onEdit={handleEdit}
                 />
               ))}
 
@@ -699,15 +518,6 @@ export function BasketDrawer() {
           )}
         </div>
       </div>
-
-      {/* Edit modal — rendered outside drawer so it layers on top */}
-      {editingItem && (
-        <BasketEditModal
-          item={editingItem}
-          onSave={handleSaveEdit}
-          onCancel={() => setEditingItem(null)}
-        />
-      )}
     </>
   );
 }
