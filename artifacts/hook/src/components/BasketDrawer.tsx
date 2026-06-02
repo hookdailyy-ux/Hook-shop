@@ -12,13 +12,26 @@ import {
   ExternalLink,
   Loader2,
   ArrowLeftRight,
+  ChevronDown,
+  ChevronUp,
   Pencil,
 } from "lucide-react";
-import { useBasket, inferStore, buildBasketKey, type BasketItem } from "@/contexts/BasketContext";
+import {
+  useBasket,
+  inferStore,
+  buildBasketKey,
+  type BasketItem,
+} from "@/contexts/BasketContext";
+import {
+  useGetProduct,
+  getGetProductQueryKey,
+} from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+
+// ── Store display config ─────────────────────────────────────────────────────
 
 const STORE_META: Record<string, { label: string; btnClass: string }> = {
   SHEIN: {
@@ -43,36 +56,194 @@ const STORE_META: Record<string, { label: string; btnClass: string }> = {
   },
 };
 
-// ── Per-item row with inline edit ────────────────────────────────────────────
+// ── Product edit modal ───────────────────────────────────────────────────────
+
+function BasketEditModal({
+  item,
+  onSave,
+  onCancel,
+}: {
+  item: BasketItem;
+  onSave: (size: string | null, color: string | null, qty: number) => void;
+  onCancel: () => void;
+}) {
+  const { data: product, isLoading } = useGetProduct(item.productId, {
+    query: {
+      enabled: !!item.productId,
+      queryKey: getGetProductQueryKey(item.productId),
+    },
+  });
+
+  const [selectedSize, setSelectedSize] = useState<string | null>(item.size);
+  const [selectedColor, setSelectedColor] = useState<string | null>(item.color);
+  const [qty, setQty] = useState(item.quantity);
+
+  const sizes = Array.isArray(product?.sizes) ? (product.sizes as string[]) : [];
+  const colors = Array.isArray(product?.colors) ? (product.colors as string[]) : [];
+  const imageUrl = product?.imageUrl ?? item.productImageUrl;
+
+  return (
+    <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center">
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onCancel} />
+      <div className="relative z-10 w-full sm:max-w-sm bg-background shadow-2xl">
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+          <span className="text-sm font-medium tracking-wide">Edit Item</span>
+          <button
+            onClick={onCancel}
+            className="text-muted-foreground hover:text-foreground transition-colors p-1"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        {isLoading ? (
+          <div className="flex items-center justify-center py-14">
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          </div>
+        ) : (
+          <div className="p-5 space-y-5 max-h-[70vh] overflow-y-auto">
+            {/* Product preview */}
+            <div className="flex gap-3 pb-4 border-b border-border">
+              <div className="w-16 h-20 shrink-0 overflow-hidden bg-stone-100">
+                {imageUrl ? (
+                  <img
+                    src={imageUrl}
+                    alt={item.productTitle}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <ShoppingBag className="h-5 w-5 text-muted-foreground/20" strokeWidth={1} />
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                {item.brand && (
+                  <p className="text-[9px] tracking-widest uppercase text-muted-foreground">
+                    {item.brand}
+                  </p>
+                )}
+                <p className="text-sm leading-snug line-clamp-2 mt-0.5">
+                  {item.productTitle}
+                </p>
+                {item.displayPrice && (
+                  <p className="text-sm font-semibold mt-1">{item.displayPrice}</p>
+                )}
+              </div>
+            </div>
+
+            {/* Sizes */}
+            {sizes.length > 0 && (
+              <div>
+                <p className="text-[9px] tracking-widest uppercase text-muted-foreground mb-2.5">
+                  Size{selectedSize ? ` — ${selectedSize}` : ""}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {sizes.map((size) => (
+                    <button
+                      key={size}
+                      onClick={() =>
+                        setSelectedSize(selectedSize === size ? null : size)
+                      }
+                      className={`min-w-[44px] h-9 px-3 text-xs tracking-widest border transition-colors ${
+                        selectedSize === size
+                          ? "bg-foreground text-background border-foreground"
+                          : "bg-background text-foreground border-border hover:border-foreground"
+                      }`}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Colors */}
+            {colors.length > 0 && (
+              <div>
+                <p className="text-[9px] tracking-widest uppercase text-muted-foreground mb-2.5">
+                  Color{selectedColor ? ` — ${selectedColor}` : ""}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {colors.map((color) => (
+                    <button
+                      key={color}
+                      onClick={() =>
+                        setSelectedColor(selectedColor === color ? null : color)
+                      }
+                      className={`h-9 px-3 text-xs tracking-widest border transition-colors ${
+                        selectedColor === color
+                          ? "bg-foreground text-background border-foreground"
+                          : "bg-background text-foreground border-border hover:border-foreground"
+                      }`}
+                    >
+                      {color}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Quantity */}
+            <div>
+              <p className="text-[9px] tracking-widest uppercase text-muted-foreground mb-2.5">
+                Quantity
+              </p>
+              <div className="flex items-center border border-border w-fit">
+                <button
+                  onClick={() => setQty((q) => Math.max(1, q - 1))}
+                  className="px-3 py-2 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                >
+                  <Minus className="h-3 w-3" />
+                </button>
+                <span className="text-sm font-medium w-10 text-center">{qty}</span>
+                <button
+                  onClick={() => setQty((q) => q + 1)}
+                  className="px-3 py-2 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                >
+                  <Plus className="h-3 w-3" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Actions */}
+        <div className="px-5 pb-6 pt-4 border-t border-border flex gap-2">
+          <button
+            onClick={() => onSave(selectedSize, selectedColor, qty)}
+            className="flex-1 py-3.5 bg-foreground text-background text-[10px] tracking-widest uppercase hover:opacity-90 transition-opacity"
+          >
+            Update Basket
+          </button>
+          <button
+            onClick={onCancel}
+            className="px-4 py-3.5 border border-border text-[10px] tracking-widest uppercase text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Per-item row ─────────────────────────────────────────────────────────────
 
 function BasketItemRow({
   item,
   onRemove,
   onSwitchStore,
-  onEditItem,
+  onOpenEdit,
+  onUpdateQty,
 }: {
   item: BasketItem;
   onRemove: (key: string) => void;
   onSwitchStore: (item: BasketItem) => void;
-  onEditItem: (oldItem: BasketItem, newSize: string | null, newColor: string | null, newQty: number) => void;
+  onOpenEdit: (item: BasketItem) => void;
+  onUpdateQty: (key: string, qty: number) => void;
 }) {
-  const [editing, setEditing] = useState(false);
-  const [editSize, setEditSize] = useState(item.size ?? "");
-  const [editColor, setEditColor] = useState(item.color ?? "");
-  const [editQty, setEditQty] = useState(item.quantity);
-
-  const startEdit = () => {
-    setEditSize(item.size ?? "");
-    setEditColor(item.color ?? "");
-    setEditQty(item.quantity);
-    setEditing(true);
-  };
-
-  const saveEdit = () => {
-    onEditItem(item, editSize.trim() || null, editColor.trim() || null, editQty);
-    setEditing(false);
-  };
-
   const otherStore =
     item.noonUrl && item.amazonUrl
       ? item.productSource === "Noon"
@@ -83,9 +254,9 @@ function BasketItemRow({
       : null;
 
   return (
-    <div className="p-4 space-y-2.5">
+    <div className="p-4 space-y-2">
       <div className="flex gap-3">
-        {/* Image */}
+        {/* Thumbnail */}
         <div className="w-14 shrink-0 overflow-hidden bg-stone-100" style={{ height: "72px" }}>
           {item.productImageUrl ? (
             <img
@@ -100,7 +271,7 @@ function BasketItemRow({
           )}
         </div>
 
-        {/* Info */}
+        {/* Details */}
         <div className="flex-1 min-w-0">
           {item.brand && (
             <p className="text-[9px] tracking-widest uppercase text-muted-foreground">
@@ -112,9 +283,9 @@ function BasketItemRow({
             <p className="text-xs font-semibold mt-0.5">{item.displayPrice}</p>
           )}
 
-          {/* Size / color chips — shown when not editing */}
-          {!editing && (item.size || item.color) && (
-            <div className="flex flex-wrap gap-1 mt-1">
+          {/* Size / Color chips */}
+          {(item.size || item.color) && (
+            <div className="flex flex-wrap gap-1 mt-1.5">
               {item.size && (
                 <span className="text-[9px] uppercase tracking-widest px-1.5 py-0.5 bg-accent border border-border">
                   {item.size}
@@ -128,106 +299,49 @@ function BasketItemRow({
             </div>
           )}
 
-          {/* Qty + actions — shown when not editing */}
-          {!editing && (
-            <div className="flex items-center gap-2.5 mt-2">
-              <div className="flex items-center border border-border">
-                <button
-                  onClick={() => onEditItem(item, item.size, item.color, item.quantity - 1)}
-                  className="px-2 py-1 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-                >
-                  <Minus className="h-2.5 w-2.5" />
-                </button>
-                <span className="text-xs w-6 text-center font-medium">{item.quantity}</span>
-                <button
-                  onClick={() => onEditItem(item, item.size, item.color, item.quantity + 1)}
-                  className="px-2 py-1 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-                >
-                  <Plus className="h-2.5 w-2.5" />
-                </button>
-              </div>
+          {/* Qty + actions */}
+          <div className="flex items-center gap-2 mt-2">
+            <div className="flex items-center border border-border">
               <button
-                onClick={startEdit}
-                className="flex items-center gap-1 text-[9px] tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <Pencil className="h-2.5 w-2.5" />
-                Edit
-              </button>
-              <button
-                onClick={() => onRemove(item.key)}
-                className="text-muted-foreground hover:text-destructive transition-colors p-0.5 ml-auto"
-              >
-                <Trash2 className="h-3 w-3" />
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Inline edit form */}
-      {editing && (
-        <div className="border border-border/60 bg-accent/20 p-3 space-y-3">
-          <p className="text-[9px] tracking-widest uppercase text-muted-foreground">Edit Item</p>
-          <div className="grid grid-cols-2 gap-2">
-            <div className="space-y-1">
-              <label className="text-[9px] uppercase tracking-widest text-muted-foreground">Size</label>
-              <input
-                value={editSize}
-                onChange={(e) => setEditSize(e.target.value)}
-                placeholder="e.g. M"
-                className="w-full border border-border bg-background px-2.5 py-1.5 text-xs focus:outline-none focus:border-foreground/50 transition-colors"
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="text-[9px] uppercase tracking-widest text-muted-foreground">Color</label>
-              <input
-                value={editColor}
-                onChange={(e) => setEditColor(e.target.value)}
-                placeholder="e.g. Black"
-                className="w-full border border-border bg-background px-2.5 py-1.5 text-xs focus:outline-none focus:border-foreground/50 transition-colors"
-              />
-            </div>
-          </div>
-          <div className="space-y-1">
-            <label className="text-[9px] uppercase tracking-widest text-muted-foreground">Quantity</label>
-            <div className="flex items-center border border-border w-fit">
-              <button
-                onClick={() => setEditQty((q) => Math.max(1, q - 1))}
-                className="px-2.5 py-1.5 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                onClick={() => onUpdateQty(item.key, item.quantity - 1)}
+                className="px-2 py-1 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
               >
                 <Minus className="h-2.5 w-2.5" />
               </button>
-              <span className="text-xs w-8 text-center font-medium">{editQty}</span>
+              <span className="text-xs w-6 text-center font-medium">{item.quantity}</span>
               <button
-                onClick={() => setEditQty((q) => q + 1)}
-                className="px-2.5 py-1.5 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                onClick={() => onUpdateQty(item.key, item.quantity + 1)}
+                className="px-2 py-1 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
               >
                 <Plus className="h-2.5 w-2.5" />
               </button>
             </div>
-          </div>
-          <div className="flex gap-2 pt-1">
+
             <button
-              onClick={saveEdit}
-              className="flex-1 py-2 bg-foreground text-background text-[9px] tracking-widest uppercase hover:opacity-90 transition-opacity"
+              onClick={() => onOpenEdit(item)}
+              className="flex items-center gap-1 text-[9px] tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors"
             >
-              Save
+              <Pencil className="h-2.5 w-2.5" />
+              Edit
             </button>
+
             <button
-              onClick={() => setEditing(false)}
-              className="flex-1 py-2 border border-border text-[9px] tracking-widest uppercase text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors"
+              onClick={() => onRemove(item.key)}
+              className="ml-auto text-muted-foreground hover:text-destructive transition-colors p-0.5"
             >
-              Cancel
+              <Trash2 className="h-3 w-3" />
             </button>
           </div>
         </div>
-      )}
+      </div>
 
-      {/* Also available on other store */}
-      {otherStore && !editing && (
+      {/* Also available / Switch store */}
+      {otherStore && (
         <div className="flex items-center justify-between bg-accent/40 border border-border/60 px-3 py-2">
           <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-[9px] tracking-wide text-muted-foreground">Also available on</span>
+            <span className="text-[9px] tracking-wide text-muted-foreground">
+              Also available on
+            </span>
             <span className="text-[9px] tracking-widest uppercase font-semibold">{otherStore}</span>
             {otherStore === "Noon" && item.noonPrice && (
               <span className="text-[9px] text-muted-foreground">· {item.noonPrice}</span>
@@ -249,71 +363,92 @@ function BasketItemRow({
   );
 }
 
-// ── Store section ────────────────────────────────────────────────────────────
+// ── Store section (collapsible) ──────────────────────────────────────────────
 
 function StoreSection({
   storeName,
   items,
   onRemove,
+  onUpdateQty,
   onSwitchStore,
-  onEditItem,
+  onOpenEdit,
 }: {
   storeName: string;
   items: BasketItem[];
   onRemove: (key: string) => void;
+  onUpdateQty: (key: string, qty: number) => void;
   onSwitchStore: (item: BasketItem) => void;
-  onEditItem: (oldItem: BasketItem, newSize: string | null, newColor: string | null, newQty: number) => void;
+  onOpenEdit: (item: BasketItem) => void;
 }) {
+  const [expanded, setExpanded] = useState(false);
+
   const meta = STORE_META[storeName] ?? STORE_META.Other;
+  const totalQty = items.reduce((s, i) => s + i.quantity, 0);
   const storeTotal = items.every((i) => i.numericPrice !== null)
     ? items.reduce((s, i) => s + (i.numericPrice ?? 0) * i.quantity, 0)
     : null;
-  const totalQty = items.reduce((s, i) => s + i.quantity, 0);
   const currencySymbol = items[0]?.displayPrice?.match(/[^\d.,\s]/)?.[0] ?? "";
 
-  const handleContinue = () => {
-    items.forEach((item) => {
-      window.open(item.affiliateUrl, "_blank", "noopener,noreferrer");
-    });
+  const handleContinue = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    items.forEach((item) =>
+      window.open(item.affiliateUrl, "_blank", "noopener,noreferrer")
+    );
   };
 
   return (
     <div className="border border-border">
-      {/* Store header */}
-      <div className="flex items-center justify-between px-4 py-3 bg-accent/30 border-b border-border">
+      {/* Collapsible header */}
+      <button
+        onClick={() => setExpanded((v) => !v)}
+        className="w-full flex items-center justify-between px-4 py-3.5 bg-accent/30 hover:bg-accent/50 transition-colors"
+      >
         <div className="flex items-center gap-2">
-          <span className="text-[10px] tracking-widest uppercase font-semibold">{meta.label}</span>
+          <span className="text-[10px] tracking-widest uppercase font-semibold">
+            {meta.label}
+          </span>
           <span className="text-[9px] tracking-widest text-muted-foreground">
             — {totalQty} {totalQty === 1 ? "item" : "items"}
           </span>
         </div>
-        {storeTotal !== null && (
-          <span className="text-sm font-medium tabular-nums">
-            Total {currencySymbol}{storeTotal.toFixed(2)}
-          </span>
-        )}
-      </div>
+        <div className="flex items-center gap-3">
+          {storeTotal !== null && (
+            <span className="text-sm font-medium tabular-nums">
+              {currencySymbol}{storeTotal.toFixed(2)}
+            </span>
+          )}
+          {expanded ? (
+            <ChevronUp className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+          ) : (
+            <ChevronDown className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+          )}
+        </div>
+      </button>
 
-      {/* Items */}
-      <div className="divide-y divide-border/50">
-        {items.map((item) => (
-          <BasketItemRow
-            key={item.key}
-            item={item}
-            onRemove={onRemove}
-            onSwitchStore={onSwitchStore}
-            onEditItem={onEditItem}
-          />
-        ))}
-      </div>
+      {/* Expanded content */}
+      {expanded && (
+        <>
+          <div className="divide-y divide-border/50">
+            {items.map((item) => (
+              <BasketItemRow
+                key={item.key}
+                item={item}
+                onRemove={onRemove}
+                onUpdateQty={onUpdateQty}
+                onSwitchStore={onSwitchStore}
+                onOpenEdit={onOpenEdit}
+              />
+            ))}
+          </div>
 
-      {/* Per-store checkout button */}
-      <div className="p-4 border-t border-border">
-        <button onClick={handleContinue} className={meta.btnClass}>
-          <ExternalLink className="h-3.5 w-3.5" />
-          Continue with {meta.label}
-        </button>
-      </div>
+          <div className="p-4 border-t border-border">
+            <button onClick={handleContinue} className={meta.btnClass}>
+              <ExternalLink className="h-3.5 w-3.5" />
+              Continue with {meta.label}
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -337,6 +472,8 @@ export function BasketDrawer() {
 
   const { toast } = useToast();
   const { t } = useTranslation();
+
+  const [editingItem, setEditingItem] = useState<BasketItem | null>(null);
   const [shareToken, setShareToken] = useState<string | null>(null);
   const [sharing, setSharing] = useState(false);
   const [copiedShare, setCopiedShare] = useState(false);
@@ -403,25 +540,30 @@ export function BasketDrawer() {
     });
   };
 
-  const handleEditItem = (
-    oldItem: BasketItem,
+  const handleSaveEdit = (
     newSize: string | null,
     newColor: string | null,
     newQty: number
   ) => {
+    if (!editingItem) return;
     if (newQty <= 0) {
-      removeItem(oldItem.key);
+      removeItem(editingItem.key);
+      setEditingItem(null);
       return;
     }
-    const newKey = buildBasketKey(oldItem.productId, newSize, newColor, oldItem.productSource);
-    if (newKey === oldItem.key) {
-      // Only qty or nothing changed — just update qty
-      updateQty(oldItem.key, newQty);
+    const newKey = buildBasketKey(
+      editingItem.productId,
+      newSize,
+      newColor,
+      editingItem.productSource
+    );
+    if (newKey === editingItem.key) {
+      updateQty(editingItem.key, newQty);
     } else {
-      // Size/color changed — remove old, add updated
-      removeItem(oldItem.key);
-      addItem({ ...oldItem, size: newSize, color: newColor }, newQty);
+      removeItem(editingItem.key);
+      addItem({ ...editingItem, size: newSize, color: newColor }, newQty);
     }
+    setEditingItem(null);
   };
 
   // Group items by store
@@ -447,7 +589,6 @@ export function BasketDrawer() {
 
       {/* Drawer */}
       <div className="fixed inset-y-0 right-0 rtl:right-auto rtl:left-0 z-50 w-full sm:max-w-md bg-background shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
-
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
           <div className="flex items-center gap-2.5">
@@ -493,24 +634,27 @@ export function BasketDrawer() {
               </p>
             </div>
           ) : (
-            <div className="p-4 space-y-4">
+            <div className="p-4 space-y-3">
               {/* Summary */}
               <p className="text-[10px] tracking-widest uppercase text-muted-foreground">
                 Your Cart ({totalItems} {totalItems === 1 ? "Item" : "Items"})
                 {currentMemberUsername && (
-                  <span className="ml-2 font-semibold text-foreground">· @{currentMemberUsername}</span>
+                  <span className="ml-2 font-semibold text-foreground">
+                    · @{currentMemberUsername}
+                  </span>
                 )}
               </p>
 
-              {/* Per-store sections */}
+              {/* Collapsible store sections */}
               {activeStores.map((store) => (
                 <StoreSection
                   key={store}
                   storeName={store}
                   items={storeGroups[store]}
                   onRemove={removeItem}
+                  onUpdateQty={updateQty}
                   onSwitchStore={handleSwitchStore}
-                  onEditItem={handleEditItem}
+                  onOpenEdit={setEditingItem}
                 />
               ))}
 
@@ -556,7 +700,7 @@ export function BasketDrawer() {
                       </button>
                       <button
                         onClick={shareViaWhatsApp}
-                        className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-green-600 text-white text-[9px] tracking-widests uppercase hover:bg-green-700 transition-colors"
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-green-600 text-white text-[9px] tracking-widest uppercase hover:bg-green-700 transition-colors"
                       >
                         <MessageCircle className="h-3 w-3" />
                         {t("basket.whatsapp")}
@@ -569,9 +713,20 @@ export function BasketDrawer() {
           )}
         </div>
       </div>
+
+      {/* Edit modal — rendered outside drawer so it layers on top */}
+      {editingItem && (
+        <BasketEditModal
+          item={editingItem}
+          onSave={handleSaveEdit}
+          onCancel={() => setEditingItem(null)}
+        />
+      )}
     </>
   );
 }
+
+// ── Floating basket button ───────────────────────────────────────────────────
 
 export function FloatingBasketButton() {
   const { totalItems, openBasket } = useBasket();
