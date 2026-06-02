@@ -17,6 +17,9 @@ export function inferStore(affiliateUrl: string): "SHEIN" | "Amazon" | "Noon" | 
 }
 
 export interface BasketItem {
+  /** Stable identity — never changes after creation, even when size/color/key change */
+  id: string;
+  /** Composite lookup key — changes when size, color or productSource change */
   key: string;
   productId: number;
   productTitle: string;
@@ -40,7 +43,7 @@ export interface BasketItem {
   sourceToken: string | null;
 }
 
-export type AddItemInput = Omit<BasketItem, "key" | "numericPrice" | "quantity">;
+export type AddItemInput = Omit<BasketItem, "id" | "key" | "numericPrice" | "quantity">;
 
 interface BasketContextType {
   items: BasketItem[];
@@ -51,6 +54,13 @@ interface BasketContextType {
   removeItem: (key: string) => void;
   updateQty: (key: string, qty: number) => void;
   updateItemFields: (key: string, fields: Partial<BasketItem>) => void;
+  /** Edit an item by its stable id — safe even when key changes */
+  editItem: (
+    id: string,
+    size: string | null,
+    color: string | null,
+    qty: number
+  ) => void;
   clearBasket: () => void;
   loadItems: (items: BasketItem[]) => void;
   totalItems: number;
@@ -77,6 +87,12 @@ export function buildBasketKey(
   return `${productId}-${size ?? ""}-${color ?? ""}-${productSource ?? ""}`;
 }
 
+function newId(): string {
+  return typeof crypto !== "undefined" && crypto.randomUUID
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
 function parseNumericPrice(displayPrice: string | null): number | null {
   if (!displayPrice) return null;
   const match = displayPrice.match(/[\d,.]+/);
@@ -91,6 +107,8 @@ function loadFromStorage(): BasketItem[] {
     const items = JSON.parse(raw) as BasketItem[];
     return items.map((i) => ({
       ...i,
+      // Back-fill stable id for items saved before this field existed
+      id: i.id ?? newId(),
       productSource: i.productSource ?? inferStore(i.affiliateUrl),
       noonUrl: i.noonUrl ?? null,
       amazonUrl: i.amazonUrl ?? null,
@@ -122,7 +140,6 @@ export function BasketProvider({ children }: { children: ReactNode }) {
   const addItem = useCallback(
     (incoming: AddItemInput, qty = 1) => {
       setItems((prev) => {
-        // Only clear if both old and new usernames are non-empty and different
         const existingUsername = prev[0]?.sourceMemberUsername ?? "";
         const incomingUsername = incoming.sourceMemberUsername;
         const shouldClear =
@@ -148,6 +165,7 @@ export function BasketProvider({ children }: { children: ReactNode }) {
               ...base,
               {
                 ...incoming,
+                id: newId(),
                 key,
                 numericPrice: parseNumericPrice(incoming.displayPrice),
                 quantity: qty,
@@ -194,13 +212,46 @@ export function BasketProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  /**
+   * Edit an item by its stable `id`.
+   * Recomputes the key from the new size/color/productSource so the item moves
+   * to the correct store group, but the item itself is never removed and re-added
+   * — it is updated in place in a single atomic setItems call.
+   */
+  const editItem = useCallback(
+    (id: string, size: string | null, color: string | null, qty: number) => {
+      setItems((prev) => {
+        const target = prev.find((i) => i.id === id);
+        if (!target) return prev;
+
+        if (qty <= 0) {
+          const next = prev.filter((i) => i.id !== id);
+          saveToStorage(next);
+          return next;
+        }
+
+        const newKey = buildBasketKey(target.productId, size, color, target.productSource);
+
+        const next = prev.map((i) =>
+          i.id === id
+            ? { ...i, key: newKey, size, color, quantity: qty }
+            : i
+        );
+        saveToStorage(next);
+        return next;
+      });
+    },
+    []
+  );
+
   const clearBasket = useCallback(() => {
     commit([]);
   }, [commit]);
 
   const loadItems = useCallback(
     (newItems: BasketItem[]) => {
-      commit(newItems);
+      // Back-fill ids on externally-loaded items
+      commit(newItems.map((i) => ({ ...i, id: i.id ?? newId() })));
     },
     [commit]
   );
@@ -225,6 +276,7 @@ export function BasketProvider({ children }: { children: ReactNode }) {
         removeItem,
         updateQty,
         updateItemFields,
+        editItem,
         clearBasket,
         loadItems,
         totalItems,
