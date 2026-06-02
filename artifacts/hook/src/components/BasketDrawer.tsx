@@ -463,7 +463,6 @@ export function BasketDrawer() {
     removeItem,
     updateQty,
     updateItemFields,
-    addItem,
     clearBasket,
     totalItems,
     currentMemberUsername,
@@ -551,18 +550,21 @@ export function BasketDrawer() {
       setEditingItem(null);
       return;
     }
+    // Compute the new key (changes when size/color change)
     const newKey = buildBasketKey(
       editingItem.productId,
       newSize,
       newColor,
       editingItem.productSource
     );
-    if (newKey === editingItem.key) {
-      updateQty(editingItem.key, newQty);
-    } else {
-      removeItem(editingItem.key);
-      addItem({ ...editingItem, size: newSize, color: newColor }, newQty);
-    }
+    // Single atomic update — patch key, size, color and qty in one setItems call.
+    // This avoids the remove+add two-step that could leave duplicate items.
+    updateItemFields(editingItem.key, {
+      key: newKey,
+      size: newSize,
+      color: newColor,
+      quantity: newQty,
+    });
     setEditingItem(null);
   };
 
