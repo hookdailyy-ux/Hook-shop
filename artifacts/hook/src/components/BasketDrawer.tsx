@@ -52,16 +52,47 @@ const STORE_META: Record<string, { label: string; btnClass: string }> = {
   },
 };
 
+// ── Checkbox ─────────────────────────────────────────────────────────────────
+
+function ItemCheckbox({
+  checked,
+  onChange,
+}: {
+  checked: boolean;
+  onChange: () => void;
+}) {
+  return (
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        onChange();
+      }}
+      aria-label={checked ? "Deselect item" : "Select item"}
+      className={`w-4 h-4 shrink-0 border flex items-center justify-center transition-colors ${
+        checked
+          ? "bg-foreground border-foreground"
+          : "bg-background border-border hover:border-foreground/50"
+      }`}
+    >
+      {checked && <Check className="h-2.5 w-2.5 text-background" strokeWidth={3} />}
+    </button>
+  );
+}
+
 // ── Per-item row ─────────────────────────────────────────────────────────────
 
 function BasketItemRow({
   item,
+  isSelected,
+  onToggleSelect,
   onRemove,
   onSwitchStore,
   onEdit,
   onUpdateQty,
 }: {
   item: BasketItem;
+  isSelected: boolean;
+  onToggleSelect: (key: string) => void;
   onRemove: (key: string) => void;
   onSwitchStore: (item: BasketItem) => void;
   onEdit: (productId: number) => void;
@@ -77,10 +108,25 @@ function BasketItemRow({
       : null;
 
   return (
-    <div className="p-4 space-y-2">
-      <div className="flex gap-3">
+    <div
+      className={`p-4 space-y-2 transition-colors ${
+        isSelected ? "bg-accent/20" : ""
+      }`}
+    >
+      <div className="flex gap-3 items-start">
+        {/* Checkbox */}
+        <div className="pt-1 shrink-0">
+          <ItemCheckbox
+            checked={isSelected}
+            onChange={() => onToggleSelect(item.key)}
+          />
+        </div>
+
         {/* Thumbnail */}
-        <div className="w-14 shrink-0 overflow-hidden bg-stone-100" style={{ height: "72px" }}>
+        <div
+          className="w-14 shrink-0 overflow-hidden bg-stone-100"
+          style={{ height: "72px" }}
+        >
           {item.productImageUrl ? (
             <img
               src={item.productImageUrl}
@@ -89,7 +135,10 @@ function BasketItemRow({
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
-              <ShoppingBag className="h-4 w-4 text-muted-foreground/20" strokeWidth={1} />
+              <ShoppingBag
+                className="h-4 w-4 text-muted-foreground/20"
+                strokeWidth={1}
+              />
             </div>
           )}
         </div>
@@ -101,7 +150,9 @@ function BasketItemRow({
               {item.brand}
             </p>
           )}
-          <p className="text-xs leading-snug line-clamp-2 mt-0.5">{item.productTitle}</p>
+          <p className="text-xs leading-snug line-clamp-2 mt-0.5">
+            {item.productTitle}
+          </p>
           {item.displayPrice && (
             <p className="text-xs font-semibold mt-0.5">{item.displayPrice}</p>
           )}
@@ -122,7 +173,7 @@ function BasketItemRow({
             </div>
           )}
 
-          {/* Qty + actions */}
+          {/* Qty + actions row */}
           <div className="flex items-center gap-2 mt-2">
             {/* Quantity stepper */}
             <div className="flex items-center border border-border">
@@ -132,7 +183,9 @@ function BasketItemRow({
               >
                 <Minus className="h-2.5 w-2.5" />
               </button>
-              <span className="text-xs w-6 text-center font-medium">{item.quantity}</span>
+              <span className="text-xs w-6 text-center font-medium">
+                {item.quantity}
+              </span>
               <button
                 onClick={() => onUpdateQty(item.key, item.quantity + 1)}
                 className="px-2 py-1 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
@@ -141,7 +194,7 @@ function BasketItemRow({
               </button>
             </div>
 
-            {/* Edit → opens product page */}
+            {/* Edit → navigates to product page */}
             <button
               onClick={() => onEdit(item.productId)}
               className="flex items-center gap-1 text-[9px] tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors"
@@ -150,6 +203,7 @@ function BasketItemRow({
               Edit
             </button>
 
+            {/* Delete */}
             <button
               onClick={() => onRemove(item.key)}
               className="ml-auto text-muted-foreground hover:text-destructive transition-colors p-0.5"
@@ -162,17 +216,23 @@ function BasketItemRow({
 
       {/* Also available / Switch store */}
       {otherStore && (
-        <div className="flex items-center justify-between bg-accent/40 border border-border/60 px-3 py-2">
+        <div className="flex items-center justify-between bg-accent/40 border border-border/60 px-3 py-2 ml-7">
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className="text-[9px] tracking-wide text-muted-foreground">
               Also available on
             </span>
-            <span className="text-[9px] tracking-widest uppercase font-semibold">{otherStore}</span>
+            <span className="text-[9px] tracking-widest uppercase font-semibold">
+              {otherStore}
+            </span>
             {otherStore === "Noon" && item.noonPrice && (
-              <span className="text-[9px] text-muted-foreground">· {item.noonPrice}</span>
+              <span className="text-[9px] text-muted-foreground">
+                · {item.noonPrice}
+              </span>
             )}
             {otherStore === "Amazon" && item.amazonPrice && (
-              <span className="text-[9px] text-muted-foreground">· {item.amazonPrice}</span>
+              <span className="text-[9px] text-muted-foreground">
+                · {item.amazonPrice}
+              </span>
             )}
           </div>
           <button
@@ -193,6 +253,8 @@ function BasketItemRow({
 function StoreSection({
   storeName,
   items,
+  selectedKeys,
+  onToggleSelect,
   onRemove,
   onUpdateQty,
   onSwitchStore,
@@ -200,6 +262,8 @@ function StoreSection({
 }: {
   storeName: string;
   items: BasketItem[];
+  selectedKeys: Set<string>;
+  onToggleSelect: (key: string) => void;
   onRemove: (key: string) => void;
   onUpdateQty: (key: string, qty: number) => void;
   onSwitchStore: (item: BasketItem) => void;
@@ -212,7 +276,8 @@ function StoreSection({
   const storeTotal = items.every((i) => i.numericPrice !== null)
     ? items.reduce((s, i) => s + (i.numericPrice ?? 0) * i.quantity, 0)
     : null;
-  const currencySymbol = items[0]?.displayPrice?.match(/[^\d.,\s]/)?.[0] ?? "";
+  const currencySymbol =
+    items[0]?.displayPrice?.match(/[^\d.,\s]/)?.[0] ?? "";
 
   const handleContinue = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -239,7 +304,8 @@ function StoreSection({
         <div className="flex items-center gap-3">
           {storeTotal !== null && (
             <span className="text-sm font-medium tabular-nums">
-              {currencySymbol}{storeTotal.toFixed(2)}
+              {currencySymbol}
+              {storeTotal.toFixed(2)}
             </span>
           )}
           {expanded ? (
@@ -258,6 +324,8 @@ function StoreSection({
               <BasketItemRow
                 key={item.key}
                 item={item}
+                isSelected={selectedKeys.has(item.key)}
+                onToggleSelect={onToggleSelect}
                 onRemove={onRemove}
                 onUpdateQty={onUpdateQty}
                 onSwitchStore={onSwitchStore}
@@ -298,6 +366,9 @@ export function BasketDrawer() {
   const { t } = useTranslation();
   const [, navigate] = useLocation();
 
+  // Selection state — keys of checked items
+  const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
+
   const [shareToken, setShareToken] = useState<string | null>(null);
   const [sharing, setSharing] = useState(false);
   const [copiedShare, setCopiedShare] = useState(false);
@@ -306,8 +377,23 @@ export function BasketDrawer() {
     ? `${window.location.origin}${BASE}/basket/${shareToken}`
     : null;
 
-  // Edit → close basket and navigate to the product page so the user
-  // can pick a different variant and use the real Add to Basket button.
+  const toggleSelect = (key: string) => {
+    setSelectedKeys((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  };
+
+  const deleteSelected = () => {
+    selectedKeys.forEach((key) => removeItem(key));
+    setSelectedKeys(new Set());
+  };
+
+  // Edit → close basket, navigate to product page.
+  // User picks a new variant there and uses the real Add to Basket button.
+  // The original variant stays untouched in the basket.
   const handleEdit = (productId: number) => {
     closeBasket();
     navigate(`/product/${productId}`);
@@ -372,15 +458,20 @@ export function BasketDrawer() {
   };
 
   // Group items by store
-  const storeGroups = items.reduce<Record<string, BasketItem[]>>((acc, item) => {
-    const store = item.productSource || inferStore(item.affiliateUrl);
-    if (!acc[store]) acc[store] = [];
-    acc[store].push(item);
-    return acc;
-  }, {});
+  const storeGroups = items.reduce<Record<string, BasketItem[]>>(
+    (acc, item) => {
+      const store = item.productSource || inferStore(item.affiliateUrl);
+      if (!acc[store]) acc[store] = [];
+      acc[store].push(item);
+      return acc;
+    },
+    {}
+  );
 
   const storeOrder = ["SHEIN", "Amazon", "Noon", "Other"];
   const activeStores = storeOrder.filter((s) => storeGroups[s]?.length);
+
+  const selectedCount = selectedKeys.size;
 
   if (!isOpen) return null;
 
@@ -406,13 +497,23 @@ export function BasketDrawer() {
             )}
           </div>
           <div className="flex items-center gap-1">
-            {items.length > 0 && (
+            {selectedCount > 0 ? (
               <button
-                onClick={clearBasket}
-                className="text-[9px] tracking-widest uppercase text-muted-foreground hover:text-destructive transition-colors px-2 py-1"
+                onClick={deleteSelected}
+                className="text-[9px] tracking-widest uppercase text-destructive hover:text-destructive/80 transition-colors px-2 py-1 flex items-center gap-1"
               >
-                {t("basket.clearAll")}
+                <Trash2 className="h-3 w-3" />
+                Delete ({selectedCount})
               </button>
+            ) : (
+              items.length > 0 && (
+                <button
+                  onClick={clearBasket}
+                  className="text-[9px] tracking-widest uppercase text-muted-foreground hover:text-destructive transition-colors px-2 py-1"
+                >
+                  {t("basket.clearAll")}
+                </button>
+              )
             )}
             <button
               onClick={closeBasket}
@@ -422,6 +523,21 @@ export function BasketDrawer() {
             </button>
           </div>
         </div>
+
+        {/* Selection banner */}
+        {selectedCount > 0 && (
+          <div className="px-5 py-2 bg-accent/40 border-b border-border flex items-center justify-between shrink-0">
+            <span className="text-[9px] tracking-widest uppercase text-muted-foreground">
+              {selectedCount} {selectedCount === 1 ? "item" : "items"} selected
+            </span>
+            <button
+              onClick={() => setSelectedKeys(new Set())}
+              className="text-[9px] tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Clear selection
+            </button>
+          </div>
+        )}
 
         {/* Body */}
         <div className="flex-1 overflow-y-auto">
@@ -440,7 +556,7 @@ export function BasketDrawer() {
             </div>
           ) : (
             <div className="p-4 space-y-3">
-              {/* Summary */}
+              {/* Summary line */}
               <p className="text-[10px] tracking-widest uppercase text-muted-foreground">
                 Your Cart ({totalItems} {totalItems === 1 ? "Item" : "Items"})
                 {currentMemberUsername && (
@@ -456,6 +572,8 @@ export function BasketDrawer() {
                   key={store}
                   storeName={store}
                   items={storeGroups[store]}
+                  selectedKeys={selectedKeys}
+                  onToggleSelect={toggleSelect}
                   onRemove={removeItem}
                   onUpdateQty={updateQty}
                   onSwitchStore={handleSwitchStore}
@@ -476,7 +594,9 @@ export function BasketDrawer() {
                     ) : (
                       <Share2 className="h-3.5 w-3.5" />
                     )}
-                    {sharing ? t("basket.generatingLink") : t("basket.shareBasket")}
+                    {sharing
+                      ? t("basket.generatingLink")
+                      : t("basket.shareBasket")}
                   </button>
                 ) : (
                   <div className="border border-border p-3 space-y-2.5 bg-accent/20">
@@ -494,7 +614,9 @@ export function BasketDrawer() {
                         {copiedShare ? (
                           <>
                             <Check className="h-3 w-3 text-green-600" />
-                            <span className="text-green-600">{t("basket.copied")}</span>
+                            <span className="text-green-600">
+                              {t("basket.copied")}
+                            </span>
                           </>
                         ) : (
                           <>
