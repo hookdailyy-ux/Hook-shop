@@ -12,8 +12,9 @@ import {
   ExternalLink,
   Loader2,
   ArrowLeftRight,
+  Pencil,
 } from "lucide-react";
-import { useBasket, inferStore, type BasketItem } from "@/contexts/BasketContext";
+import { useBasket, inferStore, buildBasketKey, type BasketItem } from "@/contexts/BasketContext";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 
@@ -36,30 +37,239 @@ const STORE_META: Record<string, { label: string; btnClass: string }> = {
       "w-full py-3.5 text-[11px] tracking-widest uppercase bg-yellow-400 text-black hover:bg-yellow-300 transition-colors flex items-center justify-center gap-2",
   },
   Other: {
-    label: "Store",
+    label: "SHEIN",
     btnClass:
-      "w-full py-3.5 text-[11px] tracking-widest uppercase border border-foreground text-foreground hover:bg-foreground hover:text-background transition-colors flex items-center justify-center gap-2",
+      "w-full py-3.5 text-[11px] tracking-widest uppercase bg-foreground text-background hover:opacity-90 transition-opacity flex items-center justify-center gap-2",
   },
 };
+
+// ── Per-item row with inline edit ────────────────────────────────────────────
+
+function BasketItemRow({
+  item,
+  onRemove,
+  onSwitchStore,
+  onEditItem,
+}: {
+  item: BasketItem;
+  onRemove: (key: string) => void;
+  onSwitchStore: (item: BasketItem) => void;
+  onEditItem: (oldItem: BasketItem, newSize: string | null, newColor: string | null, newQty: number) => void;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [editSize, setEditSize] = useState(item.size ?? "");
+  const [editColor, setEditColor] = useState(item.color ?? "");
+  const [editQty, setEditQty] = useState(item.quantity);
+
+  const startEdit = () => {
+    setEditSize(item.size ?? "");
+    setEditColor(item.color ?? "");
+    setEditQty(item.quantity);
+    setEditing(true);
+  };
+
+  const saveEdit = () => {
+    onEditItem(item, editSize.trim() || null, editColor.trim() || null, editQty);
+    setEditing(false);
+  };
+
+  const otherStore =
+    item.noonUrl && item.amazonUrl
+      ? item.productSource === "Noon"
+        ? "Amazon"
+        : item.productSource === "Amazon"
+        ? "Noon"
+        : null
+      : null;
+
+  return (
+    <div className="p-4 space-y-2.5">
+      <div className="flex gap-3">
+        {/* Image */}
+        <div className="w-14 shrink-0 overflow-hidden bg-stone-100" style={{ height: "72px" }}>
+          {item.productImageUrl ? (
+            <img
+              src={item.productImageUrl}
+              alt={item.productTitle}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <ShoppingBag className="h-4 w-4 text-muted-foreground/20" strokeWidth={1} />
+            </div>
+          )}
+        </div>
+
+        {/* Info */}
+        <div className="flex-1 min-w-0">
+          {item.brand && (
+            <p className="text-[9px] tracking-widest uppercase text-muted-foreground">
+              {item.brand}
+            </p>
+          )}
+          <p className="text-xs leading-snug line-clamp-2 mt-0.5">{item.productTitle}</p>
+          {item.displayPrice && (
+            <p className="text-xs font-semibold mt-0.5">{item.displayPrice}</p>
+          )}
+
+          {/* Size / color chips — shown when not editing */}
+          {!editing && (item.size || item.color) && (
+            <div className="flex flex-wrap gap-1 mt-1">
+              {item.size && (
+                <span className="text-[9px] uppercase tracking-widest px-1.5 py-0.5 bg-accent border border-border">
+                  {item.size}
+                </span>
+              )}
+              {item.color && (
+                <span className="text-[9px] uppercase tracking-widest px-1.5 py-0.5 bg-accent border border-border">
+                  {item.color}
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* Qty + actions — shown when not editing */}
+          {!editing && (
+            <div className="flex items-center gap-2.5 mt-2">
+              <div className="flex items-center border border-border">
+                <button
+                  onClick={() => onEditItem(item, item.size, item.color, item.quantity - 1)}
+                  className="px-2 py-1 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                >
+                  <Minus className="h-2.5 w-2.5" />
+                </button>
+                <span className="text-xs w-6 text-center font-medium">{item.quantity}</span>
+                <button
+                  onClick={() => onEditItem(item, item.size, item.color, item.quantity + 1)}
+                  className="px-2 py-1 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                >
+                  <Plus className="h-2.5 w-2.5" />
+                </button>
+              </div>
+              <button
+                onClick={startEdit}
+                className="flex items-center gap-1 text-[9px] tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <Pencil className="h-2.5 w-2.5" />
+                Edit
+              </button>
+              <button
+                onClick={() => onRemove(item.key)}
+                className="text-muted-foreground hover:text-destructive transition-colors p-0.5 ml-auto"
+              >
+                <Trash2 className="h-3 w-3" />
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Inline edit form */}
+      {editing && (
+        <div className="border border-border/60 bg-accent/20 p-3 space-y-3">
+          <p className="text-[9px] tracking-widest uppercase text-muted-foreground">Edit Item</p>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-1">
+              <label className="text-[9px] uppercase tracking-widest text-muted-foreground">Size</label>
+              <input
+                value={editSize}
+                onChange={(e) => setEditSize(e.target.value)}
+                placeholder="e.g. M"
+                className="w-full border border-border bg-background px-2.5 py-1.5 text-xs focus:outline-none focus:border-foreground/50 transition-colors"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[9px] uppercase tracking-widest text-muted-foreground">Color</label>
+              <input
+                value={editColor}
+                onChange={(e) => setEditColor(e.target.value)}
+                placeholder="e.g. Black"
+                className="w-full border border-border bg-background px-2.5 py-1.5 text-xs focus:outline-none focus:border-foreground/50 transition-colors"
+              />
+            </div>
+          </div>
+          <div className="space-y-1">
+            <label className="text-[9px] uppercase tracking-widest text-muted-foreground">Quantity</label>
+            <div className="flex items-center border border-border w-fit">
+              <button
+                onClick={() => setEditQty((q) => Math.max(1, q - 1))}
+                className="px-2.5 py-1.5 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+              >
+                <Minus className="h-2.5 w-2.5" />
+              </button>
+              <span className="text-xs w-8 text-center font-medium">{editQty}</span>
+              <button
+                onClick={() => setEditQty((q) => q + 1)}
+                className="px-2.5 py-1.5 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+              >
+                <Plus className="h-2.5 w-2.5" />
+              </button>
+            </div>
+          </div>
+          <div className="flex gap-2 pt-1">
+            <button
+              onClick={saveEdit}
+              className="flex-1 py-2 bg-foreground text-background text-[9px] tracking-widest uppercase hover:opacity-90 transition-opacity"
+            >
+              Save
+            </button>
+            <button
+              onClick={() => setEditing(false)}
+              className="flex-1 py-2 border border-border text-[9px] tracking-widest uppercase text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Also available on other store */}
+      {otherStore && !editing && (
+        <div className="flex items-center justify-between bg-accent/40 border border-border/60 px-3 py-2">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className="text-[9px] tracking-wide text-muted-foreground">Also available on</span>
+            <span className="text-[9px] tracking-widest uppercase font-semibold">{otherStore}</span>
+            {otherStore === "Noon" && item.noonPrice && (
+              <span className="text-[9px] text-muted-foreground">· {item.noonPrice}</span>
+            )}
+            {otherStore === "Amazon" && item.amazonPrice && (
+              <span className="text-[9px] text-muted-foreground">· {item.amazonPrice}</span>
+            )}
+          </div>
+          <button
+            onClick={() => onSwitchStore(item)}
+            className="flex items-center gap-1 text-[9px] tracking-widest uppercase border border-border px-2 py-1 hover:bg-foreground hover:text-background hover:border-foreground transition-colors shrink-0 ml-2"
+          >
+            <ArrowLeftRight className="h-2.5 w-2.5" />
+            Switch
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Store section ────────────────────────────────────────────────────────────
 
 function StoreSection({
   storeName,
   items,
   onRemove,
-  onUpdateQty,
   onSwitchStore,
+  onEditItem,
 }: {
   storeName: string;
   items: BasketItem[];
   onRemove: (key: string) => void;
-  onUpdateQty: (key: string, qty: number) => void;
   onSwitchStore: (item: BasketItem) => void;
+  onEditItem: (oldItem: BasketItem, newSize: string | null, newColor: string | null, newQty: number) => void;
 }) {
   const meta = STORE_META[storeName] ?? STORE_META.Other;
   const storeTotal = items.every((i) => i.numericPrice !== null)
     ? items.reduce((s, i) => s + (i.numericPrice ?? 0) * i.quantity, 0)
     : null;
   const totalQty = items.reduce((s, i) => s + i.quantity, 0);
+  const currencySymbol = items[0]?.displayPrice?.match(/[^\d.,\s]/)?.[0] ?? "";
 
   const handleContinue = () => {
     items.forEach((item) => {
@@ -72,140 +282,32 @@ function StoreSection({
       {/* Store header */}
       <div className="flex items-center justify-between px-4 py-3 bg-accent/30 border-b border-border">
         <div className="flex items-center gap-2">
-          <span className="text-[10px] tracking-widest uppercase font-semibold">
-            {meta.label}
-          </span>
+          <span className="text-[10px] tracking-widest uppercase font-semibold">{meta.label}</span>
           <span className="text-[9px] tracking-widest text-muted-foreground">
-            {totalQty} {totalQty === 1 ? "item" : "items"}
+            — {totalQty} {totalQty === 1 ? "item" : "items"}
           </span>
         </div>
         {storeTotal !== null && (
           <span className="text-sm font-medium tabular-nums">
-            {items[0]?.displayPrice?.match(/[^\d.,\s]/)?.[0] ?? ""}
-            {storeTotal.toFixed(2)}
+            Total {currencySymbol}{storeTotal.toFixed(2)}
           </span>
         )}
       </div>
 
       {/* Items */}
       <div className="divide-y divide-border/50">
-        {items.map((item) => {
-          const otherStore =
-            item.noonUrl && item.amazonUrl
-              ? item.productSource === "Noon"
-                ? "Amazon"
-                : item.productSource === "Amazon"
-                ? "Noon"
-                : null
-              : null;
-
-          return (
-            <div key={item.key} className="p-4 space-y-2.5">
-              <div className="flex gap-3">
-                {/* Image */}
-                <div className="w-14 shrink-0 overflow-hidden bg-stone-100" style={{ height: "72px" }}>
-                  {item.productImageUrl ? (
-                    <img
-                      src={item.productImageUrl}
-                      alt={item.productTitle}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <ShoppingBag className="h-4 w-4 text-muted-foreground/20" strokeWidth={1} />
-                    </div>
-                  )}
-                </div>
-
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  {item.brand && (
-                    <p className="text-[9px] tracking-widest uppercase text-muted-foreground">
-                      {item.brand}
-                    </p>
-                  )}
-                  <p className="text-xs leading-snug line-clamp-2 mt-0.5">
-                    {item.productTitle}
-                  </p>
-                  {item.displayPrice && (
-                    <p className="text-xs font-semibold mt-0.5">{item.displayPrice}</p>
-                  )}
-                  {(item.size || item.color) && (
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {item.size && (
-                        <span className="text-[9px] uppercase tracking-widest px-1.5 py-0.5 bg-accent border border-border">
-                          {item.size}
-                        </span>
-                      )}
-                      {item.color && (
-                        <span className="text-[9px] uppercase tracking-widest px-1.5 py-0.5 bg-accent border border-border">
-                          {item.color}
-                        </span>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Qty + remove */}
-                  <div className="flex items-center gap-2.5 mt-2">
-                    <div className="flex items-center border border-border">
-                      <button
-                        onClick={() => onUpdateQty(item.key, item.quantity - 1)}
-                        className="px-2 py-1 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-                      >
-                        <Minus className="h-2.5 w-2.5" />
-                      </button>
-                      <span className="text-xs w-6 text-center font-medium">
-                        {item.quantity}
-                      </span>
-                      <button
-                        onClick={() => onUpdateQty(item.key, item.quantity + 1)}
-                        className="px-2 py-1 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-                      >
-                        <Plus className="h-2.5 w-2.5" />
-                      </button>
-                    </div>
-                    <button
-                      onClick={() => onRemove(item.key)}
-                      className="text-muted-foreground hover:text-destructive transition-colors p-0.5"
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Also available on other store */}
-              {otherStore && (
-                <div className="flex items-center justify-between bg-accent/40 border border-border/60 px-3 py-2 rounded-none">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[9px] tracking-wide text-muted-foreground">
-                      Also available on
-                    </span>
-                    <span className="text-[9px] tracking-widest uppercase font-semibold">
-                      {otherStore}
-                    </span>
-                    {otherStore === "Noon" && item.noonPrice && (
-                      <span className="text-[9px] text-muted-foreground">· {item.noonPrice}</span>
-                    )}
-                    {otherStore === "Amazon" && item.amazonPrice && (
-                      <span className="text-[9px] text-muted-foreground">· {item.amazonPrice}</span>
-                    )}
-                  </div>
-                  <button
-                    onClick={() => onSwitchStore(item)}
-                    className="flex items-center gap-1 text-[9px] tracking-widest uppercase border border-border px-2 py-1 hover:bg-foreground hover:text-background hover:border-foreground transition-colors"
-                  >
-                    <ArrowLeftRight className="h-2.5 w-2.5" />
-                    Switch
-                  </button>
-                </div>
-              )}
-            </div>
-          );
-        })}
+        {items.map((item) => (
+          <BasketItemRow
+            key={item.key}
+            item={item}
+            onRemove={onRemove}
+            onSwitchStore={onSwitchStore}
+            onEditItem={onEditItem}
+          />
+        ))}
       </div>
 
-      {/* Per-store checkout */}
+      {/* Per-store checkout button */}
       <div className="p-4 border-t border-border">
         <button onClick={handleContinue} className={meta.btnClass}>
           <ExternalLink className="h-3.5 w-3.5" />
@@ -216,6 +318,8 @@ function StoreSection({
   );
 }
 
+// ── Basket drawer ────────────────────────────────────────────────────────────
+
 export function BasketDrawer() {
   const {
     items,
@@ -224,6 +328,7 @@ export function BasketDrawer() {
     removeItem,
     updateQty,
     updateItemFields,
+    addItem,
     clearBasket,
     totalItems,
     currentMemberUsername,
@@ -298,6 +403,27 @@ export function BasketDrawer() {
     });
   };
 
+  const handleEditItem = (
+    oldItem: BasketItem,
+    newSize: string | null,
+    newColor: string | null,
+    newQty: number
+  ) => {
+    if (newQty <= 0) {
+      removeItem(oldItem.key);
+      return;
+    }
+    const newKey = buildBasketKey(oldItem.productId, newSize, newColor, oldItem.productSource);
+    if (newKey === oldItem.key) {
+      // Only qty or nothing changed — just update qty
+      updateQty(oldItem.key, newQty);
+    } else {
+      // Size/color changed — remove old, add updated
+      removeItem(oldItem.key);
+      addItem({ ...oldItem, size: newSize, color: newColor }, newQty);
+    }
+  };
+
   // Group items by store
   const storeGroups = items.reduce<Record<string, BasketItem[]>>((acc, item) => {
     const store = item.productSource || inferStore(item.affiliateUrl);
@@ -368,7 +494,7 @@ export function BasketDrawer() {
             </div>
           ) : (
             <div className="p-4 space-y-4">
-              {/* Summary line */}
+              {/* Summary */}
               <p className="text-[10px] tracking-widest uppercase text-muted-foreground">
                 Your Cart ({totalItems} {totalItems === 1 ? "Item" : "Items"})
                 {currentMemberUsername && (
@@ -383,8 +509,8 @@ export function BasketDrawer() {
                   storeName={store}
                   items={storeGroups[store]}
                   onRemove={removeItem}
-                  onUpdateQty={updateQty}
                   onSwitchStore={handleSwitchStore}
+                  onEditItem={handleEditItem}
                 />
               ))}
 
@@ -430,7 +556,7 @@ export function BasketDrawer() {
                       </button>
                       <button
                         onClick={shareViaWhatsApp}
-                        className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-green-600 text-white text-[9px] tracking-widest uppercase hover:bg-green-700 transition-colors"
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-green-600 text-white text-[9px] tracking-widests uppercase hover:bg-green-700 transition-colors"
                       >
                         <MessageCircle className="h-3 w-3" />
                         {t("basket.whatsapp")}

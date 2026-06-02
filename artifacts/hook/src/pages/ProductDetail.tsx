@@ -353,43 +353,51 @@ export default function ProductDetail() {
             {/* CTA */}
             {isElectronics ? (
               (noonUrl || amazonUrl) ? (
-                <div className="flex gap-4">
+                <div className={`grid gap-4 ${noonUrl && amazonUrl ? "grid-cols-2" : "grid-cols-1"}`}>
                   {noonUrl && (
-                    <div className="flex-1 border border-border p-5 flex flex-col gap-3">
-                      <p className="text-[10px] tracking-widest uppercase font-semibold">Noon</p>
-                      {product.noonPrice && (
-                        <p className="text-2xl font-medium tracking-tight">{product.noonPrice}</p>
-                      )}
-                      <p className="text-[9px] tracking-wide text-muted-foreground">Delivered by Noon</p>
+                    <div className="border border-border p-5 flex flex-col">
+                      <p className="text-[10px] tracking-widest uppercase font-semibold mb-4">Noon</p>
+                      <div className="flex-1 min-h-[3.5rem] flex items-center mb-4">
+                        {product.noonPrice && (
+                          <p className="text-2xl font-medium tracking-tight">{product.noonPrice}</p>
+                        )}
+                      </div>
                       <button
                         onClick={() => handleAddElectronics("Noon")}
-                        className="w-full text-center bg-foreground text-background text-[10px] tracking-widest uppercase py-3 hover:opacity-90 transition-opacity flex items-center justify-center gap-2 mt-1"
+                        className="w-full bg-foreground text-background text-[10px] tracking-widest uppercase py-3.5 hover:opacity-90 transition-opacity flex items-center justify-center gap-2 whitespace-nowrap"
                       >
                         {addedStore === "Noon" ? (
-                          <><Check className="h-3 w-3" /> Added!</>
+                          <><Check className="h-3 w-3 shrink-0" />Added!</>
                         ) : (
-                          <><ShoppingBag className="h-3 w-3" /> Add to Basket</>
+                          <><ShoppingBag className="h-3 w-3 shrink-0" />Add to Basket</>
                         )}
                       </button>
+                      <p className="text-[9px] tracking-wide text-muted-foreground text-center mt-2.5">
+                        Delivered by Noon
+                      </p>
                     </div>
                   )}
                   {amazonUrl && (
-                    <div className="flex-1 border border-border p-5 flex flex-col gap-3">
-                      <p className="text-[10px] tracking-widest uppercase font-semibold">Amazon</p>
-                      {product.amazonPrice && (
-                        <p className="text-2xl font-medium tracking-tight">{product.amazonPrice}</p>
-                      )}
-                      <p className="text-[9px] tracking-wide text-muted-foreground">Delivered by Amazon</p>
+                    <div className="border border-border p-5 flex flex-col">
+                      <p className="text-[10px] tracking-widest uppercase font-semibold mb-4">Amazon</p>
+                      <div className="flex-1 min-h-[3.5rem] flex items-center mb-4">
+                        {product.amazonPrice && (
+                          <p className="text-2xl font-medium tracking-tight">{product.amazonPrice}</p>
+                        )}
+                      </div>
                       <button
                         onClick={() => handleAddElectronics("Amazon")}
-                        className="w-full text-center border border-foreground text-foreground text-[10px] tracking-widest uppercase py-3 hover:opacity-90 transition-opacity flex items-center justify-center gap-2 mt-1"
+                        className="w-full border border-foreground text-foreground text-[10px] tracking-widest uppercase py-3.5 hover:bg-foreground hover:text-background transition-colors flex items-center justify-center gap-2 whitespace-nowrap"
                       >
                         {addedStore === "Amazon" ? (
-                          <><Check className="h-3 w-3" /> Added!</>
+                          <><Check className="h-3 w-3 shrink-0" />Added!</>
                         ) : (
-                          <><ShoppingBag className="h-3 w-3" /> Add to Basket</>
+                          <><ShoppingBag className="h-3 w-3 shrink-0" />Add to Basket</>
                         )}
                       </button>
+                      <p className="text-[9px] tracking-wide text-muted-foreground text-center mt-2.5">
+                        Delivered by Amazon
+                      </p>
                     </div>
                   )}
                 </div>
@@ -399,14 +407,19 @@ export default function ProductDetail() {
                 </p>
               )
             ) : (
-              <button
-                onClick={() => setShowAddModal(true)}
-                className="w-full flex items-center justify-center gap-2 bg-foreground text-background text-xs tracking-widest uppercase py-5 hover:opacity-90 transition-opacity"
-                data-testid="button-add-to-basket"
-              >
-                <ShoppingBag className="h-4 w-4" />
-                {t("product.orderNow") === "Order Now" ? "Add to Basket" : t("product.orderNow")}
-              </button>
+              <>
+                <button
+                  onClick={() => setShowAddModal(true)}
+                  className="w-full flex items-center justify-center gap-2 bg-foreground text-background text-xs tracking-widest uppercase py-5 hover:opacity-90 transition-opacity"
+                  data-testid="button-add-to-basket"
+                >
+                  <ShoppingBag className="h-4 w-4" />
+                  Add to Basket
+                </button>
+                <p className="text-[10px] text-center text-muted-foreground mt-3 tracking-wide">
+                  {deliveryLabel}
+                </p>
+              </>
             )}
 
             {/* Add to basket modal — non-electronics */}
