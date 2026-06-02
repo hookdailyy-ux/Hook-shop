@@ -5,8 +5,7 @@ import { PlaceholderImage } from "@/components/PlaceholderImage";
 import { ProductCard } from "@/components/ProductCard";
 import { HeartButton } from "@/components/HeartButton";
 import { ImageGallery } from "@/components/ImageGallery";
-import { AddToBasketModal } from "@/components/AddToBasketModal";
-import { useBasket } from "@/contexts/BasketContext";
+import { useBasket, inferStore } from "@/contexts/BasketContext";
 import { useTranslation } from "react-i18next";
 import { ShoppingBag, Check } from "lucide-react";
 
@@ -50,8 +49,8 @@ export default function ProductDetail() {
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [galleryOpen, setGalleryOpen] = useState(false);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [addedStore, setAddedStore] = useState<"Noon" | "Amazon" | null>(null);
+  const [addedStore, setAddedStore] = useState<"Noon" | "Amazon" | "fashion" | null>(null);
+  const [variantError, setVariantError] = useState<string | null>(null);
 
   const {
     addItem,
@@ -408,38 +407,64 @@ export default function ProductDetail() {
               )
             ) : (
               <>
+                {/* Validation error */}
+                {variantError && (
+                  <p className="text-xs text-destructive mb-3 tracking-wide">
+                    {variantError}
+                  </p>
+                )}
                 <button
-                  onClick={() => setShowAddModal(true)}
+                  onClick={() => {
+                    // Validate required variants before adding
+                    if (sizes.length > 0 && !selectedSize) {
+                      setVariantError(t("product.selectSizeFirst") || "Please select a size");
+                      return;
+                    }
+                    if (colors.length > 0 && !selectedColor) {
+                      setVariantError(t("product.selectColorFirst") || "Please select a color");
+                      return;
+                    }
+                    setVariantError(null);
+                    // Add directly — no second form
+                    addItem({
+                      productId: product.id,
+                      productTitle: product.title,
+                      productImageUrl: product.imageUrl ?? null,
+                      displayPrice: product.price ?? null,
+                      affiliateUrl: product.affiliateUrl,
+                      brand: product.brand ?? null,
+                      size: selectedSize,
+                      color: selectedColor,
+                      productSource: product.source ?? inferStore(product.affiliateUrl),
+                      noonUrl: null,
+                      amazonUrl: null,
+                      noonPrice: null,
+                      amazonPrice: null,
+                      sourceMemberId: currentMemberId ?? 0,
+                      sourceMemberUsername: currentMemberUsername ?? "",
+                      sourceMemberName: currentMemberName ?? "",
+                      sourceContext: "store",
+                      sourceToken: null,
+                    });
+                    setAddedStore("fashion");
+                    setTimeout(() => {
+                      setAddedStore(null);
+                      openBasket();
+                    }, 800);
+                  }}
                   className="w-full flex items-center justify-center gap-2 bg-foreground text-background text-xs tracking-widest uppercase py-5 hover:opacity-90 transition-opacity"
                   data-testid="button-add-to-basket"
                 >
-                  <ShoppingBag className="h-4 w-4" />
-                  Add to Basket
+                  {addedStore === "fashion" ? (
+                    <><Check className="h-4 w-4" />Added!</>
+                  ) : (
+                    <><ShoppingBag className="h-4 w-4" />Add to Basket</>
+                  )}
                 </button>
                 <p className="text-[10px] text-center text-muted-foreground mt-3 tracking-wide">
                   {deliveryLabel}
                 </p>
               </>
-            )}
-
-            {/* Add to basket modal — non-electronics */}
-            {showAddModal && !isElectronics && (
-              <AddToBasketModal
-                product={{
-                  id: product.id,
-                  title: product.title,
-                  imageUrl: product.imageUrl ?? null,
-                  displayPrice: product.price ?? null,
-                  affiliateUrl: product.affiliateUrl,
-                  brand: product.brand ?? null,
-                  source: product.source ?? null,
-                }}
-                sourceMemberId={currentMemberId ?? 0}
-                sourceMemberUsername={currentMemberUsername ?? ""}
-                sourceMemberName={currentMemberName ?? ""}
-                sourceContext="store"
-                onClose={() => setShowAddModal(false)}
-              />
             )}
 
             {product.subcategory && (
