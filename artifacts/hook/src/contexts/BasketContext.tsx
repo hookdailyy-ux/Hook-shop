@@ -6,7 +6,15 @@ import {
   type ReactNode,
 } from "react";
 
-const BASKET_KEY = "hook_basket_v2";
+const BASKET_KEY = "hook_basket_v3";
+
+export function inferStore(affiliateUrl: string): "SHEIN" | "Amazon" | "Noon" | "Other" {
+  const url = (affiliateUrl ?? "").toLowerCase();
+  if (url.includes("shein")) return "SHEIN";
+  if (url.includes("amazon") || url.includes("amzn")) return "Amazon";
+  if (url.includes("noon")) return "Noon";
+  return "Other";
+}
 
 export interface BasketItem {
   key: string;
@@ -20,6 +28,11 @@ export interface BasketItem {
   quantity: number;
   size: string | null;
   color: string | null;
+  productSource: string;
+  noonUrl: string | null;
+  amazonUrl: string | null;
+  noonPrice: string | null;
+  amazonPrice: string | null;
   sourceMemberId: number;
   sourceMemberUsername: string;
   sourceMemberName: string;
@@ -37,6 +50,7 @@ interface BasketContextType {
   addItem: (item: AddItemInput, qty?: number) => void;
   removeItem: (key: string) => void;
   updateQty: (key: string, qty: number) => void;
+  updateItemFields: (key: string, fields: Partial<BasketItem>) => void;
   clearBasket: () => void;
   loadItems: (items: BasketItem[]) => void;
   totalItems: number;
@@ -57,9 +71,10 @@ export function useBasket() {
 export function buildBasketKey(
   productId: number,
   size?: string | null,
-  color?: string | null
+  color?: string | null,
+  productSource?: string | null
 ): string {
-  return `${productId}-${size ?? ""}-${color ?? ""}`;
+  return `${productId}-${size ?? ""}-${color ?? ""}-${productSource ?? ""}`;
 }
 
 function parseNumericPrice(displayPrice: string | null): number | null {
@@ -73,7 +88,15 @@ function loadFromStorage(): BasketItem[] {
   try {
     const raw = localStorage.getItem(BASKET_KEY);
     if (!raw) return [];
-    return JSON.parse(raw) as BasketItem[];
+    const items = JSON.parse(raw) as BasketItem[];
+    return items.map((i) => ({
+      ...i,
+      productSource: i.productSource ?? inferStore(i.affiliateUrl),
+      noonUrl: i.noonUrl ?? null,
+      amazonUrl: i.amazonUrl ?? null,
+      noonPrice: i.noonPrice ?? null,
+      amazonPrice: i.amazonPrice ?? null,
+    }));
   } catch {
     return [];
   }
@@ -99,13 +122,22 @@ export function BasketProvider({ children }: { children: ReactNode }) {
   const addItem = useCallback(
     (incoming: AddItemInput, qty = 1) => {
       setItems((prev) => {
-        const base =
+        // Only clear if both old and new usernames are non-empty and different
+        const existingUsername = prev[0]?.sourceMemberUsername ?? "";
+        const incomingUsername = incoming.sourceMemberUsername;
+        const shouldClear =
           prev.length > 0 &&
-          prev[0].sourceMemberUsername !== incoming.sourceMemberUsername
-            ? []
-            : prev;
+          existingUsername !== "" &&
+          incomingUsername !== "" &&
+          existingUsername !== incomingUsername;
 
-        const key = buildBasketKey(incoming.productId, incoming.size, incoming.color);
+        const base = shouldClear ? [] : prev;
+        const key = buildBasketKey(
+          incoming.productId,
+          incoming.size,
+          incoming.color,
+          incoming.productSource
+        );
         const existing = base.find((i) => i.key === key);
 
         const next: BasketItem[] = existing
@@ -152,6 +184,16 @@ export function BasketProvider({ children }: { children: ReactNode }) {
     [removeItem]
   );
 
+  const updateItemFields = useCallback((key: string, fields: Partial<BasketItem>) => {
+    setItems((prev) => {
+      const next = prev.map((i) =>
+        i.key === key ? { ...i, ...fields } : i
+      );
+      saveToStorage(next);
+      return next;
+    });
+  }, []);
+
   const clearBasket = useCallback(() => {
     commit([]);
   }, [commit]);
@@ -182,6 +224,7 @@ export function BasketProvider({ children }: { children: ReactNode }) {
         addItem,
         removeItem,
         updateQty,
+        updateItemFields,
         clearBasket,
         loadItems,
         totalItems,

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { X, ShoppingBag, Minus, Plus, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useBasket, type AddItemInput } from "@/contexts/BasketContext";
+import { useBasket, inferStore, type AddItemInput } from "@/contexts/BasketContext";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 
@@ -14,6 +14,7 @@ interface Props {
     displayPrice: string | null;
     affiliateUrl: string;
     brand: string | null;
+    source?: string | null;
   };
   sourceMemberId: number;
   sourceMemberUsername: string;
@@ -41,9 +42,13 @@ export function AddToBasketModal({
   const [added, setAdded] = useState(false);
 
   const switchingStore =
-    currentMemberId !== null && currentMemberId !== sourceMemberId;
+    currentMemberId !== null &&
+    currentMemberId !== 0 &&
+    sourceMemberId !== 0 &&
+    currentMemberId !== sourceMemberId;
 
   const handleAdd = () => {
+    const productSource = product.source ?? inferStore(product.affiliateUrl);
     const input: AddItemInput = {
       productId: product.id,
       productTitle: product.title,
@@ -53,6 +58,11 @@ export function AddToBasketModal({
       brand: product.brand,
       size: size.trim() || null,
       color: color.trim() || null,
+      productSource,
+      noonUrl: null,
+      amazonUrl: null,
+      noonPrice: null,
+      amazonPrice: null,
       sourceMemberId,
       sourceMemberUsername,
       sourceMemberName,
@@ -131,8 +141,7 @@ export function AddToBasketModal({
         <div className="p-5 space-y-4">
           {switchingStore && (
             <div className="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 px-3 py-2 leading-relaxed">
-              Adding this will clear your current basket (from @{" "}
-              {currentMemberId !== null ? "another store" : ""}).
+              Adding this will clear your current basket (from another store).
             </div>
           )}
 

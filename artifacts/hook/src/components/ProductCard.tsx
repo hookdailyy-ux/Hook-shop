@@ -5,7 +5,7 @@ import { PlaceholderImage } from "./PlaceholderImage";
 import { HeartButton } from "./HeartButton";
 import { ImageGallery } from "./ImageGallery";
 import type { Product } from "@workspace/api-client-react";
-import { useBasket } from "@/contexts/BasketContext";
+import { useBasket, inferStore } from "@/contexts/BasketContext";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -42,6 +42,11 @@ export function ProductCard({ product }: ProductCardProps) {
       brand: product.brand ?? null,
       size: null,
       color: null,
+      productSource: inferStore(product.affiliateUrl),
+      noonUrl: null,
+      amazonUrl: null,
+      noonPrice: null,
+      amazonPrice: null,
       sourceMemberId: 0,
       sourceMemberUsername: "",
       sourceMemberName: "HOOK",

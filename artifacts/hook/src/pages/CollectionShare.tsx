@@ -12,6 +12,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { AddToBasketModal } from "@/components/AddToBasketModal";
 import { ImageGallery } from "@/components/ImageGallery";
+import { inferStore } from "@/contexts/BasketContext";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -283,6 +284,7 @@ export default function CollectionShare() {
             displayPrice: addingProduct.displayPrice,
             affiliateUrl: addingProduct.affiliateUrl,
             brand: addingProduct.brand,
+            source: inferStore(addingProduct.affiliateUrl),
           }}
           sourceMemberId={0}
           sourceMemberUsername={collection.member.username}

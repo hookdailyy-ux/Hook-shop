@@ -11,42 +11,34 @@ import {
   MessageCircle,
   ExternalLink,
   Loader2,
+  ArrowLeftRight,
 } from "lucide-react";
-import { useBasket, type BasketItem } from "@/contexts/BasketContext";
+import { useBasket, inferStore, type BasketItem } from "@/contexts/BasketContext";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
-/** Derive which store an affiliate URL belongs to */
-function getStore(affiliateUrl: string): "SHEIN" | "Amazon" | "Noon" | "Other" {
-  const url = affiliateUrl.toLowerCase();
-  if (url.includes("shein")) return "SHEIN";
-  if (url.includes("amazon") || url.includes("amzn")) return "Amazon";
-  if (url.includes("noon")) return "Noon";
-  return "Other";
-}
-
 const STORE_META: Record<string, { label: string; btnClass: string }> = {
   SHEIN: {
     label: "SHEIN",
     btnClass:
-      "w-full py-3.5 text-[11px] tracking-widest uppercase bg-foreground text-background hover:opacity-90 transition-opacity",
+      "w-full py-3.5 text-[11px] tracking-widest uppercase bg-foreground text-background hover:opacity-90 transition-opacity flex items-center justify-center gap-2",
   },
   Amazon: {
     label: "Amazon",
     btnClass:
-      "w-full py-3.5 text-[11px] tracking-widest uppercase border border-foreground text-foreground hover:bg-foreground hover:text-background transition-colors",
+      "w-full py-3.5 text-[11px] tracking-widest uppercase border border-foreground text-foreground hover:bg-foreground hover:text-background transition-colors flex items-center justify-center gap-2",
   },
   Noon: {
     label: "Noon",
     btnClass:
-      "w-full py-3.5 text-[11px] tracking-widest uppercase bg-yellow-400 text-black hover:bg-yellow-300 transition-colors",
+      "w-full py-3.5 text-[11px] tracking-widest uppercase bg-yellow-400 text-black hover:bg-yellow-300 transition-colors flex items-center justify-center gap-2",
   },
   Other: {
     label: "Store",
     btnClass:
-      "w-full py-3.5 text-[11px] tracking-widest uppercase border border-foreground text-foreground hover:bg-foreground hover:text-background transition-colors",
+      "w-full py-3.5 text-[11px] tracking-widest uppercase border border-foreground text-foreground hover:bg-foreground hover:text-background transition-colors flex items-center justify-center gap-2",
   },
 };
 
@@ -55,21 +47,22 @@ function StoreSection({
   items,
   onRemove,
   onUpdateQty,
+  onSwitchStore,
 }: {
   storeName: string;
   items: BasketItem[];
   onRemove: (key: string) => void;
   onUpdateQty: (key: string, qty: number) => void;
+  onSwitchStore: (item: BasketItem) => void;
 }) {
   const meta = STORE_META[storeName] ?? STORE_META.Other;
-  const storeItems = items;
-  const storeTotal = storeItems.every((i) => i.numericPrice !== null)
-    ? storeItems.reduce((s, i) => s + (i.numericPrice ?? 0) * i.quantity, 0)
+  const storeTotal = items.every((i) => i.numericPrice !== null)
+    ? items.reduce((s, i) => s + (i.numericPrice ?? 0) * i.quantity, 0)
     : null;
-  const totalQty = storeItems.reduce((s, i) => s + i.quantity, 0);
+  const totalQty = items.reduce((s, i) => s + i.quantity, 0);
 
   const handleContinue = () => {
-    storeItems.forEach((item) => {
+    items.forEach((item) => {
       window.open(item.affiliateUrl, "_blank", "noopener,noreferrer");
     });
   };
@@ -87,8 +80,8 @@ function StoreSection({
           </span>
         </div>
         {storeTotal !== null && (
-          <span className="text-sm font-medium">
-            {storeItems[0]?.displayPrice?.match(/[^\d.,\s]/)?.[0] ?? ""}
+          <span className="text-sm font-medium tabular-nums">
+            {items[0]?.displayPrice?.match(/[^\d.,\s]/)?.[0] ?? ""}
             {storeTotal.toFixed(2)}
           </span>
         )}
@@ -96,89 +89,127 @@ function StoreSection({
 
       {/* Items */}
       <div className="divide-y divide-border/50">
-        {storeItems.map((item) => (
-          <div key={item.key} className="flex gap-3 p-4">
-            {/* Image */}
-            <div className="w-14 h-18 shrink-0 overflow-hidden bg-stone-100" style={{ height: "72px" }}>
-              {item.productImageUrl ? (
-                <img
-                  src={item.productImageUrl}
-                  alt={item.productTitle}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <ShoppingBag className="h-4 w-4 text-muted-foreground/20" strokeWidth={1} />
-                </div>
-              )}
-            </div>
+        {items.map((item) => {
+          const otherStore =
+            item.noonUrl && item.amazonUrl
+              ? item.productSource === "Noon"
+                ? "Amazon"
+                : item.productSource === "Amazon"
+                ? "Noon"
+                : null
+              : null;
 
-            {/* Info */}
-            <div className="flex-1 min-w-0">
-              {item.brand && (
-                <p className="text-[9px] tracking-widest uppercase text-muted-foreground">
-                  {item.brand}
-                </p>
-              )}
-              <p className="text-xs leading-snug line-clamp-2 mt-0.5">
-                {item.productTitle}
-              </p>
-              {item.displayPrice && (
-                <p className="text-xs font-semibold mt-0.5">{item.displayPrice}</p>
-              )}
-              {(item.size || item.color) && (
-                <div className="flex flex-wrap gap-1 mt-1">
-                  {item.size && (
-                    <span className="text-[9px] uppercase tracking-widest px-1.5 py-0.5 bg-accent border border-border">
-                      {item.size}
-                    </span>
-                  )}
-                  {item.color && (
-                    <span className="text-[9px] uppercase tracking-widest px-1.5 py-0.5 bg-accent border border-border">
-                      {item.color}
-                    </span>
+          return (
+            <div key={item.key} className="p-4 space-y-2.5">
+              <div className="flex gap-3">
+                {/* Image */}
+                <div className="w-14 shrink-0 overflow-hidden bg-stone-100" style={{ height: "72px" }}>
+                  {item.productImageUrl ? (
+                    <img
+                      src={item.productImageUrl}
+                      alt={item.productTitle}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <ShoppingBag className="h-4 w-4 text-muted-foreground/20" strokeWidth={1} />
+                    </div>
                   )}
                 </div>
-              )}
 
-              {/* Qty + remove */}
-              <div className="flex items-center gap-2.5 mt-2">
-                <div className="flex items-center border border-border">
-                  <button
-                    onClick={() => onUpdateQty(item.key, item.quantity - 1)}
-                    className="px-2 py-1 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-                  >
-                    <Minus className="h-2.5 w-2.5" />
-                  </button>
-                  <span className="text-xs w-6 text-center font-medium">
-                    {item.quantity}
-                  </span>
-                  <button
-                    onClick={() => onUpdateQty(item.key, item.quantity + 1)}
-                    className="px-2 py-1 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-                  >
-                    <Plus className="h-2.5 w-2.5" />
-                  </button>
+                {/* Info */}
+                <div className="flex-1 min-w-0">
+                  {item.brand && (
+                    <p className="text-[9px] tracking-widest uppercase text-muted-foreground">
+                      {item.brand}
+                    </p>
+                  )}
+                  <p className="text-xs leading-snug line-clamp-2 mt-0.5">
+                    {item.productTitle}
+                  </p>
+                  {item.displayPrice && (
+                    <p className="text-xs font-semibold mt-0.5">{item.displayPrice}</p>
+                  )}
+                  {(item.size || item.color) && (
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {item.size && (
+                        <span className="text-[9px] uppercase tracking-widest px-1.5 py-0.5 bg-accent border border-border">
+                          {item.size}
+                        </span>
+                      )}
+                      {item.color && (
+                        <span className="text-[9px] uppercase tracking-widest px-1.5 py-0.5 bg-accent border border-border">
+                          {item.color}
+                        </span>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Qty + remove */}
+                  <div className="flex items-center gap-2.5 mt-2">
+                    <div className="flex items-center border border-border">
+                      <button
+                        onClick={() => onUpdateQty(item.key, item.quantity - 1)}
+                        className="px-2 py-1 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                      >
+                        <Minus className="h-2.5 w-2.5" />
+                      </button>
+                      <span className="text-xs w-6 text-center font-medium">
+                        {item.quantity}
+                      </span>
+                      <button
+                        onClick={() => onUpdateQty(item.key, item.quantity + 1)}
+                        className="px-2 py-1 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                      >
+                        <Plus className="h-2.5 w-2.5" />
+                      </button>
+                    </div>
+                    <button
+                      onClick={() => onRemove(item.key)}
+                      className="text-muted-foreground hover:text-destructive transition-colors p-0.5"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </button>
+                  </div>
                 </div>
-                <button
-                  onClick={() => onRemove(item.key)}
-                  className="text-muted-foreground hover:text-destructive transition-colors p-0.5"
-                >
-                  <Trash2 className="h-3 w-3" />
-                </button>
               </div>
+
+              {/* Also available on other store */}
+              {otherStore && (
+                <div className="flex items-center justify-between bg-accent/40 border border-border/60 px-3 py-2 rounded-none">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[9px] tracking-wide text-muted-foreground">
+                      Also available on
+                    </span>
+                    <span className="text-[9px] tracking-widest uppercase font-semibold">
+                      {otherStore}
+                    </span>
+                    {otherStore === "Noon" && item.noonPrice && (
+                      <span className="text-[9px] text-muted-foreground">· {item.noonPrice}</span>
+                    )}
+                    {otherStore === "Amazon" && item.amazonPrice && (
+                      <span className="text-[9px] text-muted-foreground">· {item.amazonPrice}</span>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => onSwitchStore(item)}
+                    className="flex items-center gap-1 text-[9px] tracking-widest uppercase border border-border px-2 py-1 hover:bg-foreground hover:text-background hover:border-foreground transition-colors"
+                  >
+                    <ArrowLeftRight className="h-2.5 w-2.5" />
+                    Switch
+                  </button>
+                </div>
+              )}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Per-store checkout */}
       <div className="p-4 border-t border-border">
         <button onClick={handleContinue} className={meta.btnClass}>
-          <span className="flex items-center justify-center gap-2">
-            <ExternalLink className="h-3.5 w-3.5" />
-            Continue with {meta.label}
-          </span>
+          <ExternalLink className="h-3.5 w-3.5" />
+          Continue with {meta.label}
         </button>
       </div>
     </div>
@@ -192,6 +223,7 @@ export function BasketDrawer() {
     closeBasket,
     removeItem,
     updateQty,
+    updateItemFields,
     clearBasket,
     totalItems,
     currentMemberUsername,
@@ -251,15 +283,30 @@ export function BasketDrawer() {
     window.open(`https://wa.me/?text=${msg}`, "_blank", "noopener,noreferrer");
   };
 
-  // Group items by inferred store
+  const handleSwitchStore = (item: BasketItem) => {
+    const newSource = item.productSource === "Noon" ? "Amazon" : "Noon";
+    const newUrl = newSource === "Noon" ? item.noonUrl : item.amazonUrl;
+    const newPrice = newSource === "Noon" ? item.noonPrice : item.amazonPrice;
+    if (!newUrl) return;
+    updateItemFields(item.key, {
+      productSource: newSource,
+      affiliateUrl: newUrl,
+      displayPrice: newPrice ?? null,
+      numericPrice: newPrice
+        ? parseFloat(newPrice.replace(/[^\d.]/g, "")) || null
+        : null,
+    });
+  };
+
+  // Group items by store
   const storeGroups = items.reduce<Record<string, BasketItem[]>>((acc, item) => {
-    const store = getStore(item.affiliateUrl);
+    const store = item.productSource || inferStore(item.affiliateUrl);
     if (!acc[store]) acc[store] = [];
     acc[store].push(item);
     return acc;
   }, {});
 
-  const storeOrder: string[] = ["SHEIN", "Amazon", "Noon", "Other"];
+  const storeOrder = ["SHEIN", "Amazon", "Noon", "Other"];
   const activeStores = storeOrder.filter((s) => storeGroups[s]?.length);
 
   if (!isOpen) return null;
@@ -321,17 +368,13 @@ export function BasketDrawer() {
             </div>
           ) : (
             <div className="p-4 space-y-4">
-              {/* Curator line */}
-              {currentMemberName && currentMemberUsername && (
-                <div className="flex items-center gap-2 pb-1">
-                  <p className="text-[9px] tracking-widest uppercase text-muted-foreground">
-                    {t("basket.shoppingFrom")}
-                  </p>
-                  <p className="text-[9px] tracking-widest uppercase font-semibold">
-                    @{currentMemberUsername}
-                  </p>
-                </div>
-              )}
+              {/* Summary line */}
+              <p className="text-[10px] tracking-widest uppercase text-muted-foreground">
+                Your Cart ({totalItems} {totalItems === 1 ? "Item" : "Items"})
+                {currentMemberUsername && (
+                  <span className="ml-2 font-semibold text-foreground">· @{currentMemberUsername}</span>
+                )}
+              </p>
 
               {/* Per-store sections */}
               {activeStores.map((store) => (
@@ -341,6 +384,7 @@ export function BasketDrawer() {
                   items={storeGroups[store]}
                   onRemove={removeItem}
                   onUpdateQty={updateQty}
+                  onSwitchStore={handleSwitchStore}
                 />
               ))}
 

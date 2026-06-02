@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AddToBasketModal } from "@/components/AddToBasketModal";
-import { useBasket } from "@/contexts/BasketContext";
+import { useBasket, inferStore } from "@/contexts/BasketContext";
 import { useFavorites } from "@/contexts/FavoritesContext";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -563,6 +563,7 @@ export default function StorePage() {
               displayPrice: addingProduct.displayPrice,
               affiliateUrl: addingProduct.affiliateUrl,
               brand: addingProduct.brand,
+              source: inferStore(addingProduct.affiliateUrl),
             }}
             sourceMemberId={store.member.id}
             sourceMemberUsername={store.member.username}

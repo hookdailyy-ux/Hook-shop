@@ -1,9 +1,10 @@
 import { useEffect, useState, useCallback } from "react";
 import { Link, useParams } from "wouter";
-import { Layers, ShoppingBag, Link2, Check, Share2, Eye, Package } from "lucide-react";
+import { Layers, ShoppingBag, Link2, Check, Share2, Eye, Package, ShoppingCart } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AddToBasketModal } from "@/components/AddToBasketModal";
 import { ImageGallery } from "@/components/ImageGallery";
+import { useBasket, inferStore } from "@/contexts/BasketContext";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -40,7 +41,9 @@ export default function LookShare() {
   const [notFound, setNotFound] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
   const [addingProduct, setAddingProduct] = useState<PublicLookProduct | null>(null);
+  const [addedFullLook, setAddedFullLook] = useState(false);
   const { toast } = useToast();
+  const { addItem, openBasket } = useBasket();
 
   useEffect(() => {
     if (!token) return;
@@ -62,6 +65,37 @@ export default function LookShare() {
     () => `${window.location.origin}${BASE}/l/${token}`,
     [token]
   );
+
+  const handleAddFullLook = () => {
+    if (!look || look.products.length === 0) return;
+    look.products.forEach((product) => {
+      addItem({
+        productId: product.productId,
+        productTitle: product.title,
+        productImageUrl: product.imageUrl,
+        displayPrice: product.hookPrice,
+        affiliateUrl: product.affiliateUrl,
+        brand: product.brand,
+        size: null,
+        color: null,
+        productSource: inferStore(product.affiliateUrl),
+        noonUrl: null,
+        amazonUrl: null,
+        noonPrice: null,
+        amazonPrice: null,
+        sourceMemberId: 0,
+        sourceMemberUsername: look.member.username,
+        sourceMemberName: look.member.fullName,
+        sourceContext: "look",
+        sourceToken: token ?? null,
+      });
+    });
+    setAddedFullLook(true);
+    setTimeout(() => {
+      setAddedFullLook(false);
+      openBasket();
+    }, 800);
+  };
 
   const copyLink = async () => {
     try {
@@ -175,6 +209,25 @@ export default function LookShare() {
             View Store
           </Link>
         </div>
+
+        {/* ── Add Full Look ── */}
+        {look.products.length > 0 && (
+          <div className="py-5 border-b border-border">
+            <button
+              onClick={handleAddFullLook}
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 bg-foreground text-background text-[11px] tracking-widest uppercase hover:opacity-90 transition-opacity"
+            >
+              {addedFullLook ? (
+                <><Check className="h-3.5 w-3.5" /> Full Look Added!</>
+              ) : (
+                <><ShoppingCart className="h-3.5 w-3.5" /> Add Full Look to Basket</>
+              )}
+            </button>
+            <p className="text-[9px] tracking-wide text-muted-foreground mt-2">
+              Adds all {look.products.length} {look.products.length === 1 ? "piece" : "pieces"} · remove individual items in your basket
+            </p>
+          </div>
+        )}
 
         {/* ── Products ── */}
         <div className="py-10">

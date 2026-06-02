@@ -5,7 +5,10 @@ import { PlaceholderImage } from "@/components/PlaceholderImage";
 import { ProductCard } from "@/components/ProductCard";
 import { HeartButton } from "@/components/HeartButton";
 import { ImageGallery } from "@/components/ImageGallery";
+import { AddToBasketModal } from "@/components/AddToBasketModal";
+import { useBasket } from "@/contexts/BasketContext";
 import { useTranslation } from "react-i18next";
+import { ShoppingBag, Check } from "lucide-react";
 
 const COLOR_MAP: Record<string, string> = {
   black: "#1a1a1a",
@@ -47,6 +50,16 @@ export default function ProductDetail() {
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [galleryOpen, setGalleryOpen] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [addedStore, setAddedStore] = useState<"Noon" | "Amazon" | null>(null);
+
+  const {
+    addItem,
+    openBasket,
+    currentMemberId,
+    currentMemberUsername,
+    currentMemberName,
+  } = useBasket();
 
   const { data: product, isLoading } = useGetProduct(id, {
     query: { enabled: !!id, queryKey: getGetProductQueryKey(id) },
@@ -113,6 +126,37 @@ export default function ProductDetail() {
   const isElectronics = product.category === "electronics";
   const noonUrl = product.noonUrl;
   const amazonUrl = product.amazonUrl;
+
+  const handleAddElectronics = (store: "Noon" | "Amazon") => {
+    const url = store === "Noon" ? noonUrl : amazonUrl;
+    const price = store === "Noon" ? product.noonPrice : product.amazonPrice;
+    if (!url) return;
+    addItem({
+      productId: product.id,
+      productTitle: product.title,
+      productImageUrl: product.imageUrl ?? null,
+      displayPrice: price ?? null,
+      affiliateUrl: url,
+      brand: product.brand ?? null,
+      size: null,
+      color: null,
+      productSource: store,
+      noonUrl: product.noonUrl ?? null,
+      amazonUrl: product.amazonUrl ?? null,
+      noonPrice: product.noonPrice ?? null,
+      amazonPrice: product.amazonPrice ?? null,
+      sourceMemberId: currentMemberId ?? 0,
+      sourceMemberUsername: currentMemberUsername ?? "",
+      sourceMemberName: currentMemberName ?? "",
+      sourceContext: "store",
+      sourceToken: null,
+    });
+    setAddedStore(store);
+    setTimeout(() => {
+      setAddedStore(null);
+      openBasket();
+    }, 800);
+  };
 
   return (
     <div className="pb-32">
@@ -317,14 +361,16 @@ export default function ProductDetail() {
                         <p className="text-2xl font-medium tracking-tight">{product.noonPrice}</p>
                       )}
                       <p className="text-[9px] tracking-wide text-muted-foreground">Delivered by Noon</p>
-                      <a
-                        href={noonUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-full text-center bg-foreground text-background text-[10px] tracking-widest uppercase py-3 hover:opacity-90 transition-opacity block mt-1"
+                      <button
+                        onClick={() => handleAddElectronics("Noon")}
+                        className="w-full text-center bg-foreground text-background text-[10px] tracking-widest uppercase py-3 hover:opacity-90 transition-opacity flex items-center justify-center gap-2 mt-1"
                       >
-                        Buy Now
-                      </a>
+                        {addedStore === "Noon" ? (
+                          <><Check className="h-3 w-3" /> Added!</>
+                        ) : (
+                          <><ShoppingBag className="h-3 w-3" /> Add to Basket</>
+                        )}
+                      </button>
                     </div>
                   )}
                   {amazonUrl && (
@@ -334,14 +380,16 @@ export default function ProductDetail() {
                         <p className="text-2xl font-medium tracking-tight">{product.amazonPrice}</p>
                       )}
                       <p className="text-[9px] tracking-wide text-muted-foreground">Delivered by Amazon</p>
-                      <a
-                        href={amazonUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-full text-center border border-foreground text-foreground text-[10px] tracking-widest uppercase py-3 hover:opacity-90 transition-opacity block mt-1"
+                      <button
+                        onClick={() => handleAddElectronics("Amazon")}
+                        className="w-full text-center border border-foreground text-foreground text-[10px] tracking-widest uppercase py-3 hover:opacity-90 transition-opacity flex items-center justify-center gap-2 mt-1"
                       >
-                        Buy Now
-                      </a>
+                        {addedStore === "Amazon" ? (
+                          <><Check className="h-3 w-3" /> Added!</>
+                        ) : (
+                          <><ShoppingBag className="h-3 w-3" /> Add to Basket</>
+                        )}
+                      </button>
                     </div>
                   )}
                 </div>
@@ -351,20 +399,34 @@ export default function ProductDetail() {
                 </p>
               )
             ) : (
-              <>
-                <a
-                  href={product.affiliateUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full text-center bg-foreground text-background text-xs tracking-widest uppercase py-5 hover:opacity-90 transition-opacity block"
-                  data-testid="button-order-now"
-                >
-                  {t("product.orderNow")}
-                </a>
-                <p className="text-[10px] text-center text-muted-foreground mt-3 tracking-wide">
-                  {deliveryLabel}
-                </p>
-              </>
+              <button
+                onClick={() => setShowAddModal(true)}
+                className="w-full flex items-center justify-center gap-2 bg-foreground text-background text-xs tracking-widest uppercase py-5 hover:opacity-90 transition-opacity"
+                data-testid="button-add-to-basket"
+              >
+                <ShoppingBag className="h-4 w-4" />
+                {t("product.orderNow") === "Order Now" ? "Add to Basket" : t("product.orderNow")}
+              </button>
+            )}
+
+            {/* Add to basket modal — non-electronics */}
+            {showAddModal && !isElectronics && (
+              <AddToBasketModal
+                product={{
+                  id: product.id,
+                  title: product.title,
+                  imageUrl: product.imageUrl ?? null,
+                  displayPrice: product.price ?? null,
+                  affiliateUrl: product.affiliateUrl,
+                  brand: product.brand ?? null,
+                  source: product.source ?? null,
+                }}
+                sourceMemberId={currentMemberId ?? 0}
+                sourceMemberUsername={currentMemberUsername ?? ""}
+                sourceMemberName={currentMemberName ?? ""}
+                sourceContext="store"
+                onClose={() => setShowAddModal(false)}
+              />
             )}
 
             {product.subcategory && (
