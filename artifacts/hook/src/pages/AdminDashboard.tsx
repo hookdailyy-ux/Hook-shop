@@ -931,15 +931,16 @@ function ProductDialog({ product }: { product?: Product }) {
                   });
 
                   const data = await response.json();
-
-                  if (data.success) {
-                    set("title")(data.product.title);
-                    set("brand")(data.product.brand);
-                    set("description")(data.product.description);
-                    set("colors")(data.product.colors);
-                    set("sizes")(data.product.sizes);
-                    set("category")(data.product.category);
-                  }
+if (data.success && data.product) {
+  set("title")(data.product.title || "");
+  set("brand")(data.product.brand || "");
+  set("description")(data.product.description || "");
+  set("colors")(data.product.colors || []);
+  set("sizes")(data.product.sizes || []);
+  set("category")(data.product.category || "women");
+} else {
+  console.log("HOOK AI response:", data);
+}
                 }}
               >
                 ✨ Generate with HOOK AI

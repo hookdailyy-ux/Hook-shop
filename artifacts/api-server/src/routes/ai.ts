@@ -47,9 +47,33 @@ Return ONLY valid JSON:
 
     const data: any = await response.json();
 
+    const text =
+      data.output_text || data.output?.[0]?.content?.[0]?.text || "{}";
+    console.log("HOOK AI TEXT:", text);
+
+    let product = {};
+    try {
+      product = JSON.parse(text);
+    } catch {
+      product = {
+        title: "",
+        titleAr: "",
+        description: "",
+        descriptionAr: "",
+        brand: "",
+        category: "women",
+        subcategory: "",
+        colors: [],
+        sizes: [],
+      };
+    }
+
     return res.json({
       success: true,
-      raw: data,
+      product: {
+        ...product,
+        affiliateUrl,
+      },
     });
   } catch (error) {
     return res.status(500).json({
