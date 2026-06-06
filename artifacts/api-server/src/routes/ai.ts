@@ -46,7 +46,7 @@ Return ONLY valid JSON:
     });
 
     const data: any = await response.json();
-
+    console.log("FULL OPENAI RESPONSE:", JSON.stringify(data, null, 2));
     const text =
       data.output_text || data.output?.[0]?.content?.[0]?.text || "{}";
     console.log("HOOK AI TEXT:", text);
