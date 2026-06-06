@@ -23,7 +23,7 @@ import rankingsRouter from "./rankings";
 import adminCommerceRouter from "./admin-commerce";
 import basketShareRouter from "./basket-share";
 import teamBasketsRouter from "./team-baskets";
-
+import aiRouter from "./ai";
 const router: IRouter = Router();
 
 router.use(healthRouter);
@@ -50,5 +50,5 @@ router.use(rankingsRouter);
 router.use(adminCommerceRouter);
 router.use(basketShareRouter);
 router.use(teamBasketsRouter);
-
+router.use("/ai", aiRouter);
 export default router;

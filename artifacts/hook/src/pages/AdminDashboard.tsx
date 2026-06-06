@@ -666,7 +666,58 @@ function ProductDialog({ product }: { product?: Product }) {
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-5 mt-4">
+<div className="border border-border bg-muted/20 p-4 space-y-3">
+  <div>
+    <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+      HOOK AI Assistant
+    </p>
+    <p className="text-sm text-muted-foreground mt-1">
+      Paste your affiliate link and upload your product images. AI will help generate the product name, Arabic name, description, colors, sizes, and category.
+    </p>
+  </div>
 
+  <div className="space-y-2">
+    <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+      Affiliate Link
+    </label>
+    <Input
+      value={form.affiliateUrl}
+      onChange={(e) => set("affiliateUrl")(e.target.value)}
+      placeholder="Paste Amazon / Noon / AliExpress affiliate link"
+      className="border-border"
+    />
+  </div>
+
+  <Button
+  type="button"
+  className="w-full text-xs tracking-widest uppercase"
+  onClick={async () => {
+    const response = await fetch("/ai/generate-product", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        affiliateUrl: form.affiliateUrl,
+        images: form.images,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      set("title")(data.product.title);
+      set("brand")(data.product.brand);
+      set("description")(data.product.description);
+      set("colors")(data.product.colors);
+      set("sizes")(data.product.sizes);
+      set("category")(data.product.category);
+    }
+  }}
+>
+  ✨ Generate with HOOK AI
+</Button>
+</div>
           {/* Title + Brand */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2 col-span-2 md:col-span-1">
