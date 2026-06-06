@@ -41,9 +41,16 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { X, Plus, Trash2, Pencil, Loader2, Upload, Eye } from "lucide-react";
-import { SingleImageUpload, MultiImageUpload } from "@/components/ImageUploadField";
+import {
+  SingleImageUpload,
+  MultiImageUpload,
+} from "@/components/ImageUploadField";
 import { useUpload } from "@workspace/object-storage-web";
-import { useSiteImages, useUpsertSiteImage, useDeleteSiteImage } from "@/hooks/useSiteImages";
+import {
+  useSiteImages,
+  useUpsertSiteImage,
+  useDeleteSiteImage,
+} from "@/hooks/useSiteImages";
 import type { SiteImage, SiteImageKey } from "@/hooks/useSiteImages";
 import { useAdminAuth } from "@/contexts/AdminAuthContext";
 import { useLocation } from "wouter";
@@ -54,7 +61,18 @@ import { AdminAnalytics } from "@/components/AdminAnalytics";
 import { NewsletterTab } from "@/components/NewsletterTab";
 import { ScrollableTabBar } from "@/components/ScrollableTabBar";
 
-type Tab = "dashboard" | "products" | "looks" | "categories" | "settings" | "images" | "team" | "orders" | "rewards" | "analytics" | "newsletter";
+type Tab =
+  | "dashboard"
+  | "products"
+  | "looks"
+  | "categories"
+  | "settings"
+  | "images"
+  | "team"
+  | "orders"
+  | "rewards"
+  | "analytics"
+  | "newsletter";
 
 const CATEGORIES = [
   { value: "women", label: "Women" },
@@ -76,15 +94,22 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen pb-32" style={{ background: "hsl(var(--background))" }}>
+    <div
+      className="min-h-screen pb-32"
+      style={{ background: "hsl(var(--background))" }}
+    >
       <div className="border-b border-border sticky top-0 z-30 bg-background/95 backdrop-blur-sm">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="flex items-center gap-0">
             {/* Admin label + Logout — pinned left */}
             <div className="shrink-0 border-r border-border pr-4 mr-0 flex flex-col justify-center py-2">
-              <span className="font-serif text-lg font-light tracking-wide text-foreground leading-tight">Admin</span>
+              <span className="font-serif text-lg font-light tracking-wide text-foreground leading-tight">
+                Admin
+              </span>
               <button
-                onClick={() => { void handleLogout(); }}
+                onClick={() => {
+                  void handleLogout();
+                }}
                 className="text-[10px] tracking-widest uppercase text-muted-foreground hover:text-destructive transition-colors text-left"
                 data-testid="button-logout"
               >
@@ -93,7 +118,21 @@ export default function AdminDashboard() {
             </div>
             {/* Scrollable tabs */}
             <ScrollableTabBar>
-              {(["dashboard", "products", "looks", "categories", "settings", "images", "team", "orders", "rewards", "analytics", "newsletter"] as Tab[]).map((tab) => (
+              {(
+                [
+                  "dashboard",
+                  "products",
+                  "looks",
+                  "categories",
+                  "settings",
+                  "images",
+                  "team",
+                  "orders",
+                  "rewards",
+                  "analytics",
+                  "newsletter",
+                ] as Tab[]
+              ).map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
@@ -129,10 +168,20 @@ export default function AdminDashboard() {
   );
 }
 
-function StatCard({ title, value, loading }: { title: string; value?: number; loading?: boolean }) {
+function StatCard({
+  title,
+  value,
+  loading,
+}: {
+  title: string;
+  value?: number;
+  loading?: boolean;
+}) {
   return (
     <div className="bg-card border border-border p-6">
-      <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-3">{title}</p>
+      <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-3">
+        {title}
+      </p>
       {loading ? (
         <div className="h-10 w-16 bg-accent animate-pulse" />
       ) : (
@@ -148,24 +197,46 @@ function DashboardTab() {
   return (
     <div>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-10">
-        <StatCard title="Products" value={stats?.totalProducts} loading={isLoading} />
+        <StatCard
+          title="Products"
+          value={stats?.totalProducts}
+          loading={isLoading}
+        />
         <StatCard title="Looks" value={stats?.totalLooks} loading={isLoading} />
-        <StatCard title="Subscribers" value={stats?.totalSubscribers} loading={isLoading} />
-        <StatCard title="Featured" value={stats?.featuredCount} loading={isLoading} />
-        <StatCard title="Trending" value={stats?.trendingCount} loading={isLoading} />
+        <StatCard
+          title="Subscribers"
+          value={stats?.totalSubscribers}
+          loading={isLoading}
+        />
+        <StatCard
+          title="Featured"
+          value={stats?.featuredCount}
+          loading={isLoading}
+        />
+        <StatCard
+          title="Trending"
+          value={stats?.trendingCount}
+          loading={isLoading}
+        />
       </div>
 
       {stats && (
         <div className="border border-border">
           <div className="px-6 py-4 border-b border-border">
-            <h2 className="text-xs tracking-widest uppercase">Products by Category</h2>
+            <h2 className="text-xs tracking-widest uppercase">
+              Products by Category
+            </h2>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-border">
             {CATEGORIES.map((cat) => (
               <div key={cat.value} className="px-6 py-5">
-                <p className="text-[10px] tracking-widest uppercase text-muted-foreground mb-1">{cat.label}</p>
+                <p className="text-[10px] tracking-widest uppercase text-muted-foreground mb-1">
+                  {cat.label}
+                </p>
                 <p className="font-serif text-3xl font-light">
-                  {stats.productsByCategory[cat.value as keyof typeof stats.productsByCategory] ?? 0}
+                  {stats.productsByCategory[
+                    cat.value as keyof typeof stats.productsByCategory
+                  ] ?? 0}
                 </p>
               </div>
             ))}
@@ -192,7 +263,7 @@ function ProductsTab() {
         p.title.toLowerCase().includes(q) ||
         (p.brand?.toLowerCase().includes(q) ?? false) ||
         p.category.toLowerCase().includes(q) ||
-        (p.subcategory?.toLowerCase().includes(q) ?? false)
+        (p.subcategory?.toLowerCase().includes(q) ?? false),
     );
   }, [products, searchQuery]);
 
@@ -202,12 +273,18 @@ function ProductsTab() {
       { id },
       {
         onSuccess: () => {
-          queryClient.invalidateQueries({ queryKey: getListAdminProductsQueryKey() });
-          queryClient.invalidateQueries({ queryKey: getGetAdminStatsQueryKey() });
-          queryClient.invalidateQueries({ queryKey: getListProductsQueryKey() });
+          queryClient.invalidateQueries({
+            queryKey: getListAdminProductsQueryKey(),
+          });
+          queryClient.invalidateQueries({
+            queryKey: getGetAdminStatsQueryKey(),
+          });
+          queryClient.invalidateQueries({
+            queryKey: getListProductsQueryKey(),
+          });
           toast({ title: "Product deleted" });
         },
-      }
+      },
     );
   };
 
@@ -226,9 +303,16 @@ function ProductsTab() {
       <div className="relative mb-4">
         <svg
           className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none"
-          fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
         >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1 0 6.5 6.5a7.5 7.5 0 0 0 10.15 10.15z" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1 0 6.5 6.5a7.5 7.5 0 0 0 10.15 10.15z"
+          />
         </svg>
         <input
           type="text"
@@ -252,72 +336,114 @@ function ProductsTab() {
         <table className="w-full text-sm text-left min-w-[640px]">
           <thead className="border-b border-border bg-card">
             <tr>
-              <th className="px-4 py-3 text-[10px] tracking-widest uppercase text-muted-foreground font-medium">Product</th>
-              <th className="px-4 py-3 text-[10px] tracking-widest uppercase text-muted-foreground font-medium">Category</th>
-              <th className="px-4 py-3 text-[10px] tracking-widest uppercase text-muted-foreground font-medium">Subcategory</th>
-              <th className="px-4 py-3 text-[10px] tracking-widest uppercase text-muted-foreground font-medium">Price</th>
-              <th className="px-4 py-3 text-[10px] tracking-widest uppercase text-muted-foreground font-medium">Flags</th>
-              <th className="px-4 py-3 text-[10px] tracking-widest uppercase text-muted-foreground font-medium text-right">Actions</th>
+              <th className="px-4 py-3 text-[10px] tracking-widest uppercase text-muted-foreground font-medium">
+                Product
+              </th>
+              <th className="px-4 py-3 text-[10px] tracking-widest uppercase text-muted-foreground font-medium">
+                Category
+              </th>
+              <th className="px-4 py-3 text-[10px] tracking-widest uppercase text-muted-foreground font-medium">
+                Subcategory
+              </th>
+              <th className="px-4 py-3 text-[10px] tracking-widest uppercase text-muted-foreground font-medium">
+                Price
+              </th>
+              <th className="px-4 py-3 text-[10px] tracking-widest uppercase text-muted-foreground font-medium">
+                Flags
+              </th>
+              <th className="px-4 py-3 text-[10px] tracking-widest uppercase text-muted-foreground font-medium text-right">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
             {isLoading ? (
               <tr>
-                <td colSpan={6} className="px-4 py-12 text-center text-xs tracking-widest uppercase text-muted-foreground animate-pulse">
+                <td
+                  colSpan={6}
+                  className="px-4 py-12 text-center text-xs tracking-widest uppercase text-muted-foreground animate-pulse"
+                >
                   Loading...
                 </td>
               </tr>
             ) : filteredProducts.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-12 text-center text-xs tracking-widest uppercase text-muted-foreground">
-                  {searchQuery.trim() ? "No products match your search" : "No products yet"}
+                <td
+                  colSpan={6}
+                  className="px-4 py-12 text-center text-xs tracking-widest uppercase text-muted-foreground"
+                >
+                  {searchQuery.trim()
+                    ? "No products match your search"
+                    : "No products yet"}
                 </td>
               </tr>
-            ) : filteredProducts.map((product) => (
-              <tr key={product.id} className="hover:bg-accent/10 transition-colors" data-testid={`row-product-${product.id}`}>
-                <td className="px-4 py-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-12 bg-accent shrink-0 overflow-hidden">
-                      {product.imageUrl && (
-                        <img src={product.imageUrl} alt="" className="w-full h-full object-cover" />
+            ) : (
+              filteredProducts.map((product) => (
+                <tr
+                  key={product.id}
+                  className="hover:bg-accent/10 transition-colors"
+                  data-testid={`row-product-${product.id}`}
+                >
+                  <td className="px-4 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-12 bg-accent shrink-0 overflow-hidden">
+                        {product.imageUrl && (
+                          <img
+                            src={product.imageUrl}
+                            alt=""
+                            className="w-full h-full object-cover"
+                          />
+                        )}
+                      </div>
+                      <div>
+                        <p className="font-medium text-sm line-clamp-1">
+                          {product.title}
+                        </p>
+                        {product.brand && (
+                          <p className="text-[10px] tracking-widest uppercase text-muted-foreground">
+                            {product.brand}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-4 text-xs tracking-widest uppercase text-muted-foreground">
+                    {product.category}
+                  </td>
+                  <td className="px-4 py-4 text-xs text-muted-foreground">
+                    {product.subcategory || "—"}
+                  </td>
+                  <td className="px-4 py-4 text-sm">{product.price || "—"}</td>
+                  <td className="px-4 py-4">
+                    <div className="flex gap-2">
+                      {product.featured && (
+                        <span className="text-[10px] tracking-widest uppercase bg-foreground text-background px-2 py-0.5">
+                          Featured
+                        </span>
+                      )}
+                      {product.trending && (
+                        <span className="text-[10px] tracking-widest uppercase border border-foreground px-2 py-0.5">
+                          Trending
+                        </span>
                       )}
                     </div>
-                    <div>
-                      <p className="font-medium text-sm line-clamp-1">{product.title}</p>
-                      {product.brand && (
-                        <p className="text-[10px] tracking-widest uppercase text-muted-foreground">{product.brand}</p>
-                      )}
+                  </td>
+                  <td className="px-4 py-4 text-right">
+                    <div className="flex items-center justify-end gap-3">
+                      <ProductDialog product={product} />
+                      <button
+                        onClick={() => handleDelete(product.id, product.title)}
+                        className="text-destructive hover:text-destructive/70 transition-colors"
+                        data-testid={`button-delete-product-${product.id}`}
+                        disabled={deleteMutation.isPending}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
                     </div>
-                  </div>
-                </td>
-                <td className="px-4 py-4 text-xs tracking-widest uppercase text-muted-foreground">{product.category}</td>
-                <td className="px-4 py-4 text-xs text-muted-foreground">{product.subcategory || "—"}</td>
-                <td className="px-4 py-4 text-sm">{product.price || "—"}</td>
-                <td className="px-4 py-4">
-                  <div className="flex gap-2">
-                    {product.featured && (
-                      <span className="text-[10px] tracking-widest uppercase bg-foreground text-background px-2 py-0.5">Featured</span>
-                    )}
-                    {product.trending && (
-                      <span className="text-[10px] tracking-widest uppercase border border-foreground px-2 py-0.5">Trending</span>
-                    )}
-                  </div>
-                </td>
-                <td className="px-4 py-4 text-right">
-                  <div className="flex items-center justify-end gap-3">
-                    <ProductDialog product={product} />
-                    <button
-                      onClick={() => handleDelete(product.id, product.title)}
-                      className="text-destructive hover:text-destructive/70 transition-colors"
-                      data-testid={`button-delete-product-${product.id}`}
-                      disabled={deleteMutation.isPending}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
@@ -358,12 +484,20 @@ function TagInput({
 
   return (
     <div className="space-y-2">
-      <label className="text-[10px] uppercase tracking-widest text-muted-foreground">{label}</label>
+      <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+        {label}
+      </label>
       <div className="border border-border min-h-[44px] px-3 py-2 flex flex-wrap gap-2 items-center focus-within:ring-1 focus-within:ring-foreground">
         {values.map((v) => (
-          <span key={v} className="flex items-center gap-1 bg-accent text-foreground text-xs px-2 py-1">
+          <span
+            key={v}
+            className="flex items-center gap-1 bg-accent text-foreground text-xs px-2 py-1"
+          >
             {v}
-            <button type="button" onClick={() => onChange(values.filter((x) => x !== v))}>
+            <button
+              type="button"
+              onClick={() => onChange(values.filter((x) => x !== v))}
+            >
               <X className="h-3 w-3" />
             </button>
           </span>
@@ -382,34 +516,50 @@ function TagInput({
 }
 
 const PRESET_COLORS = [
-  { name: "Black",  hex: "#1a1a1a" },
-  { name: "White",  hex: "#f5f5f0" },
-  { name: "Beige",  hex: "#d4b896" },
-  { name: "Brown",  hex: "#8b5e3c" },
-  { name: "Grey",   hex: "#888888" },
-  { name: "Green",  hex: "#4a7c59" },
-  { name: "Blue",   hex: "#3a6a9a" },
-  { name: "Navy",   hex: "#1b2a4a" },
-  { name: "Pink",   hex: "#e8a0a0" },
+  { name: "Black", hex: "#1a1a1a" },
+  { name: "White", hex: "#f5f5f0" },
+  { name: "Beige", hex: "#d4b896" },
+  { name: "Brown", hex: "#8b5e3c" },
+  { name: "Grey", hex: "#888888" },
+  { name: "Green", hex: "#4a7c59" },
+  { name: "Blue", hex: "#3a6a9a" },
+  { name: "Navy", hex: "#1b2a4a" },
+  { name: "Pink", hex: "#e8a0a0" },
   { name: "Purple", hex: "#7a5a9a" },
-  { name: "Red",    hex: "#cc4a4a" },
+  { name: "Red", hex: "#cc4a4a" },
   { name: "Yellow", hex: "#d4c44a" },
   { name: "Orange", hex: "#d47a3a" },
-  { name: "Gold",   hex: "#c9a84c" },
+  { name: "Gold", hex: "#c9a84c" },
   { name: "Silver", hex: "#c0c0c0" },
 ] as const;
 
-function ColorSwatchPicker({ values, onChange }: { values: string[]; onChange: (v: string[]) => void }) {
+function ColorSwatchPicker({
+  values,
+  onChange,
+}: {
+  values: string[];
+  onChange: (v: string[]) => void;
+}) {
   const toggle = (name: string) =>
-    onChange(values.includes(name) ? values.filter((c) => c !== name) : [...values, name]);
+    onChange(
+      values.includes(name)
+        ? values.filter((c) => c !== name)
+        : [...values, name],
+    );
 
   return (
     <div className="space-y-3">
-      <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Colors</label>
+      <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+        Colors
+      </label>
       <div className="flex flex-wrap gap-3 pt-0.5">
         {PRESET_COLORS.map(({ name, hex }) => {
           const selected = values.includes(name);
-          const isLight = name === "White" || name === "Silver" || name === "Yellow" || name === "Gold";
+          const isLight =
+            name === "White" ||
+            name === "Silver" ||
+            name === "Yellow" ||
+            name === "Gold";
           return (
             <button
               key={name}
@@ -423,7 +573,13 @@ function ColorSwatchPicker({ values, onChange }: { values: string[]; onChange: (
             >
               {selected && (
                 <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                  <path d="M2 6l3 3 5-5" stroke={isLight ? "#2a2318" : "#fff"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  <path
+                    d="M2 6l3 3 5-5"
+                    stroke={isLight ? "#2a2318" : "#fff"}
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </svg>
               )}
             </button>
@@ -435,10 +591,20 @@ function ColorSwatchPicker({ values, onChange }: { values: string[]; onChange: (
           {values.map((name) => {
             const color = PRESET_COLORS.find((c) => c.name === name);
             return (
-              <span key={name} className="flex items-center gap-1.5 bg-accent text-xs px-2 py-1">
-                {color && <span className="w-2.5 h-2.5 rounded-full border border-border/30 shrink-0" style={{ backgroundColor: color.hex }} />}
+              <span
+                key={name}
+                className="flex items-center gap-1.5 bg-accent text-xs px-2 py-1"
+              >
+                {color && (
+                  <span
+                    className="w-2.5 h-2.5 rounded-full border border-border/30 shrink-0"
+                    style={{ backgroundColor: color.hex }}
+                  />
+                )}
                 {name}
-                <button type="button" onClick={() => toggle(name)}><X className="h-3 w-3" /></button>
+                <button type="button" onClick={() => toggle(name)}>
+                  <X className="h-3 w-3" />
+                </button>
               </span>
             );
           })}
@@ -450,11 +616,21 @@ function ColorSwatchPicker({ values, onChange }: { values: string[]; onChange: (
 
 const PRESET_SIZES = ["XS", "S", "M", "L", "XL", "XXL", "One Size"] as const;
 
-function SizePicker({ values, onChange }: { values: string[]; onChange: (v: string[]) => void }) {
+function SizePicker({
+  values,
+  onChange,
+}: {
+  values: string[];
+  onChange: (v: string[]) => void;
+}) {
   const [customInput, setCustomInput] = useState("");
 
   const togglePreset = (size: string) =>
-    onChange(values.includes(size) ? values.filter((s) => s !== size) : [...values, size]);
+    onChange(
+      values.includes(size)
+        ? values.filter((s) => s !== size)
+        : [...values, size],
+    );
 
   const addCustom = () => {
     const trimmed = customInput.trim();
@@ -462,11 +638,15 @@ function SizePicker({ values, onChange }: { values: string[]; onChange: (v: stri
     setCustomInput("");
   };
 
-  const customValues = values.filter((v) => !(PRESET_SIZES as readonly string[]).includes(v));
+  const customValues = values.filter(
+    (v) => !(PRESET_SIZES as readonly string[]).includes(v),
+  );
 
   return (
     <div className="space-y-3">
-      <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Sizes</label>
+      <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+        Sizes
+      </label>
       <div className="flex flex-wrap gap-2">
         {PRESET_SIZES.map((size) => (
           <button
@@ -488,18 +668,38 @@ function SizePicker({ values, onChange }: { values: string[]; onChange: (v: stri
           type="text"
           value={customInput}
           onChange={(e) => setCustomInput(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter" || e.key === ",") { e.preventDefault(); addCustom(); }}}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === ",") {
+              e.preventDefault();
+              addCustom();
+            }
+          }}
           placeholder="Custom size (e.g. 38, 40) — press Enter"
           className="flex-1 border border-border px-3 py-2 text-sm outline-none bg-transparent focus:ring-1 focus:ring-foreground"
         />
-        <Button type="button" variant="outline" onClick={addCustom} className="shrink-0 text-xs">Add</Button>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={addCustom}
+          className="shrink-0 text-xs"
+        >
+          Add
+        </Button>
       </div>
       {customValues.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {customValues.map((v) => (
-            <span key={v} className="flex items-center gap-1 bg-accent text-xs px-2 py-1">
+            <span
+              key={v}
+              className="flex items-center gap-1 bg-accent text-xs px-2 py-1"
+            >
               {v}
-              <button type="button" onClick={() => onChange(values.filter((x) => x !== v))}><X className="h-3 w-3" /></button>
+              <button
+                type="button"
+                onClick={() => onChange(values.filter((x) => x !== v))}
+              >
+                <X className="h-3 w-3" />
+              </button>
             </span>
           ))}
         </div>
@@ -580,7 +780,11 @@ function ProductDialog({ product }: { product?: Product }) {
 
   const { data: subcategories } = useListSubcategories(
     { category: form.category },
-    { query: { queryKey: getListSubcategoriesQueryKey({ category: form.category }) } }
+    {
+      query: {
+        queryKey: getListSubcategoriesQueryKey({ category: form.category }),
+      },
+    },
   );
 
   const set = (k: keyof ProductFormData) => (v: ProductFormData[typeof k]) =>
@@ -605,7 +809,7 @@ function ProductDialog({ product }: { product?: Product }) {
       amazonPrice: form.amazonPrice || undefined,
       externalId: form.externalId || undefined,
       affiliateUrl: isElectronics
-        ? (form.noonUrl || form.amazonUrl || form.affiliateUrl || "")
+        ? form.noonUrl || form.amazonUrl || form.affiliateUrl || ""
         : form.affiliateUrl,
     };
     if (product) {
@@ -613,27 +817,45 @@ function ProductDialog({ product }: { product?: Product }) {
         { id: product.id, data: payload as any },
         {
           onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: getListAdminProductsQueryKey() });
-            queryClient.invalidateQueries({ queryKey: getListProductsQueryKey() });
+            queryClient.invalidateQueries({
+              queryKey: getListAdminProductsQueryKey(),
+            });
+            queryClient.invalidateQueries({
+              queryKey: getListProductsQueryKey(),
+            });
             toast({ title: "Product updated" });
             setOpen(false);
           },
-          onError: () => toast({ title: "Failed to update product", variant: "destructive" }),
-        }
+          onError: () =>
+            toast({
+              title: "Failed to update product",
+              variant: "destructive",
+            }),
+        },
       );
     } else {
       createMutation.mutate(
         { data: payload as any },
         {
           onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: getListAdminProductsQueryKey() });
-            queryClient.invalidateQueries({ queryKey: getGetAdminStatsQueryKey() });
-            queryClient.invalidateQueries({ queryKey: getListProductsQueryKey() });
+            queryClient.invalidateQueries({
+              queryKey: getListAdminProductsQueryKey(),
+            });
+            queryClient.invalidateQueries({
+              queryKey: getGetAdminStatsQueryKey(),
+            });
+            queryClient.invalidateQueries({
+              queryKey: getListProductsQueryKey(),
+            });
             toast({ title: "Product created" });
             setOpen(false);
           },
-          onError: () => toast({ title: "Failed to create product", variant: "destructive" }),
-        }
+          onError: () =>
+            toast({
+              title: "Failed to create product",
+              variant: "destructive",
+            }),
+        },
       );
     }
   };
@@ -642,281 +864,588 @@ function ProductDialog({ product }: { product?: Product }) {
 
   return (
     <>
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {product ? (
-          <button
-            className="text-muted-foreground hover:text-foreground transition-colors"
-            data-testid={`button-edit-product-${product.id}`}
-          >
-            <Pencil className="h-4 w-4" />
-          </button>
-        ) : (
-          <Button className="text-xs tracking-widest uppercase font-medium" data-testid="button-add-product">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Product
-          </Button>
-        )}
-      </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[92vh] overflow-y-auto border-border">
-        <DialogHeader>
-          <DialogTitle className="font-serif text-2xl font-light">
-            {product ? "Edit Product" : "New Product"}
-          </DialogTitle>
-        </DialogHeader>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          {product ? (
+            <button
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              data-testid={`button-edit-product-${product.id}`}
+            >
+              <Pencil className="h-4 w-4" />
+            </button>
+          ) : (
+            <Button
+              className="text-xs tracking-widest uppercase font-medium"
+              data-testid="button-add-product"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Product
+            </Button>
+          )}
+        </DialogTrigger>
+        <DialogContent className="max-w-2xl max-h-[92vh] overflow-y-auto border-border">
+          <DialogHeader>
+            <DialogTitle className="font-serif text-2xl font-light">
+              {product ? "Edit Product" : "New Product"}
+            </DialogTitle>
+          </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-5 mt-4">
-<div className="border border-border bg-muted/20 p-4 space-y-3">
-  <div>
-    <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
-      HOOK AI Assistant
-    </p>
-    <p className="text-sm text-muted-foreground mt-1">
-      Paste your affiliate link and upload your product images. AI will help generate the product name, Arabic name, description, colors, sizes, and category.
-    </p>
-  </div>
+          <form onSubmit={handleSubmit} className="space-y-5 mt-4">
+            <div className="border border-border bg-muted/20 p-4 space-y-3">
+              <div>
+                <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                  HOOK AI Assistant
+                </p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Paste your affiliate link and upload your product images. AI
+                  will help generate the product name, Arabic name, description,
+                  colors, sizes, and category.
+                </p>
+              </div>
 
-  <div className="space-y-2">
-    <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
-      Affiliate Link
-    </label>
-    <Input
-      value={form.affiliateUrl}
-      onChange={(e) => set("affiliateUrl")(e.target.value)}
-      placeholder="Paste Amazon / Noon / AliExpress affiliate link"
-      className="border-border"
-    />
-  </div>
-
-  <Button
-  type="button"
-  className="w-full text-xs tracking-widest uppercase"
-  onClick={async () => {
-    const response = await fetch("/ai/generate-product", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        affiliateUrl: form.affiliateUrl,
-        images: form.images,
-      }),
-    });
-
-    const data = await response.json();
-
-    if (data.success) {
-      set("title")(data.product.title);
-      set("brand")(data.product.brand);
-      set("description")(data.product.description);
-      set("colors")(data.product.colors);
-      set("sizes")(data.product.sizes);
-      set("category")(data.product.category);
-    }
-  }}
->
-  ✨ Generate with HOOK AI
-</Button>
-</div>
-          {/* Title + Brand */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2 col-span-2 md:col-span-1">
-              <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Title *</label>
-              <Input required value={form.title} onChange={(e) => set("title")(e.target.value)} className="border-border" data-testid="input-product-title" />
-            </div>
-            <div className="space-y-2 col-span-2 md:col-span-1">
-              <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Brand</label>
-              <Input value={form.brand} onChange={(e) => set("brand")(e.target.value)} className="border-border" />
-            </div>
-          </div>
-
-          {/* Source + Status */}
-          <div className="grid grid-cols-2 gap-4">
-            {form.category !== "electronics" && (
               <div className="space-y-2">
-                <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Product Source *</label>
-                <Select value={form.source} onValueChange={set("source")}>
-                  <SelectTrigger className="border-border" data-testid="select-product-source">
+                <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Affiliate Link
+                </label>
+                <Input
+                  value={form.affiliateUrl}
+                  onChange={(e) => set("affiliateUrl")(e.target.value)}
+                  placeholder="Paste Amazon / Noon / AliExpress affiliate link"
+                  className="border-border"
+                />
+              </div>
+
+              <Button
+                type="button"
+                className="w-full text-xs tracking-widest uppercase"
+                onClick={async () => {
+                  const response = await fetch("/api/ai/generate-product", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                      affiliateUrl: form.affiliateUrl,
+                      images: form.images,
+                    }),
+                  });
+
+                  const data = await response.json();
+
+                  if (data.success) {
+                    set("title")(data.product.title);
+                    set("brand")(data.product.brand);
+                    set("description")(data.product.description);
+                    set("colors")(data.product.colors);
+                    set("sizes")(data.product.sizes);
+                    set("category")(data.product.category);
+                  }
+                }}
+              >
+                ✨ Generate with HOOK AI
+              </Button>
+            </div>
+            {/* Title + Brand */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2 col-span-2 md:col-span-1">
+                <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Title *
+                </label>
+                <Input
+                  required
+                  value={form.title}
+                  onChange={(e) => set("title")(e.target.value)}
+                  className="border-border"
+                  data-testid="input-product-title"
+                />
+              </div>
+              <div className="space-y-2 col-span-2 md:col-span-1">
+                <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Brand
+                </label>
+                <Input
+                  value={form.brand}
+                  onChange={(e) => set("brand")(e.target.value)}
+                  className="border-border"
+                />
+              </div>
+            </div>
+
+            {/* Source + Status */}
+            <div className="grid grid-cols-2 gap-4">
+              {form.category !== "electronics" && (
+                <div className="space-y-2">
+                  <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                    Product Source *
+                  </label>
+                  <Select value={form.source} onValueChange={set("source")}>
+                    <SelectTrigger
+                      className="border-border"
+                      data-testid="select-product-source"
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="SHEIN">SHEIN</SelectItem>
+                      <SelectItem value="Amazon">Amazon</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+              <div
+                className={
+                  form.category === "electronics"
+                    ? "col-span-2 space-y-2"
+                    : "space-y-2"
+                }
+              >
+                <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Status
+                </label>
+                <Select value={form.status} onValueChange={set("status")}>
+                  <SelectTrigger
+                    className="border-border"
+                    data-testid="select-product-status"
+                  >
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="SHEIN">SHEIN</SelectItem>
-                    <SelectItem value="Amazon">Amazon</SelectItem>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="hidden">Hidden</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-            )}
-            <div className={form.category === "electronics" ? "col-span-2 space-y-2" : "space-y-2"}>
-              <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Status</label>
-              <Select value={form.status} onValueChange={set("status")}>
-                <SelectTrigger className="border-border" data-testid="select-product-status">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="hidden">Hidden</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
-          </div>
 
-          {/* Category + Subcategory */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Category *</label>
-              <Select value={form.category} onValueChange={(v) => { set("category")(v); set("subcategory")(""); }}>
-                <SelectTrigger className="border-border">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {CATEGORIES.map((c) => (
-                    <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Subcategory</label>
-              <Select value={form.subcategory} onValueChange={set("subcategory")}>
-                <SelectTrigger className="border-border">
-                  <SelectValue placeholder="Select subcategory" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="__none__">None</SelectItem>
-                  {subcategories?.map((s) => (
-                    <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {/* Price — hidden for electronics (uses noon/amazon prices instead) */}
-          {form.category !== "electronics" && (
+            {/* Category + Subcategory */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Price</label>
-                <Input value={form.price} onChange={(e) => set("price")(e.target.value)} placeholder="$89" className="border-border" />
+                <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Category *
+                </label>
+                <Select
+                  value={form.category}
+                  onValueChange={(v) => {
+                    set("category")(v);
+                    set("subcategory")("");
+                  }}
+                >
+                  <SelectTrigger className="border-border">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CATEGORIES.map((c) => (
+                      <SelectItem key={c.value} value={c.value}>
+                        {c.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Original Price</label>
-                <Input value={form.originalPrice} onChange={(e) => set("originalPrice")(e.target.value)} placeholder="$120" className="border-border" />
+                <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Subcategory
+                </label>
+                <Select
+                  value={form.subcategory}
+                  onValueChange={set("subcategory")}
+                >
+                  <SelectTrigger className="border-border">
+                    <SelectValue placeholder="Select subcategory" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">None</SelectItem>
+                    {subcategories?.map((s) => (
+                      <SelectItem key={s.id} value={s.name}>
+                        {s.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
-          )}
 
-          {/* Product Link — hidden for electronics (uses noon/amazon URLs instead) */}
-          {form.category !== "electronics" && (
-            <div className="space-y-2">
-              <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Product Link *</label>
-              <Input
-                required
-                value={form.affiliateUrl}
-                onChange={(e) => set("affiliateUrl")(e.target.value)}
-                placeholder={form.source === "Amazon" ? "https://amzn.to/..." : "https://shein.com/..."}
-                className="border-border"
-                data-testid="input-affiliate-url"
-              />
-            </div>
-          )}
-
-          {/* Electronics: Noon + Amazon Store Links */}
-          {form.category === "electronics" && (
-            <div className="border border-border/60 p-4 space-y-4">
-              <p className="text-[9px] tracking-widest uppercase text-muted-foreground">Store Comparison</p>
+            {/* Price — hidden for electronics (uses noon/amazon prices instead) */}
+            {form.category !== "electronics" && (
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-3">
-                  <p className="text-[9px] tracking-widest uppercase text-muted-foreground font-semibold">Noon</p>
-                  <div className="space-y-2">
-                    <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Noon Price</label>
-                    <Input
-                      value={form.noonPrice}
-                      onChange={(e) => set("noonPrice")(e.target.value)}
-                      placeholder="AED 749"
-                      className="border-border"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Noon URL</label>
-                    <Input
-                      value={form.noonUrl}
-                      onChange={(e) => set("noonUrl")(e.target.value)}
-                      placeholder="https://noon.com/..."
-                      className="border-border"
-                    />
-                  </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                    Price
+                  </label>
+                  <Input
+                    value={form.price}
+                    onChange={(e) => set("price")(e.target.value)}
+                    placeholder="$89"
+                    className="border-border"
+                  />
                 </div>
-                <div className="space-y-3">
-                  <p className="text-[9px] tracking-widest uppercase text-muted-foreground font-semibold">Amazon</p>
-                  <div className="space-y-2">
-                    <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Amazon Price</label>
-                    <Input
-                      value={form.amazonPrice}
-                      onChange={(e) => set("amazonPrice")(e.target.value)}
-                      placeholder="AED 779"
-                      className="border-border"
-                    />
+                <div className="space-y-2">
+                  <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                    Original Price
+                  </label>
+                  <Input
+                    value={form.originalPrice}
+                    onChange={(e) => set("originalPrice")(e.target.value)}
+                    placeholder="$120"
+                    className="border-border"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Product Link — hidden for electronics (uses noon/amazon URLs instead) */}
+            {form.category !== "electronics" && (
+              <div className="space-y-2">
+                <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Product Link *
+                </label>
+                <Input
+                  required
+                  value={form.affiliateUrl}
+                  onChange={(e) => set("affiliateUrl")(e.target.value)}
+                  placeholder={
+                    form.source === "Amazon"
+                      ? "https://amzn.to/..."
+                      : "https://shein.com/..."
+                  }
+                  className="border-border"
+                  data-testid="input-affiliate-url"
+                />
+              </div>
+            )}
+
+            {/* Electronics: Noon + Amazon Store Links */}
+            {form.category === "electronics" && (
+              <div className="border border-border/60 p-4 space-y-4">
+                <p className="text-[9px] tracking-widest uppercase text-muted-foreground">
+                  Store Comparison
+                </p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-3">
+                    <p className="text-[9px] tracking-widest uppercase text-muted-foreground font-semibold">
+                      Noon
+                    </p>
+                    <div className="space-y-2">
+                      <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                        Noon Price
+                      </label>
+                      <Input
+                        value={form.noonPrice}
+                        onChange={(e) => set("noonPrice")(e.target.value)}
+                        placeholder="AED 749"
+                        className="border-border"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                        Noon URL
+                      </label>
+                      <Input
+                        value={form.noonUrl}
+                        onChange={(e) => set("noonUrl")(e.target.value)}
+                        placeholder="https://noon.com/..."
+                        className="border-border"
+                      />
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Amazon URL</label>
-                    <Input
-                      value={form.amazonUrl}
-                      onChange={(e) => set("amazonUrl")(e.target.value)}
-                      placeholder="https://amzn.to/..."
-                      className="border-border"
-                    />
+                  <div className="space-y-3">
+                    <p className="text-[9px] tracking-widest uppercase text-muted-foreground font-semibold">
+                      Amazon
+                    </p>
+                    <div className="space-y-2">
+                      <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                        Amazon Price
+                      </label>
+                      <Input
+                        value={form.amazonPrice}
+                        onChange={(e) => set("amazonPrice")(e.target.value)}
+                        placeholder="AED 779"
+                        className="border-border"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                        Amazon URL
+                      </label>
+                      <Input
+                        value={form.amazonUrl}
+                        onChange={(e) => set("amazonUrl")(e.target.value)}
+                        placeholder="https://amzn.to/..."
+                        className="border-border"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* External Product ID — hidden for electronics */}
-          {form.category !== "electronics" && (
+            {/* External Product ID — hidden for electronics */}
+            {form.category !== "electronics" && (
+              <div className="space-y-2">
+                <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                  {form.source === "Amazon" ? "Amazon ASIN" : "SHEIN SKU"}{" "}
+                  <span className="normal-case tracking-normal font-normal opacity-60">
+                    (optional)
+                  </span>
+                </label>
+                <Input
+                  value={form.externalId}
+                  onChange={(e) => set("externalId")(e.target.value)}
+                  placeholder={
+                    form.source === "Amazon"
+                      ? "e.g. B08N5WRWNW"
+                      : "e.g. sw2205185848"
+                  }
+                  className="border-border"
+                  data-testid="input-external-id"
+                />
+              </div>
+            )}
+
+            {/* Description */}
             <div className="space-y-2">
               <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
-                {form.source === "Amazon" ? "Amazon ASIN" : "SHEIN SKU"}{" "}
-                <span className="normal-case tracking-normal font-normal opacity-60">(optional)</span>
+                Description
               </label>
-              <Input
-                value={form.externalId}
-                onChange={(e) => set("externalId")(e.target.value)}
-                placeholder={form.source === "Amazon" ? "e.g. B08N5WRWNW" : "e.g. sw2205185848"}
-                className="border-border"
-                data-testid="input-external-id"
+              <Textarea
+                value={form.description}
+                onChange={(e) => set("description")(e.target.value)}
+                rows={3}
+                className="border-border resize-none"
               />
             </div>
-          )}
 
-          {/* Description */}
-          <div className="space-y-2">
-            <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Description</label>
-            <Textarea value={form.description} onChange={(e) => set("description")(e.target.value)} rows={3} className="border-border resize-none" />
+            {/* Colors — visual swatches */}
+            <ColorSwatchPicker values={form.colors} onChange={set("colors")} />
+
+            {/* Sizes — preset chips + custom */}
+            <SizePicker values={form.sizes} onChange={set("sizes")} />
+
+            {/* Main Image Upload */}
+            <SingleImageUpload
+              value={form.imageUrl}
+              onChange={set("imageUrl")}
+              label="Main Product Image"
+            />
+
+            {/* Product Image Positioning */}
+            {form.imageUrl &&
+              (() => {
+                const pBtnClass =
+                  "w-8 h-8 border border-border flex items-center justify-center text-sm hover:bg-accent transition-colors select-none";
+                return (
+                  <div className="border border-border p-3 flex flex-col gap-2">
+                    <p className="text-[9px] tracking-widest uppercase text-muted-foreground">
+                      Image Positioning
+                    </p>
+                    <div className="aspect-[3/4] overflow-hidden relative max-h-40 bg-accent">
+                      <img
+                        src={form.imageUrl}
+                        alt=""
+                        className="absolute w-full h-full"
+                        style={{
+                          objectFit: form.imageObjectFit,
+                          objectPosition: `${form.imagePosX}% ${form.imagePosY}%`,
+                          transform: `scale(${form.imageScale / 100})`,
+                          transformOrigin: `${form.imagePosX}% ${form.imagePosY}%`,
+                        }}
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <p className="text-[9px] tracking-widest uppercase text-muted-foreground flex-1">
+                        Fit
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setForm((f) => ({
+                            ...f,
+                            imageObjectFit:
+                              f.imageObjectFit === "contain"
+                                ? "cover"
+                                : "contain",
+                          }))
+                        }
+                        className={`px-3 py-1 text-[9px] tracking-widest uppercase border transition-colors ${form.imageObjectFit === "contain" ? "border-foreground bg-foreground text-background" : "border-border"}`}
+                      >
+                        {form.imageObjectFit === "contain"
+                          ? "Contain"
+                          : "Cover"}
+                      </button>
+                    </div>
+                    <div className="flex flex-col items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setForm((f) => ({
+                            ...f,
+                            imagePosY: Math.max(0, f.imagePosY - 5),
+                          }))
+                        }
+                        className={pBtnClass}
+                        title="Move up"
+                      >
+                        ↑
+                      </button>
+                      <div className="flex gap-1">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setForm((f) => ({
+                              ...f,
+                              imagePosX: Math.max(0, f.imagePosX - 5),
+                            }))
+                          }
+                          className={pBtnClass}
+                          title="Move left"
+                        >
+                          ←
+                        </button>
+                        <div className="w-8 h-8 border border-border/40 bg-accent/30 flex items-center justify-center">
+                          <span className="text-[10px] text-muted-foreground/50">
+                            ·
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setForm((f) => ({
+                              ...f,
+                              imagePosX: Math.min(100, f.imagePosX + 5),
+                            }))
+                          }
+                          className={pBtnClass}
+                          title="Move right"
+                        >
+                          →
+                        </button>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setForm((f) => ({
+                            ...f,
+                            imagePosY: Math.min(100, f.imagePosY + 5),
+                          }))
+                        }
+                        className={pBtnClass}
+                        title="Move down"
+                      >
+                        ↓
+                      </button>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setForm((f) => ({
+                            ...f,
+                            imageScale: Math.max(50, f.imageScale - 10),
+                          }))
+                        }
+                        className={pBtnClass}
+                        title="Zoom out"
+                      >
+                        −
+                      </button>
+                      <span className="flex-1 text-center text-[9px] tracking-widest text-muted-foreground">
+                        {form.imageScale}%
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setForm((f) => ({
+                            ...f,
+                            imageScale: Math.min(200, f.imageScale + 10),
+                          }))
+                        }
+                        className={pBtnClass}
+                        title="Zoom in"
+                      >
+                        +
+                      </button>
+                    </div>
+                    <p className="text-[9px] text-center text-muted-foreground/60">
+                      x {form.imagePosX}% · y {form.imagePosY}%
+                    </p>
+                  </div>
+                );
+              })()}
+
+            {/* Gallery Images Upload */}
+            <MultiImageUpload
+              values={form.images}
+              onChange={set("images")}
+              label="Gallery Images (back view, close-up, detail shots…)"
+            />
+
+            {/* Featured + Trending */}
+            <div className="grid grid-cols-2 gap-4 pt-2">
+              <div className="flex items-center justify-between border border-border px-4 py-3">
+                <label className="text-xs tracking-widest uppercase">
+                  Featured
+                </label>
+                <Switch
+                  checked={form.featured}
+                  onCheckedChange={set("featured")}
+                />
+              </div>
+              <div className="flex items-center justify-between border border-border px-4 py-3">
+                <label className="text-xs tracking-widest uppercase">
+                  Trending
+                </label>
+                <Switch
+                  checked={form.trending}
+                  onCheckedChange={set("trending")}
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setPreviewOpen(true)}
+                className="text-xs tracking-widest uppercase border-border gap-2"
+              >
+                <Eye className="h-3.5 w-3.5" />
+                Preview
+              </Button>
+              <Button
+                type="submit"
+                disabled={isPending}
+                className="text-xs tracking-widest uppercase"
+                data-testid="button-save-product"
+              >
+                {isPending ? "Saving..." : "Save Product"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Full-screen product preview overlay */}
+      {previewOpen && (
+        <div className="fixed inset-0 z-[300] bg-background overflow-auto">
+          <div className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b border-border px-6 py-3 flex items-center justify-between">
+            <p className="text-[10px] tracking-widest uppercase text-muted-foreground">
+              Product Preview
+            </p>
+            <button
+              onClick={() => setPreviewOpen(false)}
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <X className="h-4 w-4" />
+            </button>
           </div>
-
-          {/* Colors — visual swatches */}
-          <ColorSwatchPicker values={form.colors} onChange={set("colors")} />
-
-          {/* Sizes — preset chips + custom */}
-          <SizePicker values={form.sizes} onChange={set("sizes")} />
-
-          {/* Main Image Upload */}
-          <SingleImageUpload
-            value={form.imageUrl}
-            onChange={set("imageUrl")}
-            label="Main Product Image"
-          />
-
-          {/* Product Image Positioning */}
-          {form.imageUrl && (() => {
-            const pBtnClass = "w-8 h-8 border border-border flex items-center justify-center text-sm hover:bg-accent transition-colors select-none";
-            return (
-              <div className="border border-border p-3 flex flex-col gap-2">
-                <p className="text-[9px] tracking-widest uppercase text-muted-foreground">Image Positioning</p>
-                <div className="aspect-[3/4] overflow-hidden relative max-h-40 bg-accent">
+          <div className="container mx-auto px-4 sm:px-6 py-10 max-w-4xl">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16">
+              {/* Image */}
+              <div className="aspect-[3/4] bg-accent overflow-hidden relative">
+                {form.imageUrl ? (
                   <img
                     src={form.imageUrl}
-                    alt=""
+                    alt={form.title}
                     className="absolute w-full h-full"
                     style={{
                       objectFit: form.imageObjectFit,
@@ -925,172 +1454,117 @@ function ProductDialog({ product }: { product?: Product }) {
                       transformOrigin: `${form.imagePosX}% ${form.imagePosY}%`,
                     }}
                   />
-                </div>
-                <div className="flex items-center gap-2">
-                  <p className="text-[9px] tracking-widest uppercase text-muted-foreground flex-1">Fit</p>
-                  <button
-                    type="button"
-                    onClick={() => setForm((f) => ({ ...f, imageObjectFit: f.imageObjectFit === "contain" ? "cover" : "contain" }))}
-                    className={`px-3 py-1 text-[9px] tracking-widest uppercase border transition-colors ${form.imageObjectFit === "contain" ? "border-foreground bg-foreground text-background" : "border-border"}`}
-                  >
-                    {form.imageObjectFit === "contain" ? "Contain" : "Cover"}
-                  </button>
-                </div>
-                <div className="flex flex-col items-center gap-1">
-                  <button type="button" onClick={() => setForm((f) => ({ ...f, imagePosY: Math.max(0, f.imagePosY - 5) }))} className={pBtnClass} title="Move up">↑</button>
-                  <div className="flex gap-1">
-                    <button type="button" onClick={() => setForm((f) => ({ ...f, imagePosX: Math.max(0, f.imagePosX - 5) }))} className={pBtnClass} title="Move left">←</button>
-                    <div className="w-8 h-8 border border-border/40 bg-accent/30 flex items-center justify-center"><span className="text-[10px] text-muted-foreground/50">·</span></div>
-                    <button type="button" onClick={() => setForm((f) => ({ ...f, imagePosX: Math.min(100, f.imagePosX + 5) }))} className={pBtnClass} title="Move right">→</button>
-                  </div>
-                  <button type="button" onClick={() => setForm((f) => ({ ...f, imagePosY: Math.min(100, f.imagePosY + 5) }))} className={pBtnClass} title="Move down">↓</button>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button type="button" onClick={() => setForm((f) => ({ ...f, imageScale: Math.max(50, f.imageScale - 10) }))} className={pBtnClass} title="Zoom out">−</button>
-                  <span className="flex-1 text-center text-[9px] tracking-widest text-muted-foreground">{form.imageScale}%</span>
-                  <button type="button" onClick={() => setForm((f) => ({ ...f, imageScale: Math.min(200, f.imageScale + 10) }))} className={pBtnClass} title="Zoom in">+</button>
-                </div>
-                <p className="text-[9px] text-center text-muted-foreground/60">x {form.imagePosX}% · y {form.imagePosY}%</p>
-              </div>
-            );
-          })()}
-
-          {/* Gallery Images Upload */}
-          <MultiImageUpload
-            values={form.images}
-            onChange={set("images")}
-            label="Gallery Images (back view, close-up, detail shots…)"
-          />
-
-          {/* Featured + Trending */}
-          <div className="grid grid-cols-2 gap-4 pt-2">
-            <div className="flex items-center justify-between border border-border px-4 py-3">
-              <label className="text-xs tracking-widest uppercase">Featured</label>
-              <Switch checked={form.featured} onCheckedChange={set("featured")} />
-            </div>
-            <div className="flex items-center justify-between border border-border px-4 py-3">
-              <label className="text-xs tracking-widest uppercase">Trending</label>
-              <Switch checked={form.trending} onCheckedChange={set("trending")} />
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between pt-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setPreviewOpen(true)}
-              className="text-xs tracking-widest uppercase border-border gap-2"
-            >
-              <Eye className="h-3.5 w-3.5" />
-              Preview
-            </Button>
-            <Button type="submit" disabled={isPending} className="text-xs tracking-widest uppercase" data-testid="button-save-product">
-              {isPending ? "Saving..." : "Save Product"}
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
-
-    {/* Full-screen product preview overlay */}
-    {previewOpen && (
-      <div className="fixed inset-0 z-[300] bg-background overflow-auto">
-        <div className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b border-border px-6 py-3 flex items-center justify-between">
-          <p className="text-[10px] tracking-widest uppercase text-muted-foreground">Product Preview</p>
-          <button
-            onClick={() => setPreviewOpen(false)}
-            className="text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-        <div className="container mx-auto px-4 sm:px-6 py-10 max-w-4xl">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16">
-            {/* Image */}
-            <div className="aspect-[3/4] bg-accent overflow-hidden relative">
-              {form.imageUrl ? (
-                <img
-                  src={form.imageUrl}
-                  alt={form.title}
-                  className="absolute w-full h-full"
-                  style={{
-                    objectFit: form.imageObjectFit,
-                    objectPosition: `${form.imagePosX}% ${form.imagePosY}%`,
-                    transform: `scale(${form.imageScale / 100})`,
-                    transformOrigin: `${form.imagePosX}% ${form.imagePosY}%`,
-                  }}
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <p className="text-[10px] tracking-widest uppercase text-muted-foreground">No image</p>
-                </div>
-              )}
-            </div>
-            {/* Info */}
-            <div className="flex flex-col">
-              {form.brand && (
-                <p className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground mb-3">
-                  {form.brand}
-                </p>
-              )}
-              <h1 className="font-serif text-3xl md:text-4xl font-light leading-tight mb-4">
-                {form.title || "Product Title"}
-              </h1>
-              {(form.price || form.originalPrice) && (
-                <div className="flex items-baseline gap-3 mb-6">
-                  {form.price && <p className="text-xl font-medium">{form.price}</p>}
-                  {form.originalPrice && (
-                    <p className="text-sm text-muted-foreground line-through">{form.originalPrice}</p>
-                  )}
-                </div>
-              )}
-              {form.description && (
-                <p className="text-sm text-muted-foreground leading-relaxed mb-7">{form.description}</p>
-              )}
-              {/* CTA preview */}
-              <div className="mt-auto pt-4">
-                {form.category === "electronics" && (form.noonUrl || form.amazonUrl) ? (
-                  <div className="flex gap-4">
-                    {form.noonUrl && (
-                      <div className="flex-1 border border-border p-4 flex flex-col gap-3">
-                        <p className="text-[10px] tracking-widest uppercase font-semibold">Noon</p>
-                        {form.noonPrice && <p className="text-2xl font-medium tracking-tight">{form.noonPrice}</p>}
-                        <span className="w-full text-center bg-foreground text-background text-[10px] tracking-widest uppercase py-3 block">Noon</span>
-                        <p className="text-[9px] tracking-wide text-muted-foreground text-center">Delivered by Noon</p>
-                      </div>
-                    )}
-                    {form.amazonUrl && (
-                      <div className="flex-1 border border-border p-4 flex flex-col gap-3">
-                        <p className="text-[10px] tracking-widest uppercase font-semibold">Amazon</p>
-                        {form.amazonPrice && <p className="text-2xl font-medium tracking-tight">{form.amazonPrice}</p>}
-                        <span className="w-full text-center border border-foreground text-foreground text-[10px] tracking-widest uppercase py-3 block">Amazon</span>
-                        <p className="text-[9px] tracking-wide text-muted-foreground text-center">Delivered by Amazon</p>
-                      </div>
-                    )}
-                  </div>
                 ) : (
-                  <span className="w-full text-center bg-foreground text-background text-xs tracking-widest uppercase py-5 block">
-                    Order Now
-                  </span>
+                  <div className="w-full h-full flex items-center justify-center">
+                    <p className="text-[10px] tracking-widest uppercase text-muted-foreground">
+                      No image
+                    </p>
+                  </div>
                 )}
               </div>
-            </div>
-          </div>
-          {form.images.length > 0 && (
-            <div className="mt-10">
-              <p className="text-[10px] tracking-widest uppercase text-muted-foreground mb-4">Gallery</p>
-              <div className="flex gap-3 overflow-x-auto">
-                {[form.imageUrl, ...form.images].filter(Boolean).map((img, i) => (
-                  <div key={i} className="shrink-0 w-24 aspect-[3/4] bg-accent overflow-hidden">
-                    <img src={img} alt="" className="w-full h-full object-cover" />
+              {/* Info */}
+              <div className="flex flex-col">
+                {form.brand && (
+                  <p className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground mb-3">
+                    {form.brand}
+                  </p>
+                )}
+                <h1 className="font-serif text-3xl md:text-4xl font-light leading-tight mb-4">
+                  {form.title || "Product Title"}
+                </h1>
+                {(form.price || form.originalPrice) && (
+                  <div className="flex items-baseline gap-3 mb-6">
+                    {form.price && (
+                      <p className="text-xl font-medium">{form.price}</p>
+                    )}
+                    {form.originalPrice && (
+                      <p className="text-sm text-muted-foreground line-through">
+                        {form.originalPrice}
+                      </p>
+                    )}
                   </div>
-                ))}
+                )}
+                {form.description && (
+                  <p className="text-sm text-muted-foreground leading-relaxed mb-7">
+                    {form.description}
+                  </p>
+                )}
+                {/* CTA preview */}
+                <div className="mt-auto pt-4">
+                  {form.category === "electronics" &&
+                  (form.noonUrl || form.amazonUrl) ? (
+                    <div className="flex gap-4">
+                      {form.noonUrl && (
+                        <div className="flex-1 border border-border p-4 flex flex-col gap-3">
+                          <p className="text-[10px] tracking-widest uppercase font-semibold">
+                            Noon
+                          </p>
+                          {form.noonPrice && (
+                            <p className="text-2xl font-medium tracking-tight">
+                              {form.noonPrice}
+                            </p>
+                          )}
+                          <span className="w-full text-center bg-foreground text-background text-[10px] tracking-widest uppercase py-3 block">
+                            Noon
+                          </span>
+                          <p className="text-[9px] tracking-wide text-muted-foreground text-center">
+                            Delivered by Noon
+                          </p>
+                        </div>
+                      )}
+                      {form.amazonUrl && (
+                        <div className="flex-1 border border-border p-4 flex flex-col gap-3">
+                          <p className="text-[10px] tracking-widest uppercase font-semibold">
+                            Amazon
+                          </p>
+                          {form.amazonPrice && (
+                            <p className="text-2xl font-medium tracking-tight">
+                              {form.amazonPrice}
+                            </p>
+                          )}
+                          <span className="w-full text-center border border-foreground text-foreground text-[10px] tracking-widest uppercase py-3 block">
+                            Amazon
+                          </span>
+                          <p className="text-[9px] tracking-wide text-muted-foreground text-center">
+                            Delivered by Amazon
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <span className="w-full text-center bg-foreground text-background text-xs tracking-widest uppercase py-5 block">
+                      Order Now
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
-          )}
+            {form.images.length > 0 && (
+              <div className="mt-10">
+                <p className="text-[10px] tracking-widest uppercase text-muted-foreground mb-4">
+                  Gallery
+                </p>
+                <div className="flex gap-3 overflow-x-auto">
+                  {[form.imageUrl, ...form.images]
+                    .filter(Boolean)
+                    .map((img, i) => (
+                      <div
+                        key={i}
+                        className="shrink-0 w-24 aspect-[3/4] bg-accent overflow-hidden"
+                      >
+                        <img
+                          src={img}
+                          alt=""
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-    )}
+      )}
     </>
   );
 }
@@ -1108,10 +1582,12 @@ function LooksTab() {
       {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: getListLooksQueryKey() });
-          queryClient.invalidateQueries({ queryKey: getGetAdminStatsQueryKey() });
+          queryClient.invalidateQueries({
+            queryKey: getGetAdminStatsQueryKey(),
+          });
           toast({ title: "Look deleted" });
         },
-      }
+      },
     );
   };
 
@@ -1128,48 +1604,73 @@ function LooksTab() {
         <table className="w-full text-sm text-left min-w-[480px]">
           <thead className="border-b border-border bg-card">
             <tr>
-              <th className="px-4 py-3 text-[10px] tracking-widest uppercase text-muted-foreground font-medium">Look</th>
-              <th className="px-4 py-3 text-[10px] tracking-widest uppercase text-muted-foreground font-medium">Items</th>
-              <th className="px-4 py-3 text-[10px] tracking-widest uppercase text-muted-foreground font-medium text-right">Actions</th>
+              <th className="px-4 py-3 text-[10px] tracking-widest uppercase text-muted-foreground font-medium">
+                Look
+              </th>
+              <th className="px-4 py-3 text-[10px] tracking-widest uppercase text-muted-foreground font-medium">
+                Items
+              </th>
+              <th className="px-4 py-3 text-[10px] tracking-widest uppercase text-muted-foreground font-medium text-right">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
             {isLoading ? (
               <tr>
-                <td colSpan={3} className="px-4 py-12 text-center text-xs tracking-widest uppercase text-muted-foreground animate-pulse">
+                <td
+                  colSpan={3}
+                  className="px-4 py-12 text-center text-xs tracking-widest uppercase text-muted-foreground animate-pulse"
+                >
                   Loading...
                 </td>
               </tr>
-            ) : looks?.map((look) => (
-              <tr key={look.id} className="hover:bg-accent/10 transition-colors" data-testid={`row-look-${look.id}`}>
-                <td className="px-4 py-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-12 bg-accent shrink-0">
-                      {look.imageUrl && <img src={look.imageUrl} alt="" className="w-full h-full object-cover" />}
+            ) : (
+              looks?.map((look) => (
+                <tr
+                  key={look.id}
+                  className="hover:bg-accent/10 transition-colors"
+                  data-testid={`row-look-${look.id}`}
+                >
+                  <td className="px-4 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-12 bg-accent shrink-0">
+                        {look.imageUrl && (
+                          <img
+                            src={look.imageUrl}
+                            alt=""
+                            className="w-full h-full object-cover"
+                          />
+                        )}
+                      </div>
+                      <div>
+                        <p className="font-medium">{look.title}</p>
+                        {look.description && (
+                          <p className="text-xs text-muted-foreground line-clamp-1">
+                            {look.description}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-medium">{look.title}</p>
-                      {look.description && (
-                        <p className="text-xs text-muted-foreground line-clamp-1">{look.description}</p>
-                      )}
+                  </td>
+                  <td className="px-4 py-4 text-muted-foreground">
+                    {look.products?.length ?? 0} items
+                  </td>
+                  <td className="px-4 py-4 text-right">
+                    <div className="flex items-center justify-end gap-3">
+                      <LookDialog look={look} />
+                      <button
+                        onClick={() => handleDelete(look.id, look.title)}
+                        className="text-destructive hover:text-destructive/70 transition-colors"
+                        data-testid={`button-delete-look-${look.id}`}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
                     </div>
-                  </div>
-                </td>
-                <td className="px-4 py-4 text-muted-foreground">{look.products?.length ?? 0} items</td>
-                <td className="px-4 py-4 text-right">
-                  <div className="flex items-center justify-end gap-3">
-                    <LookDialog look={look} />
-                    <button
-                      onClick={() => handleDelete(look.id, look.title)}
-                      className="text-destructive hover:text-destructive/70 transition-colors"
-                      data-testid={`button-delete-look-${look.id}`}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
@@ -1214,20 +1715,27 @@ function LookDialog({ look }: { look?: Look }) {
 
   const { data: allProducts } = useListProducts(
     {},
-    { query: { queryKey: getListProductsQueryKey() } }
+    { query: { queryKey: getListProductsQueryKey() } },
   );
 
   const lookImageInputRef = useRef<HTMLInputElement>(null);
   const lookCardBase = import.meta.env.BASE_URL.replace(/\/$/, "");
-  const { uploadFile: uploadLookImage, isUploading: isLookImageUploading } = useUpload({
-    basePath: `${lookCardBase}/api/storage`,
-    onSuccess: (res) => setForm((f) => ({ ...f, imageUrl: `${lookCardBase}/api/storage${res.objectPath}` })),
-  });
-  const lookBtnClass = "w-8 h-8 border border-border flex items-center justify-center text-sm hover:bg-accent transition-colors select-none";
+  const { uploadFile: uploadLookImage, isUploading: isLookImageUploading } =
+    useUpload({
+      basePath: `${lookCardBase}/api/storage`,
+      onSuccess: (res) =>
+        setForm((f) => ({
+          ...f,
+          imageUrl: `${lookCardBase}/api/storage${res.objectPath}`,
+        })),
+    });
+  const lookBtnClass =
+    "w-8 h-8 border border-border flex items-center justify-center text-sm hover:bg-accent transition-colors select-none";
 
-  const filtered = allProducts?.filter((p) =>
-    p.title.toLowerCase().includes(search.toLowerCase()) ||
-    (p.brand ?? "").toLowerCase().includes(search.toLowerCase())
+  const filtered = allProducts?.filter(
+    (p) =>
+      p.title.toLowerCase().includes(search.toLowerCase()) ||
+      (p.brand ?? "").toLowerCase().includes(search.toLowerCase()),
   );
 
   const toggleProduct = (id: number) => {
@@ -1260,8 +1768,9 @@ function LookDialog({ look }: { look?: Look }) {
             toast({ title: "Look updated" });
             setOpen(false);
           },
-          onError: () => toast({ title: "Failed to update look", variant: "destructive" }),
-        }
+          onError: () =>
+            toast({ title: "Failed to update look", variant: "destructive" }),
+        },
       );
     } else {
       createMutation.mutate(
@@ -1269,12 +1778,15 @@ function LookDialog({ look }: { look?: Look }) {
         {
           onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: getListLooksQueryKey() });
-            queryClient.invalidateQueries({ queryKey: getGetAdminStatsQueryKey() });
+            queryClient.invalidateQueries({
+              queryKey: getGetAdminStatsQueryKey(),
+            });
             toast({ title: "Look created" });
             setOpen(false);
           },
-          onError: () => toast({ title: "Failed to create look", variant: "destructive" }),
-        }
+          onError: () =>
+            toast({ title: "Failed to create look", variant: "destructive" }),
+        },
       );
     }
   };
@@ -1283,63 +1795,326 @@ function LookDialog({ look }: { look?: Look }) {
 
   return (
     <>
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {look ? (
-          <button className="text-muted-foreground hover:text-foreground transition-colors" data-testid={`button-edit-look-${look.id}`}>
-            <Pencil className="h-4 w-4" />
-          </button>
-        ) : (
-          <Button className="text-xs tracking-widest uppercase font-medium" data-testid="button-add-look">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Look
-          </Button>
-        )}
-      </DialogTrigger>
-      <DialogContent className="max-w-xl max-h-[92vh] overflow-y-auto border-border">
-        <DialogHeader>
-          <DialogTitle className="font-serif text-2xl font-light">{look ? "Edit Look" : "New Look"}</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-5 mt-4">
-          <div className="space-y-2">
-            <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Title *</label>
-            <Input required value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} className="border-border" />
-          </div>
-          <div className="space-y-2">
-            <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Outfit Image</label>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => lookImageInputRef.current?.click()}
-                disabled={isLookImageUploading}
-                className="flex-1 flex items-center justify-center gap-1.5 border border-dashed border-border py-2 text-[10px] tracking-widest uppercase text-muted-foreground hover:border-foreground/40 hover:text-foreground transition-colors disabled:opacity-40"
-              >
-                <Upload className="h-3 w-3" />
-                {form.imageUrl ? "Replace" : "Upload"}
-              </button>
-              {form.imageUrl && (
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          {look ? (
+            <button
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              data-testid={`button-edit-look-${look.id}`}
+            >
+              <Pencil className="h-4 w-4" />
+            </button>
+          ) : (
+            <Button
+              className="text-xs tracking-widest uppercase font-medium"
+              data-testid="button-add-look"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Look
+            </Button>
+          )}
+        </DialogTrigger>
+        <DialogContent className="max-w-xl max-h-[92vh] overflow-y-auto border-border">
+          <DialogHeader>
+            <DialogTitle className="font-serif text-2xl font-light">
+              {look ? "Edit Look" : "New Look"}
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-5 mt-4">
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                Title *
+              </label>
+              <Input
+                required
+                value={form.title}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, title: e.target.value }))
+                }
+                className="border-border"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                Outfit Image
+              </label>
+              <div className="flex gap-2">
                 <button
                   type="button"
-                  onClick={() => setForm((f) => ({ ...f, imageUrl: "" }))}
-                  className="w-9 flex items-center justify-center border border-border text-muted-foreground hover:text-destructive hover:border-destructive/40 transition-colors"
+                  onClick={() => lookImageInputRef.current?.click()}
+                  disabled={isLookImageUploading}
+                  className="flex-1 flex items-center justify-center gap-1.5 border border-dashed border-border py-2 text-[10px] tracking-widest uppercase text-muted-foreground hover:border-foreground/40 hover:text-foreground transition-colors disabled:opacity-40"
                 >
-                  <Trash2 className="h-3.5 w-3.5" />
+                  <Upload className="h-3 w-3" />
+                  {form.imageUrl ? "Replace" : "Upload"}
                 </button>
+                {form.imageUrl && (
+                  <button
+                    type="button"
+                    onClick={() => setForm((f) => ({ ...f, imageUrl: "" }))}
+                    className="w-9 flex items-center justify-center border border-border text-muted-foreground hover:text-destructive hover:border-destructive/40 transition-colors"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </div>
+              <input
+                ref={lookImageInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) void uploadLookImage(f);
+                  e.target.value = "";
+                }}
+              />
+              {form.imageUrl && (
+                <div className="border border-border p-3 flex flex-col gap-2">
+                  <div className="aspect-[3/4] overflow-hidden relative max-h-40 bg-accent">
+                    <img
+                      src={form.imageUrl}
+                      alt=""
+                      className="absolute w-full h-full"
+                      style={{
+                        objectFit: form.imageObjectFit as "cover" | "contain",
+                        objectPosition: `${form.imagePosX}% ${form.imagePosY}%`,
+                        transform: `scale(${form.imageScale / 100})`,
+                        transformOrigin: `${form.imagePosX}% ${form.imagePosY}%`,
+                      }}
+                    />
+                    {isLookImageUploading && (
+                      <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
+                        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <p className="text-[9px] tracking-widest uppercase text-muted-foreground flex-1">
+                      Fit
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setForm((f) => ({
+                          ...f,
+                          imageObjectFit:
+                            f.imageObjectFit === "contain"
+                              ? "cover"
+                              : "contain",
+                        }))
+                      }
+                      className={`px-3 py-1 text-[9px] tracking-widest uppercase border transition-colors ${form.imageObjectFit === "contain" ? "border-foreground bg-foreground text-background" : "border-border"}`}
+                    >
+                      {form.imageObjectFit === "contain" ? "Contain" : "Cover"}
+                    </button>
+                  </div>
+                  <div className="flex flex-col items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setForm((f) => ({
+                          ...f,
+                          imagePosY: Math.max(0, f.imagePosY - 5),
+                        }))
+                      }
+                      className={lookBtnClass}
+                      title="Move up"
+                    >
+                      ↑
+                    </button>
+                    <div className="flex gap-1">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setForm((f) => ({
+                            ...f,
+                            imagePosX: Math.max(0, f.imagePosX - 5),
+                          }))
+                        }
+                        className={lookBtnClass}
+                        title="Move left"
+                      >
+                        ←
+                      </button>
+                      <div className="w-8 h-8 border border-border/40 bg-accent/30 flex items-center justify-center">
+                        <span className="text-[10px] text-muted-foreground/50">
+                          ·
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setForm((f) => ({
+                            ...f,
+                            imagePosX: Math.min(100, f.imagePosX + 5),
+                          }))
+                        }
+                        className={lookBtnClass}
+                        title="Move right"
+                      >
+                        →
+                      </button>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setForm((f) => ({
+                          ...f,
+                          imagePosY: Math.min(100, f.imagePosY + 5),
+                        }))
+                      }
+                      className={lookBtnClass}
+                      title="Move down"
+                    >
+                      ↓
+                    </button>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setForm((f) => ({
+                          ...f,
+                          imageScale: Math.max(50, f.imageScale - 10),
+                        }))
+                      }
+                      className={lookBtnClass}
+                      title="Zoom out"
+                    >
+                      −
+                    </button>
+                    <span className="flex-1 text-center text-[9px] tracking-widest text-muted-foreground">
+                      {form.imageScale}%
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setForm((f) => ({
+                          ...f,
+                          imageScale: Math.min(200, f.imageScale + 10),
+                        }))
+                      }
+                      className={lookBtnClass}
+                      title="Zoom in"
+                    >
+                      +
+                    </button>
+                  </div>
+                  <p className="text-[9px] text-center text-muted-foreground/60">
+                    x {form.imagePosX}% · y {form.imagePosY}%
+                  </p>
+                </div>
               )}
             </div>
-            <input
-              ref={lookImageInputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp,image/gif"
-              className="hidden"
-              onChange={(e) => { const f = e.target.files?.[0]; if (f) void uploadLookImage(f); e.target.value = ""; }}
-            />
-            {form.imageUrl && (
-              <div className="border border-border p-3 flex flex-col gap-2">
-                <div className="aspect-[3/4] overflow-hidden relative max-h-40 bg-accent">
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                Description
+              </label>
+              <Textarea
+                value={form.description}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, description: e.target.value }))
+                }
+                rows={2}
+                className="border-border resize-none"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Products in Look
+                </label>
+                <span className="text-xs text-muted-foreground">
+                  {form.productIds.length} selected
+                </span>
+              </div>
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search products..."
+                className="border-border mb-2"
+              />
+              <div className="border border-border max-h-52 overflow-y-auto divide-y divide-border">
+                {filtered?.length === 0 ? (
+                  <p className="px-4 py-3 text-xs text-muted-foreground">
+                    No products found.
+                  </p>
+                ) : (
+                  filtered?.map((p) => (
+                    <label
+                      key={p.id}
+                      className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-accent/20 transition-colors"
+                      data-testid={`select-product-${p.id}`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={form.productIds.includes(p.id)}
+                        onChange={() => toggleProduct(p.id)}
+                        className="accent-foreground"
+                      />
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium line-clamp-1">
+                          {p.title}
+                        </p>
+                        {p.brand && (
+                          <p className="text-[10px] tracking-widest uppercase text-muted-foreground">
+                            {p.brand}
+                          </p>
+                        )}
+                      </div>
+                    </label>
+                  ))
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setPreviewOpen(true)}
+                className="text-xs tracking-widest uppercase border-border gap-2"
+              >
+                <Eye className="h-3.5 w-3.5" />
+                Preview
+              </Button>
+              <Button
+                type="submit"
+                disabled={isPending}
+                className="text-xs tracking-widest uppercase"
+                data-testid="button-save-look"
+              >
+                {isPending ? "Saving..." : "Save Look"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Full-screen look preview overlay */}
+      {previewOpen && (
+        <div className="fixed inset-0 z-[300] bg-background overflow-auto">
+          <div className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b border-border px-6 py-3 flex items-center justify-between">
+            <p className="text-[10px] tracking-widest uppercase text-muted-foreground">
+              Look Preview
+            </p>
+            <button
+              onClick={() => setPreviewOpen(false)}
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+          <div className="container mx-auto px-4 sm:px-6 py-10 max-w-3xl">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+              {/* Look Image */}
+              <div className="aspect-[3/4] bg-accent overflow-hidden relative">
+                {form.imageUrl ? (
                   <img
                     src={form.imageUrl}
-                    alt=""
+                    alt={form.title}
                     className="absolute w-full h-full"
                     style={{
                       objectFit: form.imageObjectFit as "cover" | "contain",
@@ -1348,150 +2123,35 @@ function LookDialog({ look }: { look?: Look }) {
                       transformOrigin: `${form.imagePosX}% ${form.imagePosY}%`,
                     }}
                   />
-                  {isLookImageUploading && (
-                    <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
-                      <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                    </div>
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
-                  <p className="text-[9px] tracking-widest uppercase text-muted-foreground flex-1">Fit</p>
-                  <button
-                    type="button"
-                    onClick={() => setForm((f) => ({ ...f, imageObjectFit: f.imageObjectFit === "contain" ? "cover" : "contain" }))}
-                    className={`px-3 py-1 text-[9px] tracking-widest uppercase border transition-colors ${form.imageObjectFit === "contain" ? "border-foreground bg-foreground text-background" : "border-border"}`}
-                  >
-                    {form.imageObjectFit === "contain" ? "Contain" : "Cover"}
-                  </button>
-                </div>
-                <div className="flex flex-col items-center gap-1">
-                  <button type="button" onClick={() => setForm((f) => ({ ...f, imagePosY: Math.max(0, f.imagePosY - 5) }))} className={lookBtnClass} title="Move up">↑</button>
-                  <div className="flex gap-1">
-                    <button type="button" onClick={() => setForm((f) => ({ ...f, imagePosX: Math.max(0, f.imagePosX - 5) }))} className={lookBtnClass} title="Move left">←</button>
-                    <div className="w-8 h-8 border border-border/40 bg-accent/30 flex items-center justify-center"><span className="text-[10px] text-muted-foreground/50">·</span></div>
-                    <button type="button" onClick={() => setForm((f) => ({ ...f, imagePosX: Math.min(100, f.imagePosX + 5) }))} className={lookBtnClass} title="Move right">→</button>
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <p className="text-[10px] tracking-widest uppercase text-muted-foreground">
+                      No image
+                    </p>
                   </div>
-                  <button type="button" onClick={() => setForm((f) => ({ ...f, imagePosY: Math.min(100, f.imagePosY + 5) }))} className={lookBtnClass} title="Move down">↓</button>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button type="button" onClick={() => setForm((f) => ({ ...f, imageScale: Math.max(50, f.imageScale - 10) }))} className={lookBtnClass} title="Zoom out">−</button>
-                  <span className="flex-1 text-center text-[9px] tracking-widest text-muted-foreground">{form.imageScale}%</span>
-                  <button type="button" onClick={() => setForm((f) => ({ ...f, imageScale: Math.min(200, f.imageScale + 10) }))} className={lookBtnClass} title="Zoom in">+</button>
-                </div>
-                <p className="text-[9px] text-center text-muted-foreground/60">x {form.imagePosX}% · y {form.imagePosY}%</p>
+                )}
               </div>
-            )}
-          </div>
-          <div className="space-y-2">
-            <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Description</label>
-            <Textarea value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} rows={2} className="border-border resize-none" />
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Products in Look</label>
-              <span className="text-xs text-muted-foreground">{form.productIds.length} selected</span>
-            </div>
-            <Input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search products..."
-              className="border-border mb-2"
-            />
-            <div className="border border-border max-h-52 overflow-y-auto divide-y divide-border">
-              {filtered?.length === 0 ? (
-                <p className="px-4 py-3 text-xs text-muted-foreground">No products found.</p>
-              ) : filtered?.map((p) => (
-                <label
-                  key={p.id}
-                  className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-accent/20 transition-colors"
-                  data-testid={`select-product-${p.id}`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={form.productIds.includes(p.id)}
-                    onChange={() => toggleProduct(p.id)}
-                    className="accent-foreground"
-                  />
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium line-clamp-1">{p.title}</p>
-                    {p.brand && <p className="text-[10px] tracking-widest uppercase text-muted-foreground">{p.brand}</p>}
-                  </div>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between pt-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setPreviewOpen(true)}
-              className="text-xs tracking-widest uppercase border-border gap-2"
-            >
-              <Eye className="h-3.5 w-3.5" />
-              Preview
-            </Button>
-            <Button type="submit" disabled={isPending} className="text-xs tracking-widest uppercase" data-testid="button-save-look">
-              {isPending ? "Saving..." : "Save Look"}
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
-
-    {/* Full-screen look preview overlay */}
-    {previewOpen && (
-      <div className="fixed inset-0 z-[300] bg-background overflow-auto">
-        <div className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b border-border px-6 py-3 flex items-center justify-between">
-          <p className="text-[10px] tracking-widest uppercase text-muted-foreground">Look Preview</p>
-          <button
-            onClick={() => setPreviewOpen(false)}
-            className="text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-        <div className="container mx-auto px-4 sm:px-6 py-10 max-w-3xl">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-            {/* Look Image */}
-            <div className="aspect-[3/4] bg-accent overflow-hidden relative">
-              {form.imageUrl ? (
-                <img
-                  src={form.imageUrl}
-                  alt={form.title}
-                  className="absolute w-full h-full"
-                  style={{
-                    objectFit: form.imageObjectFit as "cover" | "contain",
-                    objectPosition: `${form.imagePosX}% ${form.imagePosY}%`,
-                    transform: `scale(${form.imageScale / 100})`,
-                    transformOrigin: `${form.imagePosX}% ${form.imagePosY}%`,
-                  }}
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <p className="text-[10px] tracking-widest uppercase text-muted-foreground">No image</p>
-                </div>
-              )}
-            </div>
-            {/* Look Info */}
-            <div className="flex flex-col justify-center">
-              <h1 className="font-serif text-3xl font-light leading-tight mb-4">
-                {form.title || "Look Title"}
-              </h1>
-              {form.description && (
-                <p className="text-sm text-muted-foreground leading-relaxed mb-6">{form.description}</p>
-              )}
-              {form.productIds.length > 0 && (
-                <p className="text-[10px] tracking-widest uppercase text-muted-foreground">
-                  {form.productIds.length} product{form.productIds.length !== 1 ? "s" : ""} in this look
-                </p>
-              )}
+              {/* Look Info */}
+              <div className="flex flex-col justify-center">
+                <h1 className="font-serif text-3xl font-light leading-tight mb-4">
+                  {form.title || "Look Title"}
+                </h1>
+                {form.description && (
+                  <p className="text-sm text-muted-foreground leading-relaxed mb-6">
+                    {form.description}
+                  </p>
+                )}
+                {form.productIds.length > 0 && (
+                  <p className="text-[10px] tracking-widest uppercase text-muted-foreground">
+                    {form.productIds.length} product
+                    {form.productIds.length !== 1 ? "s" : ""} in this look
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    )}
+      )}
     </>
   );
 }
@@ -1501,7 +2161,7 @@ function CategoriesTab() {
   const { toast } = useToast();
   const { data: subcategories, isLoading } = useListSubcategories(
     {},
-    { query: { queryKey: getListSubcategoriesQueryKey() } }
+    { query: { queryKey: getListSubcategoriesQueryKey() } },
   );
   const createMutation = useCreateSubcategory();
   const deleteMutation = useDeleteSubcategory();
@@ -1521,12 +2181,15 @@ function CategoriesTab() {
       { data: { category: newCategory as any, name: newName.trim() } },
       {
         onSuccess: () => {
-          queryClient.invalidateQueries({ queryKey: getListSubcategoriesQueryKey() });
+          queryClient.invalidateQueries({
+            queryKey: getListSubcategoriesQueryKey(),
+          });
           toast({ title: "Subcategory added" });
           setNewName("");
         },
-        onError: () => toast({ title: "Failed to add subcategory", variant: "destructive" }),
-      }
+        onError: () =>
+          toast({ title: "Failed to add subcategory", variant: "destructive" }),
+      },
     );
   };
 
@@ -1536,31 +2199,42 @@ function CategoriesTab() {
       { id: sub.id },
       {
         onSuccess: () => {
-          queryClient.invalidateQueries({ queryKey: getListSubcategoriesQueryKey() });
+          queryClient.invalidateQueries({
+            queryKey: getListSubcategoriesQueryKey(),
+          });
           toast({ title: "Subcategory deleted" });
         },
-      }
+      },
     );
   };
 
   return (
     <div className="space-y-8">
-      <form onSubmit={handleAdd} className="flex gap-3 items-end border border-border p-5">
+      <form
+        onSubmit={handleAdd}
+        className="flex gap-3 items-end border border-border p-5"
+      >
         <div className="space-y-2">
-          <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Main Category</label>
+          <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+            Main Category
+          </label>
           <Select value={newCategory} onValueChange={setNewCategory}>
             <SelectTrigger className="w-44 border-border">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               {CATEGORIES.map((c) => (
-                <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+                <SelectItem key={c.value} value={c.value}>
+                  {c.label}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
         <div className="space-y-2 flex-1">
-          <label className="text-[10px] uppercase tracking-widest text-muted-foreground">New Subcategory Name</label>
+          <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+            New Subcategory Name
+          </label>
           <Input
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
@@ -1569,27 +2243,42 @@ function CategoriesTab() {
             data-testid="input-subcategory-name"
           />
         </div>
-        <Button type="submit" disabled={createMutation.isPending} className="text-xs tracking-widest uppercase" data-testid="button-add-subcategory">
+        <Button
+          type="submit"
+          disabled={createMutation.isPending}
+          className="text-xs tracking-widest uppercase"
+          data-testid="button-add-subcategory"
+        >
           <Plus className="h-4 w-4 mr-2" />
           Add
         </Button>
       </form>
 
       {isLoading ? (
-        <div className="text-xs tracking-widest uppercase text-muted-foreground animate-pulse">Loading...</div>
+        <div className="text-xs tracking-widest uppercase text-muted-foreground animate-pulse">
+          Loading...
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {grouped.map((group) => (
             <div key={group.value} className="border border-border">
               <div className="px-5 py-3 border-b border-border bg-card">
-                <h3 className="text-xs tracking-widest uppercase font-medium">{group.label}</h3>
+                <h3 className="text-xs tracking-widest uppercase font-medium">
+                  {group.label}
+                </h3>
               </div>
               <div className="divide-y divide-border">
                 {group.subs.length === 0 ? (
-                  <p className="px-5 py-3 text-xs text-muted-foreground">No subcategories.</p>
+                  <p className="px-5 py-3 text-xs text-muted-foreground">
+                    No subcategories.
+                  </p>
                 ) : (
                   group.subs.map((sub) => (
-                    <div key={sub.id} className="flex items-center justify-between px-5 py-3" data-testid={`row-sub-${sub.id}`}>
+                    <div
+                      key={sub.id}
+                      className="flex items-center justify-between px-5 py-3"
+                      data-testid={`row-sub-${sub.id}`}
+                    >
                       <span className="text-sm">{sub.name}</span>
                       <button
                         onClick={() => handleDelete(sub)}
@@ -1614,7 +2303,11 @@ const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 function SettingsTab() {
   const { toast } = useToast();
-  const [form, setForm] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
+  const [form, setForm] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
   const [loading, setLoading] = useState(false);
   const [discoverUrl, setDiscoverUrl] = useState("");
   const [discoverLoading, setDiscoverLoading] = useState(false);
@@ -1637,7 +2330,10 @@ function SettingsTab() {
       return;
     }
     if (form.newPassword.length < 6) {
-      toast({ title: "Password must be at least 6 characters", variant: "destructive" });
+      toast({
+        title: "Password must be at least 6 characters",
+        variant: "destructive",
+      });
       return;
     }
     setLoading(true);
@@ -1651,15 +2347,21 @@ function SettingsTab() {
           newPassword: form.newPassword,
         }),
       });
-      const body = await res.json() as { ok?: boolean; error?: string };
+      const body = (await res.json()) as { ok?: boolean; error?: string };
       if (res.ok && body.ok) {
         toast({ title: "Password updated successfully" });
         setForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
       } else {
-        toast({ title: body.error ?? "Failed to update password", variant: "destructive" });
+        toast({
+          title: body.error ?? "Failed to update password",
+          variant: "destructive",
+        });
       }
     } catch {
-      toast({ title: "Network error. Please try again.", variant: "destructive" });
+      toast({
+        title: "Network error. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -1681,7 +2383,10 @@ function SettingsTab() {
         toast({ title: "Failed to save link", variant: "destructive" });
       }
     } catch {
-      toast({ title: "Network error. Please try again.", variant: "destructive" });
+      toast({
+        title: "Network error. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setDiscoverLoading(false);
     }
@@ -1691,14 +2396,20 @@ function SettingsTab() {
     <div className="max-w-md space-y-8">
       <div className="mb-2">
         <h2 className="font-serif text-2xl font-light mb-1">Settings</h2>
-        <p className="text-xs text-muted-foreground tracking-wide">Manage links and admin credentials.</p>
+        <p className="text-xs text-muted-foreground tracking-wide">
+          Manage links and admin credentials.
+        </p>
       </div>
 
       {/* SHEIN Referral Link */}
       <div className="border border-border p-6">
-        <h3 className="text-xs tracking-widest uppercase font-medium mb-2">✨ Explore More via SHEIN</h3>
+        <h3 className="text-xs tracking-widest uppercase font-medium mb-2">
+          ✨ Explore More via SHEIN
+        </h3>
         <p className="text-[10px] text-muted-foreground tracking-wide mb-2 leading-relaxed">
-          Paste your SHEIN referral link here. An <strong>"✨ Explore More via SHEIN"</strong> button will appear on all SHEIN-powered sections:
+          Paste your SHEIN referral link here. An{" "}
+          <strong>"✨ Explore More via SHEIN"</strong> button will appear on all
+          SHEIN-powered sections:
         </p>
         <ul className="text-[10px] text-muted-foreground mb-5 space-y-1 pl-3 leading-relaxed list-disc">
           <li>Women</li>
@@ -1709,7 +2420,9 @@ function SettingsTab() {
         </ul>
         <form onSubmit={handleDiscoverSave} className="space-y-4">
           <div className="space-y-2">
-            <label className="text-[10px] uppercase tracking-widest text-muted-foreground">SHEIN Referral URL</label>
+            <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+              SHEIN Referral URL
+            </label>
             <Input
               type="url"
               value={discoverUrl}
@@ -1745,25 +2458,35 @@ function SettingsTab() {
 
       {/* Change Password */}
       <div className="border border-border p-6">
-        <h3 className="text-xs tracking-widest uppercase font-medium mb-6">Change Password</h3>
+        <h3 className="text-xs tracking-widest uppercase font-medium mb-6">
+          Change Password
+        </h3>
         <form onSubmit={handlePasswordChange} className="space-y-4">
           <div className="space-y-2">
-            <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Current Password</label>
+            <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+              Current Password
+            </label>
             <Input
               type="password"
               value={form.currentPassword}
-              onChange={(e) => setForm((f) => ({ ...f, currentPassword: e.target.value }))}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, currentPassword: e.target.value }))
+              }
               required
               className="border-border"
               data-testid="input-current-password"
             />
           </div>
           <div className="space-y-2">
-            <label className="text-[10px] uppercase tracking-widest text-muted-foreground">New Password</label>
+            <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+              New Password
+            </label>
             <Input
               type="password"
               value={form.newPassword}
-              onChange={(e) => setForm((f) => ({ ...f, newPassword: e.target.value }))}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, newPassword: e.target.value }))
+              }
               required
               minLength={6}
               className="border-border"
@@ -1771,11 +2494,15 @@ function SettingsTab() {
             />
           </div>
           <div className="space-y-2">
-            <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Confirm New Password</label>
+            <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+              Confirm New Password
+            </label>
             <Input
               type="password"
               value={form.confirmPassword}
-              onChange={(e) => setForm((f) => ({ ...f, confirmPassword: e.target.value }))}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, confirmPassword: e.target.value }))
+              }
               required
               className="border-border"
               data-testid="input-confirm-password"
@@ -1863,16 +2590,23 @@ function FooterLinksSection() {
     setNewUrl("");
   };
 
-  const handleDelete = (id: string) => void saveLinks(links.filter((l) => l.id !== id));
+  const handleDelete = (id: string) =>
+    void saveLinks(links.filter((l) => l.id !== id));
 
   const handleEditSave = (id: string) => {
-    void saveLinks(links.map((l) => (l.id === id ? { ...l, label: editLabel, url: editUrl } : l)));
+    void saveLinks(
+      links.map((l) =>
+        l.id === id ? { ...l, label: editLabel, url: editUrl } : l,
+      ),
+    );
     setEditId(null);
   };
 
   return (
     <div className="border border-border p-6">
-      <h3 className="text-xs tracking-widest uppercase font-medium mb-1">Footer Links</h3>
+      <h3 className="text-xs tracking-widest uppercase font-medium mb-1">
+        Footer Links
+      </h3>
       <p className="text-[10px] text-muted-foreground tracking-wide mb-5 leading-relaxed">
         Links shown in the footer. Each opens in a new tab.
       </p>
@@ -1881,30 +2615,68 @@ function FooterLinksSection() {
       ) : (
         <div className="space-y-2 mb-5">
           {links.length === 0 && (
-            <p className="text-[10px] text-muted-foreground/60">No links yet.</p>
+            <p className="text-[10px] text-muted-foreground/60">
+              No links yet.
+            </p>
           )}
           {links.map((link) => (
             <div key={link.id} className="border border-border p-3">
               {editId === link.id ? (
                 <div className="space-y-2">
-                  <Input value={editLabel} onChange={(e) => setEditLabel(e.target.value)} placeholder="Label" className="border-border text-xs h-8" />
-                  <Input value={editUrl} onChange={(e) => setEditUrl(e.target.value)} placeholder="URL" className="border-border text-xs h-8" />
+                  <Input
+                    value={editLabel}
+                    onChange={(e) => setEditLabel(e.target.value)}
+                    placeholder="Label"
+                    className="border-border text-xs h-8"
+                  />
+                  <Input
+                    value={editUrl}
+                    onChange={(e) => setEditUrl(e.target.value)}
+                    placeholder="URL"
+                    className="border-border text-xs h-8"
+                  />
                   <div className="flex gap-2">
-                    <Button size="sm" onClick={() => handleEditSave(link.id)} disabled={saving} className="text-[10px] tracking-widest uppercase h-7">Save</Button>
-                    <Button size="sm" variant="outline" onClick={() => setEditId(null)} className="text-[10px] tracking-widest uppercase h-7">Cancel</Button>
+                    <Button
+                      size="sm"
+                      onClick={() => handleEditSave(link.id)}
+                      disabled={saving}
+                      className="text-[10px] tracking-widest uppercase h-7"
+                    >
+                      Save
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setEditId(null)}
+                      className="text-[10px] tracking-widest uppercase h-7"
+                    >
+                      Cancel
+                    </Button>
                   </div>
                 </div>
               ) : (
                 <div className="flex items-center justify-between gap-2">
                   <div className="min-w-0">
                     <p className="text-xs font-medium truncate">{link.label}</p>
-                    <p className="text-[10px] text-muted-foreground truncate">{link.url}</p>
+                    <p className="text-[10px] text-muted-foreground truncate">
+                      {link.url}
+                    </p>
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
-                    <button onClick={() => { setEditId(link.id); setEditLabel(link.label); setEditUrl(link.url); }} className="p-1.5 text-muted-foreground hover:text-foreground transition-colors">
+                    <button
+                      onClick={() => {
+                        setEditId(link.id);
+                        setEditLabel(link.label);
+                        setEditUrl(link.url);
+                      }}
+                      className="p-1.5 text-muted-foreground hover:text-foreground transition-colors"
+                    >
                       <Pencil className="h-3 w-3" />
                     </button>
-                    <button onClick={() => handleDelete(link.id)} className="p-1.5 text-muted-foreground hover:text-destructive transition-colors">
+                    <button
+                      onClick={() => handleDelete(link.id)}
+                      className="p-1.5 text-muted-foreground hover:text-destructive transition-colors"
+                    >
                       <Trash2 className="h-3 w-3" />
                     </button>
                   </div>
@@ -1915,11 +2687,31 @@ function FooterLinksSection() {
         </div>
       )}
       <div className="border border-dashed border-border p-4 space-y-3">
-        <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Add New Link</p>
-        <Input value={newLabel} onChange={(e) => setNewLabel(e.target.value)} placeholder="Label (e.g. Instagram)" className="border-border text-xs h-8" data-testid="input-footer-link-label" />
-        <Input value={newUrl} onChange={(e) => setNewUrl(e.target.value)} placeholder="URL (e.g. https://instagram.com/...)" className="border-border text-xs h-8" data-testid="input-footer-link-url" />
-        <Button onClick={handleAdd} disabled={saving || !newLabel.trim() || !newUrl.trim()} className="text-[10px] tracking-widest uppercase h-8" data-testid="button-add-footer-link">
-          <Plus className="h-3 w-3 mr-1.5" />Add Link
+        <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+          Add New Link
+        </p>
+        <Input
+          value={newLabel}
+          onChange={(e) => setNewLabel(e.target.value)}
+          placeholder="Label (e.g. Instagram)"
+          className="border-border text-xs h-8"
+          data-testid="input-footer-link-label"
+        />
+        <Input
+          value={newUrl}
+          onChange={(e) => setNewUrl(e.target.value)}
+          placeholder="URL (e.g. https://instagram.com/...)"
+          className="border-border text-xs h-8"
+          data-testid="input-footer-link-url"
+        />
+        <Button
+          onClick={handleAdd}
+          disabled={saving || !newLabel.trim() || !newUrl.trim()}
+          className="text-[10px] tracking-widest uppercase h-8"
+          data-testid="button-add-footer-link"
+        >
+          <Plus className="h-3 w-3 mr-1.5" />
+          Add Link
         </Button>
       </div>
     </div>
@@ -1930,19 +2722,31 @@ function WhatsAppSection() {
   const { toast } = useToast();
   const [text, setText] = useState("Contact Us");
   const [number, setNumber] = useState("");
-  const [message, setMessage] = useState("Hi, I have a question about your products!");
+  const [message, setMessage] = useState(
+    "Hi, I have a question about your products!",
+  );
   const [loaded, setLoaded] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     fetch(`${BASE}/api/site-settings`)
       .then((r) => r.json())
-      .then((d: { whatsappText?: string; whatsappNumber?: string; whatsappMessage?: string }) => {
-        if (d.whatsappText !== undefined) setText(d.whatsappText || "Contact Us");
-        if (d.whatsappNumber !== undefined) setNumber(d.whatsappNumber);
-        if (d.whatsappMessage !== undefined) setMessage(d.whatsappMessage || "Hi, I have a question about your products!");
-        setLoaded(true);
-      })
+      .then(
+        (d: {
+          whatsappText?: string;
+          whatsappNumber?: string;
+          whatsappMessage?: string;
+        }) => {
+          if (d.whatsappText !== undefined)
+            setText(d.whatsappText || "Contact Us");
+          if (d.whatsappNumber !== undefined) setNumber(d.whatsappNumber);
+          if (d.whatsappMessage !== undefined)
+            setMessage(
+              d.whatsappMessage || "Hi, I have a question about your products!",
+            );
+          setLoaded(true);
+        },
+      )
       .catch(() => setLoaded(true));
   }, []);
 
@@ -1954,7 +2758,11 @@ function WhatsAppSection() {
         method: "PUT",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ whatsappText: text, whatsappNumber: number, whatsappMessage: message }),
+        body: JSON.stringify({
+          whatsappText: text,
+          whatsappNumber: number,
+          whatsappMessage: message,
+        }),
       });
       if (res.ok) toast({ title: "WhatsApp settings saved" });
       else toast({ title: "Failed to save", variant: "destructive" });
@@ -1967,35 +2775,77 @@ function WhatsAppSection() {
 
   return (
     <div className="border border-border p-6">
-      <h3 className="text-xs tracking-widest uppercase font-medium mb-1">Contact Us Button</h3>
+      <h3 className="text-xs tracking-widest uppercase font-medium mb-1">
+        Contact Us Button
+      </h3>
       <p className="text-[10px] text-muted-foreground tracking-wide mb-5 leading-relaxed">
         A WhatsApp button shown in the footer. Leave number blank to hide it.
       </p>
       <form onSubmit={handleSave} className="space-y-4">
         <div className="space-y-2">
-          <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Button Text</label>
-          <Input value={text} onChange={(e) => setText(e.target.value)} placeholder="Contact Us" disabled={!loaded} className="border-border" data-testid="input-whatsapp-text" />
+          <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+            Button Text
+          </label>
+          <Input
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Contact Us"
+            disabled={!loaded}
+            className="border-border"
+            data-testid="input-whatsapp-text"
+          />
         </div>
         <div className="space-y-2">
-          <label className="text-[10px] uppercase tracking-widest text-muted-foreground">WhatsApp Number</label>
-          <Input value={number} onChange={(e) => setNumber(e.target.value)} placeholder="e.g. 447911123456 (no + or spaces)" disabled={!loaded} className="border-border" data-testid="input-whatsapp-number" />
-          <p className="text-[10px] text-muted-foreground">Country code first, no + or spaces</p>
+          <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+            WhatsApp Number
+          </label>
+          <Input
+            value={number}
+            onChange={(e) => setNumber(e.target.value)}
+            placeholder="e.g. 447911123456 (no + or spaces)"
+            disabled={!loaded}
+            className="border-border"
+            data-testid="input-whatsapp-number"
+          />
+          <p className="text-[10px] text-muted-foreground">
+            Country code first, no + or spaces
+          </p>
         </div>
         <div className="space-y-2">
-          <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Default Message</label>
-          <Textarea value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Hi, I have a question..." disabled={!loaded} className="border-border text-xs" rows={3} data-testid="input-whatsapp-message" />
+          <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+            Default Message
+          </label>
+          <Textarea
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="Hi, I have a question..."
+            disabled={!loaded}
+            className="border-border text-xs"
+            rows={3}
+            data-testid="input-whatsapp-message"
+          />
         </div>
         {number && (
           <div className="p-3 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800">
             <p className="text-[10px] text-green-800 dark:text-green-400 tracking-wide">
               Preview:{" "}
-              <a href={`https://wa.me/${number}?text=${encodeURIComponent(message)}`} target="_blank" rel="noopener noreferrer" className="underline">
+              <a
+                href={`https://wa.me/${number}?text=${encodeURIComponent(message)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline"
+              >
                 Test WhatsApp link
               </a>
             </p>
           </div>
         )}
-        <Button type="submit" disabled={saving || !loaded} className="text-xs tracking-widest uppercase" data-testid="button-save-whatsapp">
+        <Button
+          type="submit"
+          disabled={saving || !loaded}
+          className="text-xs tracking-widest uppercase"
+          data-testid="button-save-whatsapp"
+        >
           {saving ? "Saving..." : "Save"}
         </Button>
       </form>
@@ -2007,21 +2857,33 @@ function IconsSection() {
   const { toast } = useToast();
   const BASE_PATH = import.meta.env.BASE_URL.replace(/\/$/, "");
   const { uploadFile } = useUpload({ basePath: `${BASE_PATH}/api/storage` });
-  const [icons, setIcons] = useState({ faviconUrl: "", appleTouchIconUrl: "", pwaIcon192Url: "", pwaIcon512Url: "" });
+  const [icons, setIcons] = useState({
+    faviconUrl: "",
+    appleTouchIconUrl: "",
+    pwaIcon192Url: "",
+    pwaIcon512Url: "",
+  });
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     fetch(`${BASE}/api/site-settings`)
       .then((r) => r.json())
-      .then((d: { faviconUrl?: string; appleTouchIconUrl?: string; pwaIcon192Url?: string; pwaIcon512Url?: string }) => {
-        setIcons({
-          faviconUrl: d.faviconUrl ?? "",
-          appleTouchIconUrl: d.appleTouchIconUrl ?? "",
-          pwaIcon192Url: d.pwaIcon192Url ?? "",
-          pwaIcon512Url: d.pwaIcon512Url ?? "",
-        });
-        setLoaded(true);
-      })
+      .then(
+        (d: {
+          faviconUrl?: string;
+          appleTouchIconUrl?: string;
+          pwaIcon192Url?: string;
+          pwaIcon512Url?: string;
+        }) => {
+          setIcons({
+            faviconUrl: d.faviconUrl ?? "",
+            appleTouchIconUrl: d.appleTouchIconUrl ?? "",
+            pwaIcon192Url: d.pwaIcon192Url ?? "",
+            pwaIcon512Url: d.pwaIcon512Url ?? "",
+          });
+          setLoaded(true);
+        },
+      )
       .catch(() => setLoaded(true));
   }, []);
 
@@ -2050,18 +2912,46 @@ function IconsSection() {
     }
   };
 
-  const iconFields: { field: keyof typeof icons; key: string; label: string; desc: string }[] = [
-    { field: "faviconUrl", key: "favicon", label: "Favicon (browser tab)", desc: "Recommended: 32×32 ICO or PNG" },
-    { field: "appleTouchIconUrl", key: "apple", label: "Apple Touch Icon (iOS home screen)", desc: "Recommended: 180×180 PNG" },
-    { field: "pwaIcon192Url", key: "icon192", label: "App Icon 192×192 (Android)", desc: "Recommended: 192×192 PNG" },
-    { field: "pwaIcon512Url", key: "icon512", label: "App Icon 512×512 (PWA)", desc: "Recommended: 512×512 PNG" },
+  const iconFields: {
+    field: keyof typeof icons;
+    key: string;
+    label: string;
+    desc: string;
+  }[] = [
+    {
+      field: "faviconUrl",
+      key: "favicon",
+      label: "Favicon (browser tab)",
+      desc: "Recommended: 32×32 ICO or PNG",
+    },
+    {
+      field: "appleTouchIconUrl",
+      key: "apple",
+      label: "Apple Touch Icon (iOS home screen)",
+      desc: "Recommended: 180×180 PNG",
+    },
+    {
+      field: "pwaIcon192Url",
+      key: "icon192",
+      label: "App Icon 192×192 (Android)",
+      desc: "Recommended: 192×192 PNG",
+    },
+    {
+      field: "pwaIcon512Url",
+      key: "icon512",
+      label: "App Icon 512×512 (PWA)",
+      desc: "Recommended: 512×512 PNG",
+    },
   ];
 
   return (
     <div className="border border-border p-6">
-      <h3 className="text-xs tracking-widest uppercase font-medium mb-1">App Icon &amp; Favicon</h3>
+      <h3 className="text-xs tracking-widest uppercase font-medium mb-1">
+        App Icon &amp; Favicon
+      </h3>
       <p className="text-[10px] text-muted-foreground tracking-wide mb-6 leading-relaxed">
-        Icons shown in browser tabs, iOS/Android home screens, and when users install HOOK as an app.
+        Icons shown in browser tabs, iOS/Android home screens, and when users
+        install HOOK as an app.
       </p>
       {!loaded ? (
         <p className="text-xs text-muted-foreground">Loading...</p>
@@ -2069,11 +2959,19 @@ function IconsSection() {
         <div className="space-y-6">
           {iconFields.map(({ field, key, label, desc }) => (
             <div key={field}>
-              <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-0.5">{label}</p>
-              <p className="text-[10px] text-muted-foreground/60 mb-3">{desc}</p>
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-0.5">
+                {label}
+              </p>
+              <p className="text-[10px] text-muted-foreground/60 mb-3">
+                {desc}
+              </p>
               <div className="flex items-center gap-3">
                 {icons[field] ? (
-                  <img src={icons[field]} alt={label} className="w-10 h-10 object-contain border border-border" />
+                  <img
+                    src={icons[field]}
+                    alt={label}
+                    className="w-10 h-10 object-contain border border-border"
+                  />
                 ) : (
                   <div className="w-10 h-10 border border-dashed border-border flex items-center justify-center">
                     <Upload className="h-3.5 w-3.5 text-muted-foreground/30" />
@@ -2094,7 +2992,12 @@ function IconsSection() {
                   </span>
                 </label>
                 {icons[field] && (
-                  <a href={icons[field]} target="_blank" rel="noopener noreferrer" className="text-[10px] tracking-widest uppercase text-muted-foreground underline underline-offset-4 hover:text-foreground transition-colors">
+                  <a
+                    href={icons[field]}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[10px] tracking-widest uppercase text-muted-foreground underline underline-offset-4 hover:text-foreground transition-colors"
+                  >
                     View
                   </a>
                 )}
@@ -2127,12 +3030,19 @@ function SiteImagesTab() {
   const deleteMutation = useDeleteSiteImage();
   const { toast } = useToast();
 
-  const handlePositionChange = (key: SiteImageKey, field: keyof SiteImage, delta: number) => {
+  const handlePositionChange = (
+    key: SiteImageKey,
+    field: keyof SiteImage,
+    delta: number,
+  ) => {
     const current = images?.[key];
     if (!current) return;
     const min = field === "scale" ? 50 : 0;
     const max = field === "scale" ? 200 : 100;
-    const updated: SiteImage = { ...current, [field]: Math.max(min, Math.min(max, (current[field] as number) + delta)) };
+    const updated: SiteImage = {
+      ...current,
+      [field]: Math.max(min, Math.min(max, (current[field] as number) + delta)),
+    };
     upsertMutation.mutate({ key, data: updated });
   };
 
@@ -2145,20 +3055,33 @@ function SiteImagesTab() {
 
   const handleDelete = (key: SiteImageKey, label: string) => {
     if (!confirm(`Delete the ${label} image?`)) return;
-    deleteMutation.mutate(key, { onSuccess: () => toast({ title: "Image deleted" }) });
+    deleteMutation.mutate(key, {
+      onSuccess: () => toast({ title: "Image deleted" }),
+    });
   };
 
   const handleUploaded = (key: SiteImageKey, imageUrl: string) => {
     const current = images?.[key];
     upsertMutation.mutate(
-      { key, data: { imageUrl, posX: current?.posX ?? 50, posY: current?.posY ?? 50, scale: current?.scale ?? 100, objectFit: current?.objectFit ?? "cover" } },
-      { onSuccess: () => toast({ title: "Image saved" }) }
+      {
+        key,
+        data: {
+          imageUrl,
+          posX: current?.posX ?? 50,
+          posY: current?.posY ?? 50,
+          scale: current?.scale ?? 100,
+          objectFit: current?.objectFit ?? "cover",
+        },
+      },
+      { onSuccess: () => toast({ title: "Image saved" }) },
     );
   };
 
   return (
     <div>
-      <p className="text-xs tracking-widest uppercase text-muted-foreground mb-6">{SITE_IMAGE_SECTIONS.length} sections</p>
+      <p className="text-xs tracking-widest uppercase text-muted-foreground mb-6">
+        {SITE_IMAGE_SECTIONS.length} sections
+      </p>
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         {SITE_IMAGE_SECTIONS.map(({ key, label }) => (
           <SectionImageCard
@@ -2167,7 +3090,9 @@ function SiteImagesTab() {
             image={images?.[key]}
             onUploaded={(url) => handleUploaded(key, url)}
             onDelete={() => handleDelete(key, label)}
-            onPositionChange={(field, delta) => handlePositionChange(key, field, delta)}
+            onPositionChange={(field, delta) =>
+              handlePositionChange(key, field, delta)
+            }
             onFitToggle={() => handleFitToggle(key)}
           />
         ))}
@@ -2195,7 +3120,9 @@ function SectionImageCard({
   const cardBase = import.meta.env.BASE_URL.replace(/\/$/, "");
   const { uploadFile, isUploading, progress } = useUpload({
     basePath: `${cardBase}/api/storage`,
-    onSuccess: (res) => { onUploaded(`${cardBase}/api/storage${res.objectPath}`); },
+    onSuccess: (res) => {
+      onUploaded(`${cardBase}/api/storage${res.objectPath}`);
+    },
   });
 
   const handleFile = (file: File) => {
@@ -2203,7 +3130,8 @@ function SectionImageCard({
     void uploadFile(file);
   };
 
-  const btnClass = "w-8 h-8 border border-border flex items-center justify-center text-sm hover:bg-accent transition-colors select-none";
+  const btnClass =
+    "w-8 h-8 border border-border flex items-center justify-center text-sm hover:bg-accent transition-colors select-none";
   const [showPreview, setShowPreview] = useState(false);
 
   return (
@@ -2213,8 +3141,12 @@ function SectionImageCard({
         <div className="fixed inset-0 z-[9999] bg-black/95 flex flex-col">
           <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 shrink-0">
             <div>
-              <p className="text-[9px] tracking-[0.3em] uppercase text-white/40 mb-0.5">Hero Preview</p>
-              <p className="text-sm tracking-widest uppercase text-white font-light">{label}</p>
+              <p className="text-[9px] tracking-[0.3em] uppercase text-white/40 mb-0.5">
+                Hero Preview
+              </p>
+              <p className="text-sm tracking-widest uppercase text-white font-light">
+                {label}
+              </p>
             </div>
             <button
               onClick={() => setShowPreview(false)}
@@ -2227,7 +3159,9 @@ function SectionImageCard({
           <div className="flex-1 flex flex-col items-center justify-center gap-8 p-6 overflow-auto">
             {/* Mobile preview */}
             <div className="flex flex-col items-center gap-2">
-              <p className="text-[9px] tracking-widest uppercase text-white/30">Mobile</p>
+              <p className="text-[9px] tracking-widest uppercase text-white/30">
+                Mobile
+              </p>
               <div className="w-72 h-44 relative overflow-hidden bg-[#e8e0d4] shadow-2xl">
                 <img
                   src={image.imageUrl}
@@ -2242,14 +3176,20 @@ function SectionImageCard({
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-black/10" />
                 <div className="absolute inset-0 flex flex-col justify-end px-5 pb-5">
-                  <p className="font-serif text-xl text-white leading-tight">{label}</p>
-                  <p className="text-[9px] tracking-widest uppercase text-white/60 mt-1">Preview</p>
+                  <p className="font-serif text-xl text-white leading-tight">
+                    {label}
+                  </p>
+                  <p className="text-[9px] tracking-widest uppercase text-white/60 mt-1">
+                    Preview
+                  </p>
                 </div>
               </div>
             </div>
             {/* Desktop preview */}
             <div className="flex flex-col items-center gap-2">
-              <p className="text-[9px] tracking-widest uppercase text-white/30">Desktop</p>
+              <p className="text-[9px] tracking-widest uppercase text-white/30">
+                Desktop
+              </p>
               <div className="w-full max-w-2xl h-52 relative overflow-hidden bg-[#e8e0d4] shadow-2xl">
                 <img
                   src={image.imageUrl}
@@ -2264,120 +3204,179 @@ function SectionImageCard({
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-black/10" />
                 <div className="absolute inset-0 flex flex-col justify-end px-8 pb-8">
-                  <p className="font-serif text-4xl text-white leading-tight">{label}</p>
-                  <p className="text-[10px] tracking-widest uppercase text-white/60 mt-1">Preview</p>
+                  <p className="font-serif text-4xl text-white leading-tight">
+                    {label}
+                  </p>
+                  <p className="text-[10px] tracking-widest uppercase text-white/60 mt-1">
+                    Preview
+                  </p>
                 </div>
               </div>
             </div>
             <p className="text-[9px] tracking-widest uppercase text-white/30">
-              zoom {image.scale}% · x {image.posX}% · y {image.posY}% · {image.objectFit ?? "cover"}
+              zoom {image.scale}% · x {image.posX}% · y {image.posY}% ·{" "}
+              {image.objectFit ?? "cover"}
             </p>
           </div>
         </div>
       )}
 
-    <div className="border border-border p-4 flex flex-col gap-3">
-      <p className="text-[10px] tracking-widest uppercase font-medium">{label}</p>
+      <div className="border border-border p-4 flex flex-col gap-3">
+        <p className="text-[10px] tracking-widest uppercase font-medium">
+          {label}
+        </p>
 
-      <div className="aspect-video bg-accent overflow-hidden relative">
-        {image?.imageUrl ? (
-          <img
-            src={image.imageUrl}
-            alt=""
-            className="absolute w-full h-full"
-            style={{
-              objectFit: image.objectFit ?? "cover",
-              objectPosition: `${image.posX}% ${image.posY}%`,
-              transform: `scale(${image.scale / 100})`,
-              transformOrigin: `${image.posX}% ${image.posY}%`,
-            }}
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <p className="text-[9px] tracking-widest uppercase text-muted-foreground/40">No Image</p>
-          </div>
-        )}
-        {isUploading && (
-          <div className="absolute inset-0 bg-background/80 flex flex-col items-center justify-center gap-2">
-            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-            <p className="text-[9px] tracking-widest uppercase text-muted-foreground">{progress}%</p>
-          </div>
-        )}
-      </div>
-
-      <div className="flex gap-2">
-        <button
-          type="button"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={isUploading}
-          className="flex-1 flex items-center justify-center gap-1.5 border border-dashed border-border py-2 text-[10px] tracking-widest uppercase text-muted-foreground hover:border-foreground/40 hover:text-foreground transition-colors disabled:opacity-40"
-        >
-          <Upload className="h-3 w-3" />
-          {image ? "Replace" : "Upload"}
-        </button>
-        {image && (
-          <>
-            <button
-              type="button"
-              onClick={() => setShowPreview(true)}
-              className="w-9 flex items-center justify-center border border-border text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors"
-              title="Preview"
-            >
-              <Eye className="h-3.5 w-3.5" />
-            </button>
-            <button
-              type="button"
-              onClick={onDelete}
-              className="w-9 flex items-center justify-center border border-border text-muted-foreground hover:text-destructive hover:border-destructive/40 transition-colors"
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
-          </>
-        )}
-      </div>
-
-      {image && (
-        <div className="flex flex-col gap-2 pt-2 border-t border-border">
-          <div className="flex items-center gap-2">
-            <p className="text-[9px] tracking-widest uppercase text-muted-foreground flex-1">Fit</p>
-            <button
-              onClick={onFitToggle}
-              className={`px-3 py-1 text-[9px] tracking-widest uppercase border transition-colors ${image.objectFit === "contain" ? "border-foreground bg-foreground text-background" : "border-border"}`}
-            >
-              {image.objectFit === "contain" ? "Contain" : "Cover"}
-            </button>
-          </div>
-          <p className="text-[9px] tracking-widest uppercase text-muted-foreground">Position</p>
-          <div className="flex flex-col items-center gap-1">
-            <button onClick={() => onPositionChange("posY", -5)} className={btnClass} title="Move up">↑</button>
-            <div className="flex gap-1">
-              <button onClick={() => onPositionChange("posX", -5)} className={btnClass} title="Move left">←</button>
-              <div className="w-8 h-8 border border-border/40 bg-accent/30 flex items-center justify-center">
-                <span className="text-[10px] text-muted-foreground/50">·</span>
-              </div>
-              <button onClick={() => onPositionChange("posX", 5)} className={btnClass} title="Move right">→</button>
+        <div className="aspect-video bg-accent overflow-hidden relative">
+          {image?.imageUrl ? (
+            <img
+              src={image.imageUrl}
+              alt=""
+              className="absolute w-full h-full"
+              style={{
+                objectFit: image.objectFit ?? "cover",
+                objectPosition: `${image.posX}% ${image.posY}%`,
+                transform: `scale(${image.scale / 100})`,
+                transformOrigin: `${image.posX}% ${image.posY}%`,
+              }}
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <p className="text-[9px] tracking-widest uppercase text-muted-foreground/40">
+                No Image
+              </p>
             </div>
-            <button onClick={() => onPositionChange("posY", 5)} className={btnClass} title="Move down">↓</button>
-          </div>
-          <div className="flex items-center gap-2">
-            <button onClick={() => onPositionChange("scale", -10)} className={btnClass} title="Zoom out">−</button>
-            <span className="flex-1 text-center text-[9px] tracking-widest text-muted-foreground">{image.scale}%</span>
-            <button onClick={() => onPositionChange("scale", 10)} className={btnClass} title="Zoom in">+</button>
-          </div>
-          <p className="text-[9px] text-center text-muted-foreground/60">
-            x {image.posX}% · y {image.posY}%
-          </p>
+          )}
+          {isUploading && (
+            <div className="absolute inset-0 bg-background/80 flex flex-col items-center justify-center gap-2">
+              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              <p className="text-[9px] tracking-widest uppercase text-muted-foreground">
+                {progress}%
+              </p>
+            </div>
+          )}
         </div>
-      )}
 
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/jpeg,image/png,image/webp,image/gif"
-        className="hidden"
-        onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); e.target.value = ""; }}
-      />
-    </div>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploading}
+            className="flex-1 flex items-center justify-center gap-1.5 border border-dashed border-border py-2 text-[10px] tracking-widest uppercase text-muted-foreground hover:border-foreground/40 hover:text-foreground transition-colors disabled:opacity-40"
+          >
+            <Upload className="h-3 w-3" />
+            {image ? "Replace" : "Upload"}
+          </button>
+          {image && (
+            <>
+              <button
+                type="button"
+                onClick={() => setShowPreview(true)}
+                className="w-9 flex items-center justify-center border border-border text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors"
+                title="Preview"
+              >
+                <Eye className="h-3.5 w-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={onDelete}
+                className="w-9 flex items-center justify-center border border-border text-muted-foreground hover:text-destructive hover:border-destructive/40 transition-colors"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </>
+          )}
+        </div>
+
+        {image && (
+          <div className="flex flex-col gap-2 pt-2 border-t border-border">
+            <div className="flex items-center gap-2">
+              <p className="text-[9px] tracking-widest uppercase text-muted-foreground flex-1">
+                Fit
+              </p>
+              <button
+                onClick={onFitToggle}
+                className={`px-3 py-1 text-[9px] tracking-widest uppercase border transition-colors ${image.objectFit === "contain" ? "border-foreground bg-foreground text-background" : "border-border"}`}
+              >
+                {image.objectFit === "contain" ? "Contain" : "Cover"}
+              </button>
+            </div>
+            <p className="text-[9px] tracking-widest uppercase text-muted-foreground">
+              Position
+            </p>
+            <div className="flex flex-col items-center gap-1">
+              <button
+                onClick={() => onPositionChange("posY", -5)}
+                className={btnClass}
+                title="Move up"
+              >
+                ↑
+              </button>
+              <div className="flex gap-1">
+                <button
+                  onClick={() => onPositionChange("posX", -5)}
+                  className={btnClass}
+                  title="Move left"
+                >
+                  ←
+                </button>
+                <div className="w-8 h-8 border border-border/40 bg-accent/30 flex items-center justify-center">
+                  <span className="text-[10px] text-muted-foreground/50">
+                    ·
+                  </span>
+                </div>
+                <button
+                  onClick={() => onPositionChange("posX", 5)}
+                  className={btnClass}
+                  title="Move right"
+                >
+                  →
+                </button>
+              </div>
+              <button
+                onClick={() => onPositionChange("posY", 5)}
+                className={btnClass}
+                title="Move down"
+              >
+                ↓
+              </button>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => onPositionChange("scale", -10)}
+                className={btnClass}
+                title="Zoom out"
+              >
+                −
+              </button>
+              <span className="flex-1 text-center text-[9px] tracking-widest text-muted-foreground">
+                {image.scale}%
+              </span>
+              <button
+                onClick={() => onPositionChange("scale", 10)}
+                className={btnClass}
+                title="Zoom in"
+              >
+                +
+              </button>
+            </div>
+            <p className="text-[9px] text-center text-muted-foreground/60">
+              x {image.posX}% · y {image.posY}%
+            </p>
+          </div>
+        )}
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp,image/gif"
+          className="hidden"
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) handleFile(f);
+            e.target.value = "";
+          }}
+        />
+      </div>
     </>
   );
 }
