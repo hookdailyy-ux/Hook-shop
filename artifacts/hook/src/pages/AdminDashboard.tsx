@@ -11,15 +11,20 @@ import {
   useCreateLook,
   useUpdateLook,
   useDeleteLook,
+  useCreateSetup,
+  useUpdateSetup,
+  useDeleteSetup,
+  useListSetups,
   useCreateSubcategory,
   useDeleteSubcategory,
   getListAdminProductsQueryKey,
   getListLooksQueryKey,
+  getListSetupsQueryKey,
   getGetAdminStatsQueryKey,
   getListSubcategoriesQueryKey,
   getListProductsQueryKey,
 } from "@workspace/api-client-react";
-import type { Product, Look, Subcategory } from "@workspace/api-client-react";
+import type { Product, Look, Setup, Subcategory } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -65,6 +70,7 @@ type Tab =
   | "dashboard"
   | "products"
   | "looks"
+  | "setups"
   | "categories"
   | "settings"
   | "images"
@@ -123,6 +129,7 @@ export default function AdminDashboard() {
                   "dashboard",
                   "products",
                   "looks",
+                  "setups",
                   "categories",
                   "settings",
                   "images",
@@ -155,6 +162,7 @@ export default function AdminDashboard() {
         {activeTab === "dashboard" && <DashboardTab />}
         {activeTab === "products" && <ProductsTab />}
         {activeTab === "looks" && <LooksTab />}
+        {activeTab === "setups" && <SetupsTab />}
         {activeTab === "categories" && <CategoriesTab />}
         {activeTab === "settings" && <SettingsTab />}
         {activeTab === "images" && <SiteImagesTab />}
@@ -2146,6 +2154,555 @@ function LookDialog({ look }: { look?: Look }) {
                   <p className="text-[10px] tracking-widest uppercase text-muted-foreground">
                     {form.productIds.length} product
                     {form.productIds.length !== 1 ? "s" : ""} in this look
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SETUPS TAB
+// ─────────────────────────────────────────────────────────────────────────────
+
+function SetupsTab() {
+  const { data: setups, isLoading } = useListSetups();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const deleteMutation = useDeleteSetup();
+
+  const handleDelete = (id: number, title: string) => {
+    if (!confirm(`Delete "${title}"?`)) return;
+    deleteMutation.mutate(
+      { id },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: getListSetupsQueryKey() });
+          queryClient.invalidateQueries({ queryKey: getGetAdminStatsQueryKey() });
+          toast({ title: "Setup deleted" });
+        },
+      },
+    );
+  };
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <p className="text-xs tracking-widest uppercase text-muted-foreground">
+          {setups?.length ?? 0} setups
+        </p>
+        <SetupDialog />
+      </div>
+
+      <div className="border border-border overflow-x-auto">
+        <table className="w-full text-sm text-left min-w-[480px]">
+          <thead className="border-b border-border bg-card">
+            <tr>
+              <th className="px-4 py-3 text-[10px] tracking-widest uppercase text-muted-foreground font-medium">
+                Setup
+              </th>
+              <th className="px-4 py-3 text-[10px] tracking-widest uppercase text-muted-foreground font-medium">
+                Items
+              </th>
+              <th className="px-4 py-3 text-[10px] tracking-widest uppercase text-muted-foreground font-medium text-right">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border">
+            {isLoading ? (
+              <tr>
+                <td
+                  colSpan={3}
+                  className="px-4 py-12 text-center text-xs tracking-widest uppercase text-muted-foreground animate-pulse"
+                >
+                  Loading...
+                </td>
+              </tr>
+            ) : (
+              setups?.map((setup) => (
+                <tr
+                  key={setup.id}
+                  className="hover:bg-accent/10 transition-colors"
+                  data-testid={`row-setup-${setup.id}`}
+                >
+                  <td className="px-4 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-12 bg-accent shrink-0">
+                        {setup.imageUrl && (
+                          <img
+                            src={setup.imageUrl}
+                            alt=""
+                            className="w-full h-full object-cover"
+                          />
+                        )}
+                      </div>
+                      <div>
+                        <p className="font-medium">{setup.title}</p>
+                        {setup.description && (
+                          <p className="text-xs text-muted-foreground line-clamp-1">
+                            {setup.description}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-4 text-muted-foreground">
+                    {setup.products?.length ?? 0} items
+                  </td>
+                  <td className="px-4 py-4 text-right">
+                    <div className="flex items-center justify-end gap-3">
+                      <SetupDialog setup={setup} />
+                      <button
+                        onClick={() => handleDelete(setup.id, setup.title)}
+                        className="text-destructive hover:text-destructive/70 transition-colors"
+                        data-testid={`button-delete-setup-${setup.id}`}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+function SetupDialog({ setup }: { setup?: Setup }) {
+  const [open, setOpen] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const createMutation = useCreateSetup();
+  const updateMutation = useUpdateSetup();
+
+  const [form, setForm] = useState({
+    title: setup?.title ?? "",
+    description: setup?.description ?? "",
+    imageUrl: setup?.imageUrl ?? "",
+    imagePosX: setup?.imagePosX ?? 50,
+    imagePosY: setup?.imagePosY ?? 50,
+    imageScale: setup?.imageScale ?? 100,
+    imageObjectFit: (setup as any)?.imageObjectFit ?? "cover",
+    productIds: setup?.products?.map((p) => p.id) ?? [],
+  });
+  const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    if (open) {
+      setForm({
+        title: setup?.title ?? "",
+        description: setup?.description ?? "",
+        imageUrl: setup?.imageUrl ?? "",
+        imagePosX: setup?.imagePosX ?? 50,
+        imagePosY: setup?.imagePosY ?? 50,
+        imageScale: setup?.imageScale ?? 100,
+        imageObjectFit: (setup as any)?.imageObjectFit ?? "cover",
+        productIds: setup?.products?.map((p) => p.id) ?? [],
+      });
+    }
+  }, [open]);
+
+  const { data: allProducts } = useListProducts(
+    {},
+    { query: { queryKey: getListProductsQueryKey() } },
+  );
+
+  const setupImageInputRef = useRef<HTMLInputElement>(null);
+  const setupCardBase = import.meta.env.BASE_URL.replace(/\/$/, "");
+  const { uploadFile: uploadSetupImage, isUploading: isSetupImageUploading } =
+    useUpload({
+      basePath: `${setupCardBase}/api/storage`,
+      onSuccess: (res) =>
+        setForm((f) => ({
+          ...f,
+          imageUrl: `${setupCardBase}/api/storage${res.objectPath}`,
+        })),
+    });
+  const setupBtnClass =
+    "w-8 h-8 border border-border flex items-center justify-center text-sm hover:bg-accent transition-colors select-none";
+
+  const filtered = allProducts?.filter(
+    (p) =>
+      p.title.toLowerCase().includes(search.toLowerCase()) ||
+      (p.brand ?? "").toLowerCase().includes(search.toLowerCase()),
+  );
+
+  const toggleProduct = (id: number) => {
+    setForm((f) => ({
+      ...f,
+      productIds: f.productIds.includes(id)
+        ? f.productIds.filter((x) => x !== id)
+        : [...f.productIds, id],
+    }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const payload = {
+      title: form.title,
+      description: form.description || undefined,
+      imageUrl: form.imageUrl || undefined,
+      imagePosX: form.imagePosX,
+      imagePosY: form.imagePosY,
+      imageScale: form.imageScale,
+      imageObjectFit: form.imageObjectFit,
+      productIds: form.productIds,
+    };
+    if (setup) {
+      updateMutation.mutate(
+        { id: setup.id, data: payload as any },
+        {
+          onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: getListSetupsQueryKey() });
+            toast({ title: "Setup updated" });
+            setOpen(false);
+          },
+          onError: () =>
+            toast({ title: "Failed to update setup", variant: "destructive" }),
+        },
+      );
+    } else {
+      createMutation.mutate(
+        { data: payload as any },
+        {
+          onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: getListSetupsQueryKey() });
+            queryClient.invalidateQueries({ queryKey: getGetAdminStatsQueryKey() });
+            toast({ title: "Setup created" });
+            setOpen(false);
+          },
+          onError: () =>
+            toast({ title: "Failed to create setup", variant: "destructive" }),
+        },
+      );
+    }
+  };
+
+  const isPending = createMutation.isPending || updateMutation.isPending;
+
+  return (
+    <>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          {setup ? (
+            <button
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              data-testid={`button-edit-setup-${setup.id}`}
+            >
+              <Pencil className="h-4 w-4" />
+            </button>
+          ) : (
+            <Button
+              className="text-xs tracking-widest uppercase font-medium"
+              data-testid="button-add-setup"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Setup
+            </Button>
+          )}
+        </DialogTrigger>
+        <DialogContent className="max-w-xl max-h-[92vh] overflow-y-auto border-border">
+          <DialogHeader>
+            <DialogTitle className="font-serif text-2xl font-light">
+              {setup ? "Edit Setup" : "New Setup"}
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-5 mt-4">
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                Title *
+              </label>
+              <Input
+                required
+                value={form.title}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, title: e.target.value }))
+                }
+                className="border-border"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                Setup Image
+              </label>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setupImageInputRef.current?.click()}
+                  disabled={isSetupImageUploading}
+                  className="flex-1 flex items-center justify-center gap-1.5 border border-dashed border-border py-2 text-[10px] tracking-widest uppercase text-muted-foreground hover:border-foreground/40 hover:text-foreground transition-colors disabled:opacity-40"
+                >
+                  <Upload className="h-3 w-3" />
+                  {form.imageUrl ? "Replace" : "Upload"}
+                </button>
+                {form.imageUrl && (
+                  <button
+                    type="button"
+                    onClick={() => setForm((f) => ({ ...f, imageUrl: "" }))}
+                    className="w-9 flex items-center justify-center border border-border text-muted-foreground hover:text-destructive hover:border-destructive/40 transition-colors"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </div>
+              <input
+                ref={setupImageInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) void uploadSetupImage(f);
+                  e.target.value = "";
+                }}
+              />
+              {form.imageUrl && (
+                <div className="border border-border p-3 flex flex-col gap-2">
+                  <div className="aspect-[3/4] overflow-hidden relative max-h-40 bg-accent">
+                    <img
+                      src={form.imageUrl}
+                      alt=""
+                      className="absolute w-full h-full"
+                      style={{
+                        objectFit: form.imageObjectFit as "cover" | "contain",
+                        objectPosition: `${form.imagePosX}% ${form.imagePosY}%`,
+                        transform: `scale(${form.imageScale / 100})`,
+                        transformOrigin: `${form.imagePosX}% ${form.imagePosY}%`,
+                      }}
+                    />
+                    {isSetupImageUploading && (
+                      <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
+                        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <p className="text-[9px] tracking-widest uppercase text-muted-foreground flex-1">
+                      Fit
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setForm((f) => ({
+                          ...f,
+                          imageObjectFit:
+                            f.imageObjectFit === "contain" ? "cover" : "contain",
+                        }))
+                      }
+                      className={`px-3 py-1 text-[9px] tracking-widest uppercase border transition-colors ${form.imageObjectFit === "contain" ? "border-foreground bg-foreground text-background" : "border-border"}`}
+                    >
+                      {form.imageObjectFit === "contain" ? "Contain" : "Cover"}
+                    </button>
+                  </div>
+                  <div className="flex flex-col items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => setForm((f) => ({ ...f, imagePosY: Math.max(0, f.imagePosY - 5) }))}
+                      className={setupBtnClass}
+                      title="Move up"
+                    >
+                      ↑
+                    </button>
+                    <div className="flex gap-1">
+                      <button
+                        type="button"
+                        onClick={() => setForm((f) => ({ ...f, imagePosX: Math.max(0, f.imagePosX - 5) }))}
+                        className={setupBtnClass}
+                        title="Move left"
+                      >
+                        ←
+                      </button>
+                      <div className="w-8 h-8 border border-border/40 bg-accent/30 flex items-center justify-center">
+                        <span className="text-[10px] text-muted-foreground/50">·</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setForm((f) => ({ ...f, imagePosX: Math.min(100, f.imagePosX + 5) }))}
+                        className={setupBtnClass}
+                        title="Move right"
+                      >
+                        →
+                      </button>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setForm((f) => ({ ...f, imagePosY: Math.min(100, f.imagePosY + 5) }))}
+                      className={setupBtnClass}
+                      title="Move down"
+                    >
+                      ↓
+                    </button>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setForm((f) => ({ ...f, imageScale: Math.max(50, f.imageScale - 10) }))}
+                      className={setupBtnClass}
+                      title="Zoom out"
+                    >
+                      −
+                    </button>
+                    <span className="flex-1 text-center text-[9px] tracking-widest text-muted-foreground">
+                      {form.imageScale}%
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setForm((f) => ({ ...f, imageScale: Math.min(200, f.imageScale + 10) }))}
+                      className={setupBtnClass}
+                      title="Zoom in"
+                    >
+                      +
+                    </button>
+                  </div>
+                  <p className="text-[9px] text-center text-muted-foreground/60">
+                    x {form.imagePosX}% · y {form.imagePosY}%
+                  </p>
+                </div>
+              )}
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                Description
+              </label>
+              <Textarea
+                value={form.description}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, description: e.target.value }))
+                }
+                rows={2}
+                className="border-border resize-none"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Products in Setup
+                </label>
+                <span className="text-xs text-muted-foreground">
+                  {form.productIds.length} selected
+                </span>
+              </div>
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search products..."
+                className="border-border mb-2"
+              />
+              <div className="border border-border max-h-52 overflow-y-auto divide-y divide-border">
+                {filtered?.length === 0 ? (
+                  <p className="px-4 py-3 text-xs text-muted-foreground">
+                    No products found.
+                  </p>
+                ) : (
+                  filtered?.map((p) => (
+                    <label
+                      key={p.id}
+                      className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-accent/20 transition-colors"
+                      data-testid={`select-product-setup-${p.id}`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={form.productIds.includes(p.id)}
+                        onChange={() => toggleProduct(p.id)}
+                        className="accent-foreground"
+                      />
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium line-clamp-1">{p.title}</p>
+                        {p.brand && (
+                          <p className="text-[10px] tracking-widest uppercase text-muted-foreground">
+                            {p.brand}
+                          </p>
+                        )}
+                      </div>
+                    </label>
+                  ))
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setPreviewOpen(true)}
+                className="text-xs tracking-widest uppercase border-border gap-2"
+              >
+                <Eye className="h-3.5 w-3.5" />
+                Preview
+              </Button>
+              <Button
+                type="submit"
+                disabled={isPending}
+                className="text-xs tracking-widest uppercase"
+                data-testid="button-save-setup"
+              >
+                {isPending ? "Saving..." : "Save Setup"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Full-screen setup preview overlay */}
+      {previewOpen && (
+        <div className="fixed inset-0 z-[300] bg-background overflow-auto">
+          <div className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b border-border px-6 py-3 flex items-center justify-between">
+            <p className="text-[10px] tracking-widest uppercase text-muted-foreground">
+              Setup Preview
+            </p>
+            <button
+              onClick={() => setPreviewOpen(false)}
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+          <div className="container mx-auto px-4 sm:px-6 py-10 max-w-3xl">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+              <div className="aspect-[3/4] bg-accent overflow-hidden relative">
+                {form.imageUrl ? (
+                  <img
+                    src={form.imageUrl}
+                    alt={form.title}
+                    className="absolute w-full h-full"
+                    style={{
+                      objectFit: form.imageObjectFit as "cover" | "contain",
+                      objectPosition: `${form.imagePosX}% ${form.imagePosY}%`,
+                      transform: `scale(${form.imageScale / 100})`,
+                      transformOrigin: `${form.imagePosX}% ${form.imagePosY}%`,
+                    }}
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <p className="text-[10px] tracking-widest uppercase text-muted-foreground">
+                      No image
+                    </p>
+                  </div>
+                )}
+              </div>
+              <div className="flex flex-col justify-center">
+                <h1 className="font-serif text-3xl font-light leading-tight mb-4">
+                  {form.title || "Setup Title"}
+                </h1>
+                {form.description && (
+                  <p className="text-sm text-muted-foreground leading-relaxed mb-6">
+                    {form.description}
+                  </p>
+                )}
+                {form.productIds.length > 0 && (
+                  <p className="text-[10px] tracking-widest uppercase text-muted-foreground">
+                    {form.productIds.length} product
+                    {form.productIds.length !== 1 ? "s" : ""} in this setup
                   </p>
                 )}
               </div>

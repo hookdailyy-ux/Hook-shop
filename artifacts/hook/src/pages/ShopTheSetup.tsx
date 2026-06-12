@@ -1,41 +1,21 @@
 import { useListSetups } from "@workspace/api-client-react";
 import { useSiteImages } from "@/hooks/useSiteImages";
-import { SetupCard } from "@/components/SetupCard";
+import { Link } from "wouter";
 import { useTranslation } from "react-i18next";
 import type { Setup } from "@workspace/api-client-react";
+import { ShoppingBag } from "lucide-react";
 
-function SetupSkeleton() {
-  return (
-    <div>
-      <div className="w-full aspect-[3/4] bg-accent/50 animate-pulse" style={{ maxHeight: "80dvh" }} />
-      <div className="mt-8 space-y-3 text-center">
-        <div className="h-3 w-16 bg-accent/50 animate-pulse mx-auto" />
-        <div className="h-8 w-64 bg-accent/50 animate-pulse mx-auto" />
-      </div>
-      <div className="mt-10">
-        <div className="h-px bg-accent/50 mb-8" />
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i}>
-              <div className="aspect-[3/4] bg-accent/50 animate-pulse mb-3" />
-              <div className="h-3 w-3/4 bg-accent/50 animate-pulse mb-1.5" />
-              <div className="h-3 w-1/2 bg-accent/50 animate-pulse mb-3" />
-              <div className="h-10 bg-accent/50 animate-pulse" />
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
+// ── Setup grid card ───────────────────────────────────────────────────────────
 
-function SetupMiniCard({ setup }: { setup: Setup }) {
+function SetupGridCard({ setup }: { setup: Setup }) {
+  const { t } = useTranslation();
   return (
-    <a
-      href={`#setup-${setup.id}`}
+    <Link
+      href={`/shop-the-setup/${setup.id}`}
       className="group flex flex-col gap-3"
-      data-testid={`setup-mini-card-${setup.id}`}
+      data-testid={`setup-grid-card-${setup.id}`}
     >
+      {/* Portrait image */}
       <div className="relative aspect-[3/4] bg-[#e8e0d4] overflow-hidden">
         {setup.imageUrl ? (
           <img
@@ -46,23 +26,54 @@ function SetupMiniCard({ setup }: { setup: Setup }) {
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-[9px] tracking-widest uppercase text-muted-foreground/50">No Image</span>
+            <ShoppingBag className="h-8 w-8 text-muted-foreground/20" strokeWidth={1} />
+          </div>
+        )}
+        {/* Hover overlay */}
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-500 flex items-end justify-center pb-6">
+          <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-white text-[10px] tracking-[0.3em] uppercase bg-black/60 backdrop-blur-sm px-5 py-2.5">
+            {t("hero.cta")}
+          </span>
+        </div>
+        {/* Item count badge */}
+        {(setup.products?.length ?? 0) > 0 && (
+          <div className="absolute top-3 right-3 bg-background/90 backdrop-blur-sm text-foreground text-[9px] tracking-widest uppercase px-2 py-1">
+            {setup.products!.length} {setup.products!.length === 1 ? "item" : "items"}
           </div>
         )}
       </div>
-      <div className="flex flex-col gap-1 px-0.5">
-        <p className="text-xs font-medium leading-snug line-clamp-2 group-hover:underline decoration-1 underline-offset-2">
-          {setup.title}
+      {/* Info */}
+      <div className="flex flex-col gap-0.5 px-0.5">
+        <p className="text-[9px] tracking-[0.3em] uppercase text-muted-foreground">
+          {t("shopTheSetup.setup")}
         </p>
-        {(setup.products?.length ?? 0) > 0 && (
-          <p className="text-[10px] text-muted-foreground tracking-wide">
-            {setup.products!.length} {setup.products!.length === 1 ? "item" : "items"}
-          </p>
-        )}
+        <h3 className="font-serif text-lg font-light leading-snug line-clamp-2 group-hover:underline decoration-1 underline-offset-2">
+          {setup.title}
+        </h3>
       </div>
-    </a>
+    </Link>
   );
 }
+
+// ── Skeleton ──────────────────────────────────────────────────────────────────
+
+function GridSkeleton() {
+  return (
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-10">
+      {Array.from({ length: 8 }).map((_, i) => (
+        <div key={i}>
+          <div className="aspect-[3/4] bg-accent/40 animate-pulse" />
+          <div className="mt-3 space-y-1.5">
+            <div className="h-2 w-12 bg-accent/40 animate-pulse" />
+            <div className="h-4 w-3/4 bg-accent/40 animate-pulse" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function ShopTheSetup() {
   const { data: setups, isLoading } = useListSetups();
@@ -108,42 +119,19 @@ export default function ShopTheSetup() {
         </div>
       </div>
 
-      {/* ── Setups list ── */}
+      {/* ── Grid ── */}
       <div className="container mx-auto px-4 sm:px-6 mt-12">
         {isLoading ? (
-          <div className="space-y-20">
-            <SetupSkeleton />
-            <div className="border-t border-border pt-20"><SetupSkeleton /></div>
-          </div>
+          <GridSkeleton />
         ) : !setups || setups.length === 0 ? (
           <div className="text-center py-28 border border-dashed border-border">
             <p className="text-xs tracking-widest text-muted-foreground uppercase">{t("shopTheSetup.empty")}</p>
           </div>
         ) : (
-          <div className="space-y-0">
-            {setups.map((setup, idx) => (
-              <div
-                key={setup.id}
-                id={`setup-${setup.id}`}
-                className={`py-16 md:py-24 scroll-mt-20 ${idx < setups.length - 1 ? "border-b border-border" : ""}`}
-              >
-                <SetupCard setup={setup} />
-              </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-10 md:gap-x-6 md:gap-y-14">
+            {setups.map((setup) => (
+              <SetupGridCard key={setup.id} setup={setup} />
             ))}
-          </div>
-        )}
-
-        {/* ── You May Also Like ── */}
-        {setups && setups.length > 1 && (
-          <div className="mt-24 pt-16 border-t border-border">
-            <h2 className="font-serif text-2xl md:text-3xl font-light mb-10">
-              {t("product.youMayAlsoLike")}
-            </h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-10 md:gap-x-8">
-              {setups.slice(0, 4).map((setup) => (
-                <SetupMiniCard key={setup.id} setup={setup} />
-              ))}
-            </div>
           </div>
         )}
       </div>

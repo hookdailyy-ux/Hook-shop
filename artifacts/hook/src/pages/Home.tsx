@@ -118,7 +118,7 @@ export default function Home() {
                     key: String(look.id),
                     props: {
                       title: look.title,
-                      href: "/shop-the-look" as const,
+                      href: `/shop-the-look/${look.id}`,
                       imageUrl: look.imageUrl ?? undefined,
                       label: t("shopTheLook.outfit"),
                       cta: t("hero.cta"),
@@ -165,7 +165,7 @@ export default function Home() {
                     key: String(setup.id),
                     props: {
                       title: setup.title,
-                      href: "/shop-the-setup" as const,
+                      href: `/shop-the-setup/${setup.id}`,
                       imageUrl: setup.imageUrl ?? undefined,
                       label: t("shopTheSetup.setup"),
                       cta: t("home.shopTheSetup"),

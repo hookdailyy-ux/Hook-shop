@@ -7,6 +7,8 @@ import { AppLayout } from "@/components/AppLayout";
 import Home from "@/pages/Home";
 import ShopTheLook from "@/pages/ShopTheLook";
 import ShopTheSetup from "@/pages/ShopTheSetup";
+import LookDetail from "@/pages/LookDetail";
+import SetupDetail from "@/pages/SetupDetail";
 import CategoryPage from "@/pages/CategoryPage";
 import ProductDetail from "@/pages/ProductDetail";
 import AdminDashboard from "@/pages/AdminDashboard";
@@ -120,7 +122,9 @@ function Router() {
           <AppLayout>
             <Switch>
               <Route path="/" component={Home} />
+              <Route path="/shop-the-look/:id" component={LookDetail} />
               <Route path="/shop-the-look" component={ShopTheLook} />
+              <Route path="/shop-the-setup/:id" component={SetupDetail} />
               <Route path="/shop-the-setup" component={ShopTheSetup} />
               <Route path="/women" component={() => <CategoryPage category="women" />} />
               <Route path="/men" component={() => <CategoryPage category="men" />} />
