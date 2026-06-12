@@ -41,10 +41,6 @@ export interface Product {
   imageScale?: number;
   imageObjectFit?: ProductImageObjectFit;
   /** @nullable */
-  noonUrl?: string | null;
-  /** @nullable */
-  noonPrice?: string | null;
-  /** @nullable */
   amazonUrl?: string | null;
   /** @nullable */
   amazonPrice?: string | null;

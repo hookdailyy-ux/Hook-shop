@@ -726,8 +726,6 @@ type ProductFormData = {
   price: string;
   originalPrice: string;
   affiliateUrl: string;
-  noonUrl: string;
-  noonPrice: string;
   amazonUrl: string;
   amazonPrice: string;
   externalId: string;
@@ -775,8 +773,6 @@ function ProductDialog({ product }: { product?: Product }) {
     price: product?.price ?? "",
     originalPrice: product?.originalPrice ?? "",
     affiliateUrl: product?.affiliateUrl ?? "",
-    noonUrl: (product as any)?.noonUrl ?? "",
-    noonPrice: (product as any)?.noonPrice ?? "",
     amazonUrl: (product as any)?.amazonUrl ?? "",
     amazonPrice: (product as any)?.amazonPrice ?? "",
     externalId: (product as any)?.externalId ?? "",
@@ -825,14 +821,12 @@ function ProductDialog({ product }: { product?: Product }) {
       price: form.price || undefined,
       originalPrice: form.originalPrice || undefined,
       imageUrl: form.imageUrl || undefined,
-      noonUrl: form.noonUrl || undefined,
-      noonPrice: form.noonPrice || undefined,
       amazonUrl: form.amazonUrl || undefined,
       amazonPrice: form.amazonPrice || undefined,
       externalId: form.externalId || undefined,
       placements: form.placements,
       affiliateUrl: isElectronics
-        ? form.noonUrl || form.amazonUrl || form.affiliateUrl || ""
+        ? form.amazonUrl || form.affiliateUrl || ""
         : form.affiliateUrl,
     };
     if (product) {
@@ -933,7 +927,7 @@ function ProductDialog({ product }: { product?: Product }) {
                 <Input
                   value={form.affiliateUrl}
                   onChange={(e) => set("affiliateUrl")(e.target.value)}
-                  placeholder="Paste Amazon / Noon / AliExpress affiliate link"
+                  placeholder="Paste Amazon / AliExpress affiliate link"
                   className="border-border"
                 />
               </div>
@@ -1131,7 +1125,7 @@ if (data.success && data.product) {
               )}
             </div>
 
-            {/* Price — hidden for electronics (uses noon/amazon prices instead) */}
+            {/* Price — hidden for electronics (uses amazon price instead) */}
             {form.category !== "electronics" && (
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -1159,7 +1153,7 @@ if (data.success && data.product) {
               </div>
             )}
 
-            {/* Product Link — hidden for electronics (uses noon/amazon URLs instead) */}
+            {/* Product Link — hidden for electronics (uses amazon URL instead) */}
             {form.category !== "electronics" && (
               <div className="space-y-2">
                 <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
@@ -1180,66 +1174,34 @@ if (data.success && data.product) {
               </div>
             )}
 
-            {/* Electronics: Noon + Amazon Store Links */}
+            {/* Electronics: Amazon Store Link */}
             {form.category === "electronics" && (
               <div className="border border-border/60 p-4 space-y-4">
                 <p className="text-[9px] tracking-widest uppercase text-muted-foreground">
-                  Store Comparison
+                  Amazon Store
                 </p>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-3">
-                    <p className="text-[9px] tracking-widest uppercase text-muted-foreground font-semibold">
-                      Noon
-                    </p>
-                    <div className="space-y-2">
-                      <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
-                        Noon Price
-                      </label>
-                      <Input
-                        value={form.noonPrice}
-                        onChange={(e) => set("noonPrice")(e.target.value)}
-                        placeholder="AED 749"
-                        className="border-border"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
-                        Noon URL
-                      </label>
-                      <Input
-                        value={form.noonUrl}
-                        onChange={(e) => set("noonUrl")(e.target.value)}
-                        placeholder="https://noon.com/..."
-                        className="border-border"
-                      />
-                    </div>
+                <div className="space-y-3">
+                  <div className="space-y-2">
+                    <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                      Amazon Price
+                    </label>
+                    <Input
+                      value={form.amazonPrice}
+                      onChange={(e) => set("amazonPrice")(e.target.value)}
+                      placeholder="AED 779"
+                      className="border-border"
+                    />
                   </div>
-                  <div className="space-y-3">
-                    <p className="text-[9px] tracking-widest uppercase text-muted-foreground font-semibold">
-                      Amazon
-                    </p>
-                    <div className="space-y-2">
-                      <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
-                        Amazon Price
-                      </label>
-                      <Input
-                        value={form.amazonPrice}
-                        onChange={(e) => set("amazonPrice")(e.target.value)}
-                        placeholder="AED 779"
-                        className="border-border"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
-                        Amazon URL
-                      </label>
-                      <Input
-                        value={form.amazonUrl}
-                        onChange={(e) => set("amazonUrl")(e.target.value)}
-                        placeholder="https://amzn.to/..."
-                        className="border-border"
-                      />
-                    </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                      Amazon URL
+                    </label>
+                    <Input
+                      value={form.amazonUrl}
+                      onChange={(e) => set("amazonUrl")(e.target.value)}
+                      placeholder="https://amzn.to/..."
+                      className="border-border"
+                    />
                   </div>
                 </div>
               </div>
@@ -1558,26 +1520,8 @@ if (data.success && data.product) {
                 {/* CTA preview */}
                 <div className="mt-auto pt-4">
                   {form.category === "electronics" &&
-                  (form.noonUrl || form.amazonUrl) ? (
+                  form.amazonUrl ? (
                     <div className="flex gap-4">
-                      {form.noonUrl && (
-                        <div className="flex-1 border border-border p-4 flex flex-col gap-3">
-                          <p className="text-[10px] tracking-widest uppercase font-semibold">
-                            Noon
-                          </p>
-                          {form.noonPrice && (
-                            <p className="text-2xl font-medium tracking-tight">
-                              {form.noonPrice}
-                            </p>
-                          )}
-                          <span className="w-full text-center bg-foreground text-background text-[10px] tracking-widest uppercase py-3 block">
-                            Noon
-                          </span>
-                          <p className="text-[9px] tracking-wide text-muted-foreground text-center">
-                            Delivered by Noon
-                          </p>
-                        </div>
-                      )}
                       {form.amazonUrl && (
                         <div className="flex-1 border border-border p-4 flex flex-col gap-3">
                           <p className="text-[10px] tracking-widest uppercase font-semibold">
@@ -3180,17 +3124,15 @@ function SettingsTab() {
 
   const [sheinGeneralUrl, setSheinGeneralUrl] = useState("");
   const [amazonGeneralUrl, setAmazonGeneralUrl] = useState("");
-  const [noonGeneralUrl, setNoonGeneralUrl] = useState("");
   const [supplierLinksLoading, setSupplierLinksLoading] = useState(false);
 
   useEffect(() => {
     fetch(`${BASE}/api/site-settings`)
       .then((r) => r.json())
-      .then((d: { discoverMoreUrl?: string; sheinGeneralUrl?: string; amazonGeneralUrl?: string; noonGeneralUrl?: string }) => {
+      .then((d: { discoverMoreUrl?: string; sheinGeneralUrl?: string; amazonGeneralUrl?: string }) => {
         setDiscoverUrl(d.discoverMoreUrl ?? "");
         setSheinGeneralUrl(d.sheinGeneralUrl ?? "");
         setAmazonGeneralUrl(d.amazonGeneralUrl ?? "");
-        setNoonGeneralUrl(d.noonGeneralUrl ?? "");
         setDiscoverFetched(true);
       })
       .catch(() => setDiscoverFetched(true));
@@ -3248,7 +3190,7 @@ function SettingsTab() {
         method: "PUT",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sheinGeneralUrl, amazonGeneralUrl, noonGeneralUrl }),
+        body: JSON.stringify({ sheinGeneralUrl, amazonGeneralUrl }),
       });
       if (res.ok) {
         toast({ title: "Supplier links saved" });
@@ -3302,7 +3244,7 @@ function SettingsTab() {
           Supplier General Links
         </h3>
         <p className="text-[10px] text-muted-foreground tracking-wide mb-5 leading-relaxed">
-          These links appear as <strong>"Explore More via SHEIN / Amazon / Noon"</strong> buttons in the basket under each supplier group.
+          These links appear as <strong>"Explore More via SHEIN / Amazon"</strong> buttons in the basket under each supplier group.
         </p>
         <form onSubmit={handleSupplierLinksSave} className="space-y-4">
           <div className="space-y-2">
@@ -3331,20 +3273,6 @@ function SettingsTab() {
               disabled={!discoverFetched}
               className="border-border"
               data-testid="input-amazon-general-url"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
-              Noon General Link
-            </label>
-            <Input
-              type="url"
-              value={noonGeneralUrl}
-              onChange={(e) => setNoonGeneralUrl(e.target.value)}
-              placeholder="https://noon.com/..."
-              disabled={!discoverFetched}
-              className="border-border"
-              data-testid="input-noon-general-url"
             />
           </div>
           <div className="pt-1">

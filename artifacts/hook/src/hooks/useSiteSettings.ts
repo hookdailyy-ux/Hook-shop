@@ -25,7 +25,6 @@ export interface SiteSettings {
   pwaIcon512Url: string;
   sheinGeneralUrl: string;
   amazonGeneralUrl: string;
-  noonGeneralUrl: string;
 }
 
 export function useSiteSettings() {

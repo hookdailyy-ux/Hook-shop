@@ -106,10 +106,6 @@ export interface Product {
   imageScale?: number;
   imageObjectFit?: ProductImageObjectFit;
   /** @nullable */
-  noonUrl?: string | null;
-  /** @nullable */
-  noonPrice?: string | null;
-  /** @nullable */
   amazonUrl?: string | null;
   /** @nullable */
   amazonPrice?: string | null;
@@ -174,8 +170,6 @@ export interface ProductInput {
   imagePosY?: number;
   imageScale?: number;
   imageObjectFit?: ProductInputImageObjectFit;
-  noonUrl?: string;
-  noonPrice?: string;
   amazonUrl?: string;
   amazonPrice?: string;
   placements?: string[];
@@ -238,8 +232,6 @@ export interface ProductUpdate {
   imagePosY?: number;
   imageScale?: number;
   imageObjectFit?: ProductUpdateImageObjectFit;
-  noonUrl?: string;
-  noonPrice?: string;
   amazonUrl?: string;
   amazonPrice?: string;
   placements?: string[];

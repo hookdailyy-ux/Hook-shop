@@ -577,10 +577,6 @@ components:
         imageObjectFit:
           type: string
           enum: [cover, contain]
-        noonUrl:
-          type: ["string", "null"]
-        noonPrice:
-          type: ["string", "null"]
         amazonUrl:
           type: ["string", "null"]
         amazonPrice:
@@ -649,10 +645,6 @@ components:
         imageObjectFit:
           type: string
           enum: [cover, contain]
-        noonUrl:
-          type: string
-        noonPrice:
-          type: string
         amazonUrl:
           type: string
         amazonPrice:
@@ -717,10 +709,6 @@ components:
         imageObjectFit:
           type: string
           enum: [cover, contain]
-        noonUrl:
-          type: string
-        noonPrice:
-          type: string
         amazonUrl:
           type: string
         amazonPrice:

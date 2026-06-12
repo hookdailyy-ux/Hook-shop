@@ -27,7 +27,6 @@ import { useToast } from "@/hooks/use-toast";
 const STORE_META: Record<string, { label: string; exploreLabel: string }> = {
   SHEIN: { label: "SHEIN", exploreLabel: "EXPLORE MORE VIA SHEIN" },
   Amazon: { label: "Amazon", exploreLabel: "EXPLORE MORE VIA AMAZON" },
-  Noon: { label: "Noon", exploreLabel: "EXPLORE MORE VIA NOON" },
   Other: { label: "Other", exploreLabel: "EXPLORE MORE" },
 };
 
@@ -440,7 +439,6 @@ export function BasketDrawer() {
   const generalLinks: Record<string, string> = {
     SHEIN: settings?.sheinGeneralUrl ?? "",
     Amazon: settings?.amazonGeneralUrl ?? "",
-    Noon: settings?.noonGeneralUrl ?? "",
     Other: settings?.sheinGeneralUrl ?? "",
   };
 
@@ -455,7 +453,7 @@ export function BasketDrawer() {
     {}
   );
 
-  const storeOrder = ["SHEIN", "Amazon", "Noon", "Other"];
+  const storeOrder = ["SHEIN", "Amazon", "Other"];
   const activeStores = storeOrder.filter((s) => storeGroups[s]?.length);
 
   const hasContent = totalItems > 0;

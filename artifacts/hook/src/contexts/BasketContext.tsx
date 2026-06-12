@@ -9,11 +9,10 @@ import {
 const BASKET_KEY = "hook_basket_v3";
 const BASKET_GROUPS_KEY = "hook_basket_groups_v1";
 
-export function inferStore(affiliateUrl: string): "SHEIN" | "Amazon" | "Noon" | "Other" {
+export function inferStore(affiliateUrl: string): "SHEIN" | "Amazon" | "Other" {
   const url = (affiliateUrl ?? "").toLowerCase();
   if (url.includes("shein")) return "SHEIN";
   if (url.includes("amazon") || url.includes("amzn")) return "Amazon";
-  if (url.includes("noon")) return "Noon";
   return "Other";
 }
 
@@ -31,9 +30,7 @@ export interface BasketItem {
   size: string | null;
   color: string | null;
   productSource: string;
-  noonUrl: string | null;
   amazonUrl: string | null;
-  noonPrice: string | null;
   amazonPrice: string | null;
   sourceMemberId: number;
   sourceMemberUsername: string;
@@ -136,9 +133,7 @@ function loadFromStorage(): BasketItem[] {
       ...i,
       id: i.id ?? newId(),
       productSource: i.productSource ?? inferStore(i.affiliateUrl),
-      noonUrl: i.noonUrl ?? null,
       amazonUrl: i.amazonUrl ?? null,
-      noonPrice: i.noonPrice ?? null,
       amazonPrice: i.amazonPrice ?? null,
     }));
   } catch {

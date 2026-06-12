@@ -16,7 +16,7 @@ export default function ProductDetail() {
   const { t } = useTranslation();
   const [selectedImage, setSelectedImage] = useState(0);
   const [galleryOpen, setGalleryOpen] = useState(false);
-  const [addedStore, setAddedStore] = useState<"Noon" | "Amazon" | "fashion" | null>(null);
+  const [addedStore, setAddedStore] = useState<"Amazon" | "fashion" | null>(null);
 
   const {
     addItem,
@@ -88,26 +88,21 @@ export default function ProductDetail() {
       : t("product.deliveredByShein");
 
   const isElectronics = product.category === "electronics";
-  const noonUrl = product.noonUrl;
   const amazonUrl = product.amazonUrl;
 
-  const handleAddElectronics = (store: "Noon" | "Amazon") => {
-    const url = store === "Noon" ? noonUrl : amazonUrl;
-    const price = store === "Noon" ? product.noonPrice : product.amazonPrice;
-    if (!url) return;
+  const handleAddElectronics = () => {
+    if (!amazonUrl) return;
     addItem({
       productId: product.id,
       productTitle: product.title,
       productImageUrl: product.imageUrl ?? null,
-      displayPrice: price ?? null,
-      affiliateUrl: url,
+      displayPrice: product.amazonPrice ?? null,
+      affiliateUrl: amazonUrl,
       brand: product.brand ?? null,
       size: null,
       color: null,
-      productSource: store,
-      noonUrl: product.noonUrl ?? null,
+      productSource: "Amazon",
       amazonUrl: product.amazonUrl ?? null,
-      noonPrice: product.noonPrice ?? null,
       amazonPrice: product.amazonPrice ?? null,
       sourceMemberId: currentMemberId ?? 0,
       sourceMemberUsername: currentMemberUsername ?? "",
@@ -115,7 +110,7 @@ export default function ProductDetail() {
       sourceContext: "store",
       sourceToken: null,
     });
-    setAddedStore(store);
+    setAddedStore("Amazon");
     setTimeout(() => {
       setAddedStore(null);
       openBasket();
@@ -278,54 +273,27 @@ export default function ProductDetail() {
 
             {/* CTA */}
             {isElectronics ? (
-              (noonUrl || amazonUrl) ? (
-                <div className={`grid gap-4 ${noonUrl && amazonUrl ? "grid-cols-2" : "grid-cols-1"}`}>
-                  {noonUrl && (
-                    <div className="border border-border p-5 flex flex-col">
-                      <p className="text-[10px] tracking-widest uppercase font-semibold mb-4">Noon</p>
-                      <div className="flex-1 min-h-[3.5rem] flex items-center mb-4">
-                        {product.noonPrice && (
-                          <p className="text-2xl font-medium tracking-tight">{product.noonPrice}</p>
-                        )}
-                      </div>
-                      <button
-                        onClick={() => handleAddElectronics("Noon")}
-                        className="w-full bg-foreground text-background text-[10px] tracking-widest uppercase py-3.5 hover:opacity-90 transition-opacity flex items-center justify-center gap-2 whitespace-nowrap"
-                      >
-                        {addedStore === "Noon" ? (
-                          <><Check className="h-3 w-3 shrink-0" />Added!</>
-                        ) : (
-                          <><ShoppingBag className="h-3 w-3 shrink-0" />Add to Basket</>
-                        )}
-                      </button>
-                      <p className="text-[9px] tracking-wide text-muted-foreground text-center mt-2.5">
-                        Delivered by Noon
-                      </p>
-                    </div>
-                  )}
-                  {amazonUrl && (
-                    <div className="border border-border p-5 flex flex-col">
-                      <p className="text-[10px] tracking-widest uppercase font-semibold mb-4">Amazon</p>
-                      <div className="flex-1 min-h-[3.5rem] flex items-center mb-4">
-                        {product.amazonPrice && (
-                          <p className="text-2xl font-medium tracking-tight">{product.amazonPrice}</p>
-                        )}
-                      </div>
-                      <button
-                        onClick={() => handleAddElectronics("Amazon")}
-                        className="w-full border border-foreground text-foreground text-[10px] tracking-widest uppercase py-3.5 hover:bg-foreground hover:text-background transition-colors flex items-center justify-center gap-2 whitespace-nowrap"
-                      >
-                        {addedStore === "Amazon" ? (
-                          <><Check className="h-3 w-3 shrink-0" />Added!</>
-                        ) : (
-                          <><ShoppingBag className="h-3 w-3 shrink-0" />Add to Basket</>
-                        )}
-                      </button>
-                      <p className="text-[9px] tracking-wide text-muted-foreground text-center mt-2.5">
-                        Delivered by Amazon
-                      </p>
-                    </div>
-                  )}
+              amazonUrl ? (
+                <div className="border border-border p-5 flex flex-col">
+                  <p className="text-[10px] tracking-widest uppercase font-semibold mb-4">Amazon</p>
+                  <div className="flex-1 min-h-[3.5rem] flex items-center mb-4">
+                    {product.amazonPrice && (
+                      <p className="text-2xl font-medium tracking-tight">{product.amazonPrice}</p>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => handleAddElectronics()}
+                    className="w-full border border-foreground text-foreground text-[10px] tracking-widest uppercase py-3.5 hover:bg-foreground hover:text-background transition-colors flex items-center justify-center gap-2 whitespace-nowrap"
+                  >
+                    {addedStore === "Amazon" ? (
+                      <><Check className="h-3 w-3 shrink-0" />Added!</>
+                    ) : (
+                      <><ShoppingBag className="h-3 w-3 shrink-0" />Add to Basket</>
+                    )}
+                  </button>
+                  <p className="text-[9px] tracking-wide text-muted-foreground text-center mt-2.5">
+                    Delivered by Amazon
+                  </p>
                 </div>
               ) : (
                 <p className="text-xs text-muted-foreground tracking-wide text-center py-4 border border-border/40">
@@ -347,9 +315,7 @@ export default function ProductDetail() {
                       size: null,
                       color: null,
                       productSource: product.source ?? inferStore(product.affiliateUrl),
-                      noonUrl: null,
                       amazonUrl: null,
-                      noonPrice: null,
                       amazonPrice: null,
                       sourceMemberId: currentMemberId ?? 0,
                       sourceMemberUsername: currentMemberUsername ?? "",
