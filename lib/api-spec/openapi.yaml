@@ -585,6 +585,11 @@ components:
           type: ["string", "null"]
         amazonPrice:
           type: ["string", "null"]
+        placements:
+          type: array
+          items:
+            type: string
+          nullable: true
         createdAt:
           type: string
 
@@ -652,6 +657,10 @@ components:
           type: string
         amazonPrice:
           type: string
+        placements:
+          type: array
+          items:
+            type: string
 
     ProductUpdate:
       type: object
@@ -716,6 +725,10 @@ components:
           type: string
         amazonPrice:
           type: string
+        placements:
+          type: array
+          items:
+            type: string
 
     Look:
       type: object

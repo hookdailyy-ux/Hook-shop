@@ -48,5 +48,6 @@ export interface Product {
   amazonUrl?: string | null;
   /** @nullable */
   amazonPrice?: string | null;
+  placements?: string[] | null;
   createdAt: string;
 }

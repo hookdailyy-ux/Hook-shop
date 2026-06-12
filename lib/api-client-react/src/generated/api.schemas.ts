@@ -113,6 +113,7 @@ export interface Product {
   amazonUrl?: string | null;
   /** @nullable */
   amazonPrice?: string | null;
+  placements?: string[] | null;
   createdAt: string;
 }
 
@@ -177,6 +178,7 @@ export interface ProductInput {
   noonPrice?: string;
   amazonUrl?: string;
   amazonPrice?: string;
+  placements?: string[];
 }
 
 export type ProductUpdateSource = typeof ProductUpdateSource[keyof typeof ProductUpdateSource];
@@ -240,6 +242,7 @@ export interface ProductUpdate {
   noonPrice?: string;
   amazonUrl?: string;
   amazonPrice?: string;
+  placements?: string[];
 }
 
 export interface Look {

@@ -36,4 +36,5 @@ export interface ProductUpdate {
   noonPrice?: string;
   amazonUrl?: string;
   amazonPrice?: string;
+  placements?: string[];
 }

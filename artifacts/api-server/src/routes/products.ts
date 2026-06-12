@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db, productsTable } from "@workspace/db";
-import { eq, and, ne, asc } from "drizzle-orm";
+import { eq, and, ne, asc, or, SQL, sql } from "drizzle-orm";
 import { z } from "zod";
 import { requireTeamMember } from "../middlewares/requireTeamMember";
 
@@ -16,17 +16,32 @@ function serializeProduct(p: typeof productsTable.$inferSelect) {
     images: Array.isArray(p.images) ? p.images : [],
     colors: Array.isArray(p.colors) ? p.colors : [],
     sizes: Array.isArray(p.sizes) ? p.sizes : [],
+    placements: Array.isArray(p.placements) ? p.placements : [],
     createdAt: p.createdAt.toISOString(),
   };
+}
+
+/**
+ * Build a category filter condition that respects the placements override model:
+ * - Products with empty placements show in their primary category
+ * - Products with non-empty placements show ONLY in those specific categories
+ */
+function categoryCondition(cat: string): SQL<unknown> {
+  const placementsHasCategory = sql<boolean>`${productsTable.placements} @> ${JSON.stringify([cat])}::jsonb`;
+  const isUnplaced = sql<boolean>`(${productsTable.placements} IS NULL OR jsonb_array_length(${productsTable.placements}) = 0)`;
+  return or(
+    and(eq(productsTable.category, cat), isUnplaced),
+    placementsHasCategory
+  ) as SQL<unknown>;
 }
 
 router.get("/products", async (req, res) => {
   try {
     const { category, subcategory, featured, trending, limit } = req.query;
-    const conditions: ReturnType<typeof eq>[] = [];
+    const conditions: SQL<unknown>[] = [];
     // Always exclude hidden products on the public endpoint
     conditions.push(ne(productsTable.status, "hidden"));
-    if (category && typeof category === "string") conditions.push(eq(productsTable.category, category));
+    if (category && typeof category === "string") conditions.push(categoryCondition(category));
     if (subcategory && typeof subcategory === "string") conditions.push(eq(productsTable.subcategory, subcategory));
     if (featured === "true") conditions.push(eq(productsTable.featured, true));
     if (trending === "true") conditions.push(eq(productsTable.trending, true));
@@ -69,6 +84,7 @@ router.post("/products", async (req, res) => {
       noonPrice: z.string().optional(),
       amazonUrl: z.string().optional(),
       amazonPrice: z.string().optional(),
+      placements: z.array(z.string()).optional(),
     });
     const data = schema.parse(req.body);
     const [product] = await db.insert(productsTable).values({
@@ -98,6 +114,7 @@ router.post("/products", async (req, res) => {
       noonPrice: data.noonPrice ?? null,
       amazonUrl: data.amazonUrl ?? null,
       amazonPrice: data.amazonPrice ?? null,
+      placements: data.placements ?? [],
     }).returning();
     res.status(201).json(serializeProduct(product));
   } catch (err) {
@@ -146,7 +163,7 @@ router.get("/products/catalog", requireTeamMember, async (req, res) => {
 
 router.get("/products/:id", async (req, res) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(String(req.params.id));
     const [product] = await db.select().from(productsTable).where(eq(productsTable.id, id));
     if (!product) { res.status(404).json({ error: "Not found" }); return; }
     res.json(serializeProduct(product));
@@ -158,21 +175,21 @@ router.get("/products/:id", async (req, res) => {
 
 router.patch("/products/:id", async (req, res) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(String(req.params.id));
     const schema = z.object({
       title: z.string().optional(),
       description: z.string().optional(),
       source: z.enum(sourceEnum).optional(),
       category: z.enum(categoryEnum).optional(),
-      subcategory: z.string().optional(),
-      price: z.string().optional(),
-      originalPrice: z.string().optional(),
-      imageUrl: z.string().optional(),
+      subcategory: z.string().optional().nullable(),
+      price: z.string().optional().nullable(),
+      originalPrice: z.string().optional().nullable(),
+      imageUrl: z.string().optional().nullable(),
       images: z.array(z.string()).optional(),
       affiliateUrl: z.string().optional(),
-      brand: z.string().optional(),
-      material: z.string().optional(),
-      externalId: z.string().optional(),
+      brand: z.string().optional().nullable(),
+      material: z.string().optional().nullable(),
+      externalId: z.string().optional().nullable(),
       colors: z.array(z.string()).optional(),
       sizes: z.array(z.string()).optional(),
       featured: z.boolean().optional(),
@@ -182,10 +199,11 @@ router.patch("/products/:id", async (req, res) => {
       imagePosY: z.number().int().min(0).max(100).optional(),
       imageScale: z.number().int().min(50).max(200).optional(),
       imageObjectFit: z.enum(["cover", "contain"]).optional(),
-      noonUrl: z.string().optional(),
-      noonPrice: z.string().optional(),
-      amazonUrl: z.string().optional(),
-      amazonPrice: z.string().optional(),
+      noonUrl: z.string().optional().nullable(),
+      noonPrice: z.string().optional().nullable(),
+      amazonUrl: z.string().optional().nullable(),
+      amazonPrice: z.string().optional().nullable(),
+      placements: z.array(z.string()).optional(),
     });
     const data = schema.parse(req.body);
     const [product] = await db.update(productsTable).set(data).where(eq(productsTable.id, id)).returning();
@@ -199,7 +217,7 @@ router.patch("/products/:id", async (req, res) => {
 
 router.delete("/products/:id", async (req, res) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(String(req.params.id));
     await db.delete(productsTable).where(eq(productsTable.id, id));
     res.status(204).send();
   } catch (err) {

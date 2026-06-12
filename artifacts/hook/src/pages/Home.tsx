@@ -28,10 +28,10 @@ export default function Home() {
     { id: -4, title: "Street Style" },
   ];
   const SETUP_PLACEHOLDERS = [
-    { id: -1, title: "Kitchen Setup" },
-    { id: -2, title: "Desk Setup" },
-    { id: -3, title: "Bedroom Setup" },
-    { id: -4, title: "Living Room" },
+    { id: -1, title: "Bedroom Setup" },
+    { id: -2, title: "Setup" },
+    { id: -3, title: "Living Room" },
+    { id: -4, title: "Office Edit" },
   ];
 
   return (

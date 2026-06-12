@@ -36,4 +36,5 @@ export interface ProductInput {
   noonPrice?: string;
   amazonUrl?: string;
   amazonPrice?: string;
+  placements?: string[];
 }

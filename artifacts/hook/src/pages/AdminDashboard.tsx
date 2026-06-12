@@ -742,7 +742,20 @@ type ProductFormData = {
   imagePosY: number;
   imageScale: number;
   imageObjectFit: "cover" | "contain";
+  placements: string[];
 };
+
+const PLACEMENT_OPTIONS = [
+  { value: "women", label: "Women" },
+  { value: "men", label: "Men" },
+  { value: "kids", label: "Kids" },
+  { value: "couples", label: "Couples" },
+  { value: "favorites", label: "Favorites" },
+  { value: "home", label: "Home Essentials" },
+  { value: "electronics", label: "Tech" },
+  { value: "look", label: "Shop The Look" },
+  { value: "setup", label: "Shop The Setup" },
+] as const;
 
 function ProductDialog({ product }: { product?: Product }) {
   const [open, setOpen] = useState(false);
@@ -778,6 +791,7 @@ function ProductDialog({ product }: { product?: Product }) {
     imagePosY: product?.imagePosY ?? 50,
     imageScale: product?.imageScale ?? 100,
     imageObjectFit: (product?.imageObjectFit as "cover" | "contain") ?? "cover",
+    placements: Array.isArray((product as any)?.placements) ? ((product as any).placements as string[]) : [],
   });
 
   const [form, setForm] = useState<ProductFormData>(defaultForm);
@@ -816,6 +830,7 @@ function ProductDialog({ product }: { product?: Product }) {
       amazonUrl: form.amazonUrl || undefined,
       amazonPrice: form.amazonPrice || undefined,
       externalId: form.externalId || undefined,
+      placements: form.placements,
       affiliateUrl: isElectronics
         ? form.noonUrl || form.amazonUrl || form.affiliateUrl || ""
         : form.affiliateUrl,
@@ -1072,6 +1087,48 @@ if (data.success && data.product) {
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+
+            {/* Product Placement */}
+            <div className="border border-border p-4 space-y-3">
+              <div>
+                <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-0.5">
+                  Product Placement
+                </p>
+                <p className="text-[10px] text-muted-foreground/70 leading-relaxed">
+                  By default the product appears in its primary category above. Check boxes to <strong>also</strong> show it in other sections, or to <strong>override</strong> placement entirely.
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                {PLACEMENT_OPTIONS.map((opt) => (
+                  <label
+                    key={opt.value}
+                    className="flex items-center gap-2 cursor-pointer text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <input
+                      type="checkbox"
+                      className="accent-foreground"
+                      checked={form.placements.includes(opt.value)}
+                      onChange={(e) => {
+                        const next = e.target.checked
+                          ? [...form.placements, opt.value]
+                          : form.placements.filter((v) => v !== opt.value);
+                        set("placements")(next);
+                      }}
+                    />
+                    {opt.label}
+                  </label>
+                ))}
+              </div>
+              {form.placements.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => set("placements")([])}
+                  className="text-[9px] tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Clear placements
+                </button>
+              )}
             </div>
 
             {/* Price — hidden for electronics (uses noon/amazon prices instead) */}
@@ -1694,6 +1751,7 @@ function LookDialog({ look }: { look?: Look }) {
   const { toast } = useToast();
   const createMutation = useCreateLook();
   const updateMutation = useUpdateLook();
+  const createProductMutation = useCreateProduct();
 
   const [form, setForm] = useState({
     title: look?.title ?? "",
@@ -1706,6 +1764,51 @@ function LookDialog({ look }: { look?: Look }) {
     productIds: look?.products?.map((p) => p.id) ?? [],
   });
   const [search, setSearch] = useState("");
+
+  const defaultNewProduct = () => ({
+    title: "",
+    brand: "",
+    affiliateUrl: "",
+    price: "",
+    source: "SHEIN",
+    imageUrl: "",
+    category: "women" as const,
+    placements: [] as string[],
+  });
+  const [showNewProduct, setShowNewProduct] = useState(false);
+  const [newProduct, setNewProduct] = useState(defaultNewProduct);
+
+  const handleCreateProduct = async () => {
+    if (!newProduct.title.trim() || !newProduct.affiliateUrl.trim()) {
+      toast({ title: "Title and affiliate URL are required", variant: "destructive" });
+      return;
+    }
+    createProductMutation.mutate(
+      {
+        data: {
+          title: newProduct.title,
+          brand: newProduct.brand || undefined,
+          affiliateUrl: newProduct.affiliateUrl,
+          price: newProduct.price || undefined,
+          source: newProduct.source as "SHEIN" | "Amazon",
+          category: newProduct.category,
+          imageUrl: newProduct.imageUrl || undefined,
+          placements: newProduct.placements,
+          status: "active",
+        } as any,
+      },
+      {
+        onSuccess: (created) => {
+          setForm((f) => ({ ...f, productIds: [...f.productIds, created.id] }));
+          queryClient.invalidateQueries({ queryKey: getListProductsQueryKey() });
+          setNewProduct(defaultNewProduct());
+          setShowNewProduct(false);
+          toast({ title: `"${created.title}" added to look` });
+        },
+        onError: () => toast({ title: "Failed to create product", variant: "destructive" }),
+      },
+    );
+  };
 
   useEffect(() => {
     if (open) {
@@ -2079,6 +2182,85 @@ function LookDialog({ look }: { look?: Look }) {
               </div>
             </div>
 
+            {/* Create New Product inline */}
+            <div className="border border-dashed border-border">
+              <button
+                type="button"
+                onClick={() => setShowNewProduct((v) => !v)}
+                className="w-full px-4 py-3 flex items-center justify-between text-[10px] tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors"
+                data-testid="button-toggle-new-product-look"
+              >
+                <span className="flex items-center gap-2">
+                  <Plus className="h-3.5 w-3.5" />
+                  Create New Product
+                </span>
+                <span className="text-[9px]">{showNewProduct ? "✕ Cancel" : "Expand"}</span>
+              </button>
+              {showNewProduct && (
+                <div className="p-4 border-t border-border space-y-3 bg-muted/20">
+                  <p className="text-[9px] tracking-widest uppercase text-muted-foreground">
+                    New product will be created and added to this look.
+                  </p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="col-span-2 space-y-1">
+                      <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Title *</label>
+                      <Input value={newProduct.title} onChange={(e) => setNewProduct((f) => ({ ...f, title: e.target.value }))} placeholder="Product name" className="border-border text-sm" />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Brand</label>
+                      <Input value={newProduct.brand} onChange={(e) => setNewProduct((f) => ({ ...f, brand: e.target.value }))} placeholder="e.g. SHEIN" className="border-border text-sm" />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Price</label>
+                      <Input value={newProduct.price} onChange={(e) => setNewProduct((f) => ({ ...f, price: e.target.value }))} placeholder="AED 89" className="border-border text-sm" />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Source</label>
+                      <Select value={newProduct.source} onValueChange={(v) => setNewProduct((f) => ({ ...f, source: v }))}>
+                        <SelectTrigger className="border-border text-sm"><SelectValue /></SelectTrigger>
+                        <SelectContent><SelectItem value="SHEIN">SHEIN</SelectItem><SelectItem value="Amazon">Amazon</SelectItem></SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Primary Category</label>
+                      <Select value={newProduct.category} onValueChange={(v) => setNewProduct((f) => ({ ...f, category: v as typeof f.category }))}>
+                        <SelectTrigger className="border-border text-sm"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {CATEGORIES.map((c) => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="col-span-2 space-y-1">
+                      <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Affiliate URL *</label>
+                      <Input value={newProduct.affiliateUrl} onChange={(e) => setNewProduct((f) => ({ ...f, affiliateUrl: e.target.value }))} placeholder="https://..." className="border-border text-sm" />
+                    </div>
+                    <div className="col-span-2 space-y-1">
+                      <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Image URL</label>
+                      <Input value={newProduct.imageUrl} onChange={(e) => setNewProduct((f) => ({ ...f, imageUrl: e.target.value }))} placeholder="https://..." className="border-border text-sm" />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Also show on category pages</p>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+                      {PLACEMENT_OPTIONS.map((opt) => (
+                        <label key={opt.value} className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
+                          <input type="checkbox" className="accent-foreground" checked={newProduct.placements.includes(opt.value)}
+                            onChange={(e) => {
+                              const next = e.target.checked ? [...newProduct.placements, opt.value] : newProduct.placements.filter((v) => v !== opt.value);
+                              setNewProduct((f) => ({ ...f, placements: next }));
+                            }} />
+                          {opt.label}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                  <Button type="button" onClick={() => void handleCreateProduct()} disabled={createProductMutation.isPending} className="w-full text-xs tracking-widest uppercase" data-testid="button-create-product-in-look">
+                    {createProductMutation.isPending ? "Creating..." : "Create & Add to Look"}
+                  </Button>
+                </div>
+              )}
+            </div>
+
             <div className="flex items-center justify-between pt-2">
               <Button
                 type="button"
@@ -2283,6 +2465,7 @@ function SetupDialog({ setup }: { setup?: Setup }) {
   const { toast } = useToast();
   const createMutation = useCreateSetup();
   const updateMutation = useUpdateSetup();
+  const createProductMutation = useCreateProduct();
 
   const [form, setForm] = useState({
     title: setup?.title ?? "",
@@ -2295,6 +2478,51 @@ function SetupDialog({ setup }: { setup?: Setup }) {
     productIds: setup?.products?.map((p) => p.id) ?? [],
   });
   const [search, setSearch] = useState("");
+
+  const defaultNewProduct = () => ({
+    title: "",
+    brand: "",
+    affiliateUrl: "",
+    price: "",
+    source: "SHEIN",
+    imageUrl: "",
+    category: "home" as const,
+    placements: [] as string[],
+  });
+  const [showNewProduct, setShowNewProduct] = useState(false);
+  const [newProduct, setNewProduct] = useState(defaultNewProduct);
+
+  const handleCreateProduct = async () => {
+    if (!newProduct.title.trim() || !newProduct.affiliateUrl.trim()) {
+      toast({ title: "Title and affiliate URL are required", variant: "destructive" });
+      return;
+    }
+    createProductMutation.mutate(
+      {
+        data: {
+          title: newProduct.title,
+          brand: newProduct.brand || undefined,
+          affiliateUrl: newProduct.affiliateUrl,
+          price: newProduct.price || undefined,
+          source: newProduct.source as "SHEIN" | "Amazon",
+          category: newProduct.category,
+          imageUrl: newProduct.imageUrl || undefined,
+          placements: newProduct.placements,
+          status: "active",
+        } as any,
+      },
+      {
+        onSuccess: (created) => {
+          setForm((f) => ({ ...f, productIds: [...f.productIds, created.id] }));
+          queryClient.invalidateQueries({ queryKey: getListProductsQueryKey() });
+          setNewProduct(defaultNewProduct());
+          setShowNewProduct(false);
+          toast({ title: `"${created.title}" added to setup` });
+        },
+        onError: () => toast({ title: "Failed to create product", variant: "destructive" }),
+      },
+    );
+  };
 
   useEffect(() => {
     if (open) {
@@ -2628,6 +2856,85 @@ function SetupDialog({ setup }: { setup?: Setup }) {
                   ))
                 )}
               </div>
+            </div>
+
+            {/* Create New Product inline */}
+            <div className="border border-dashed border-border">
+              <button
+                type="button"
+                onClick={() => setShowNewProduct((v) => !v)}
+                className="w-full px-4 py-3 flex items-center justify-between text-[10px] tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors"
+                data-testid="button-toggle-new-product-setup"
+              >
+                <span className="flex items-center gap-2">
+                  <Plus className="h-3.5 w-3.5" />
+                  Create New Product
+                </span>
+                <span className="text-[9px]">{showNewProduct ? "✕ Cancel" : "Expand"}</span>
+              </button>
+              {showNewProduct && (
+                <div className="p-4 border-t border-border space-y-3 bg-muted/20">
+                  <p className="text-[9px] tracking-widest uppercase text-muted-foreground">
+                    New product will be created and added to this setup.
+                  </p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="col-span-2 space-y-1">
+                      <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Title *</label>
+                      <Input value={newProduct.title} onChange={(e) => setNewProduct((f) => ({ ...f, title: e.target.value }))} placeholder="Product name" className="border-border text-sm" />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Brand</label>
+                      <Input value={newProduct.brand} onChange={(e) => setNewProduct((f) => ({ ...f, brand: e.target.value }))} placeholder="e.g. Amazon" className="border-border text-sm" />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Price</label>
+                      <Input value={newProduct.price} onChange={(e) => setNewProduct((f) => ({ ...f, price: e.target.value }))} placeholder="AED 149" className="border-border text-sm" />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Source</label>
+                      <Select value={newProduct.source} onValueChange={(v) => setNewProduct((f) => ({ ...f, source: v }))}>
+                        <SelectTrigger className="border-border text-sm"><SelectValue /></SelectTrigger>
+                        <SelectContent><SelectItem value="SHEIN">SHEIN</SelectItem><SelectItem value="Amazon">Amazon</SelectItem></SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Primary Category</label>
+                      <Select value={newProduct.category} onValueChange={(v) => setNewProduct((f) => ({ ...f, category: v as typeof f.category }))}>
+                        <SelectTrigger className="border-border text-sm"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {CATEGORIES.map((c) => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="col-span-2 space-y-1">
+                      <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Affiliate URL *</label>
+                      <Input value={newProduct.affiliateUrl} onChange={(e) => setNewProduct((f) => ({ ...f, affiliateUrl: e.target.value }))} placeholder="https://..." className="border-border text-sm" />
+                    </div>
+                    <div className="col-span-2 space-y-1">
+                      <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Image URL</label>
+                      <Input value={newProduct.imageUrl} onChange={(e) => setNewProduct((f) => ({ ...f, imageUrl: e.target.value }))} placeholder="https://..." className="border-border text-sm" />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Also show on category pages</p>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+                      {PLACEMENT_OPTIONS.map((opt) => (
+                        <label key={opt.value} className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
+                          <input type="checkbox" className="accent-foreground" checked={newProduct.placements.includes(opt.value)}
+                            onChange={(e) => {
+                              const next = e.target.checked ? [...newProduct.placements, opt.value] : newProduct.placements.filter((v) => v !== opt.value);
+                              setNewProduct((f) => ({ ...f, placements: next }));
+                            }} />
+                          {opt.label}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                  <Button type="button" onClick={() => void handleCreateProduct()} disabled={createProductMutation.isPending} className="w-full text-xs tracking-widest uppercase" data-testid="button-create-product-in-setup">
+                    {createProductMutation.isPending ? "Creating..." : "Create & Add to Setup"}
+                  </Button>
+                </div>
+              )}
             </div>
 
             <div className="flex items-center justify-between pt-2">

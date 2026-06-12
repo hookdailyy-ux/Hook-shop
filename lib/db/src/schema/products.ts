@@ -30,6 +30,7 @@ export const productsTable = pgTable("products", {
   noonPrice: text("noon_price"),
   amazonUrl: text("amazon_url"),
   amazonPrice: text("amazon_price"),
+  placements: jsonb("placements").$type<string[]>().notNull().default([]),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

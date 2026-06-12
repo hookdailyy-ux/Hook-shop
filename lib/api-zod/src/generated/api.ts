@@ -105,6 +105,7 @@ export const ListProductsResponseItem = zod.object({
   "noonPrice": zod.string().nullish(),
   "amazonUrl": zod.string().nullish(),
   "amazonPrice": zod.string().nullish(),
+  "placements": zod.array(zod.string()).nullish(),
   "createdAt": zod.string()
 })
 export const ListProductsResponse = zod.array(ListProductsResponseItem)
@@ -138,7 +139,8 @@ export const CreateProductBody = zod.object({
   "noonUrl": zod.string().optional(),
   "noonPrice": zod.string().optional(),
   "amazonUrl": zod.string().optional(),
-  "amazonPrice": zod.string().optional()
+  "amazonPrice": zod.string().optional(),
+  "placements": zod.array(zod.string()).optional()
 })
 
 
@@ -176,6 +178,7 @@ export const GetProductResponse = zod.object({
   "noonPrice": zod.string().nullish(),
   "amazonUrl": zod.string().nullish(),
   "amazonPrice": zod.string().nullish(),
+  "placements": zod.array(zod.string()).nullish(),
   "createdAt": zod.string()
 })
 
@@ -212,7 +215,8 @@ export const UpdateProductBody = zod.object({
   "noonUrl": zod.string().optional(),
   "noonPrice": zod.string().optional(),
   "amazonUrl": zod.string().optional(),
-  "amazonPrice": zod.string().optional()
+  "amazonPrice": zod.string().optional(),
+  "placements": zod.array(zod.string()).optional()
 })
 
 export const UpdateProductResponse = zod.object({
@@ -242,6 +246,7 @@ export const UpdateProductResponse = zod.object({
   "noonPrice": zod.string().nullish(),
   "amazonUrl": zod.string().nullish(),
   "amazonPrice": zod.string().nullish(),
+  "placements": zod.array(zod.string()).nullish(),
   "createdAt": zod.string()
 })
 
@@ -296,6 +301,7 @@ export const ListLooksResponseItem = zod.object({
   "noonPrice": zod.string().nullish(),
   "amazonUrl": zod.string().nullish(),
   "amazonPrice": zod.string().nullish(),
+  "placements": zod.array(zod.string()).nullish(),
   "createdAt": zod.string()
 })).optional(),
   "createdAt": zod.string()
@@ -359,6 +365,7 @@ export const GetLookResponse = zod.object({
   "noonPrice": zod.string().nullish(),
   "amazonUrl": zod.string().nullish(),
   "amazonPrice": zod.string().nullish(),
+  "placements": zod.array(zod.string()).nullish(),
   "createdAt": zod.string()
 })).optional(),
   "createdAt": zod.string()
@@ -417,6 +424,7 @@ export const UpdateLookResponse = zod.object({
   "noonPrice": zod.string().nullish(),
   "amazonUrl": zod.string().nullish(),
   "amazonPrice": zod.string().nullish(),
+  "placements": zod.array(zod.string()).nullish(),
   "createdAt": zod.string()
 })).optional(),
   "createdAt": zod.string()
@@ -473,6 +481,7 @@ export const ListSetupsResponseItem = zod.object({
   "noonPrice": zod.string().nullish(),
   "amazonUrl": zod.string().nullish(),
   "amazonPrice": zod.string().nullish(),
+  "placements": zod.array(zod.string()).nullish(),
   "createdAt": zod.string()
 })).optional(),
   "createdAt": zod.string()
@@ -536,6 +545,7 @@ export const GetSetupResponse = zod.object({
   "noonPrice": zod.string().nullish(),
   "amazonUrl": zod.string().nullish(),
   "amazonPrice": zod.string().nullish(),
+  "placements": zod.array(zod.string()).nullish(),
   "createdAt": zod.string()
 })).optional(),
   "createdAt": zod.string()
@@ -594,6 +604,7 @@ export const UpdateSetupResponse = zod.object({
   "noonPrice": zod.string().nullish(),
   "amazonUrl": zod.string().nullish(),
   "amazonPrice": zod.string().nullish(),
+  "placements": zod.array(zod.string()).nullish(),
   "createdAt": zod.string()
 })).optional(),
   "createdAt": zod.string()
@@ -664,6 +675,7 @@ export const ListAdminProductsResponseItem = zod.object({
   "noonPrice": zod.string().nullish(),
   "amazonUrl": zod.string().nullish(),
   "amazonPrice": zod.string().nullish(),
+  "placements": zod.array(zod.string()).nullish(),
   "createdAt": zod.string()
 })
 export const ListAdminProductsResponse = zod.array(ListAdminProductsResponseItem)
