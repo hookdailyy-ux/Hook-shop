@@ -523,104 +523,6 @@ function TagInput({
   );
 }
 
-const PRESET_COLORS = [
-  { name: "Black", hex: "#1a1a1a" },
-  { name: "White", hex: "#f5f5f0" },
-  { name: "Beige", hex: "#d4b896" },
-  { name: "Brown", hex: "#8b5e3c" },
-  { name: "Grey", hex: "#888888" },
-  { name: "Green", hex: "#4a7c59" },
-  { name: "Blue", hex: "#3a6a9a" },
-  { name: "Navy", hex: "#1b2a4a" },
-  { name: "Pink", hex: "#e8a0a0" },
-  { name: "Purple", hex: "#7a5a9a" },
-  { name: "Red", hex: "#cc4a4a" },
-  { name: "Yellow", hex: "#d4c44a" },
-  { name: "Orange", hex: "#d47a3a" },
-  { name: "Gold", hex: "#c9a84c" },
-  { name: "Silver", hex: "#c0c0c0" },
-] as const;
-
-function ColorSwatchPicker({
-  values,
-  onChange,
-}: {
-  values: string[];
-  onChange: (v: string[]) => void;
-}) {
-  const toggle = (name: string) =>
-    onChange(
-      values.includes(name)
-        ? values.filter((c) => c !== name)
-        : [...values, name],
-    );
-
-  return (
-    <div className="space-y-3">
-      <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
-        Colors
-      </label>
-      <div className="flex flex-wrap gap-3 pt-0.5">
-        {PRESET_COLORS.map(({ name, hex }) => {
-          const selected = values.includes(name);
-          const isLight =
-            name === "White" ||
-            name === "Silver" ||
-            name === "Yellow" ||
-            name === "Gold";
-          return (
-            <button
-              key={name}
-              type="button"
-              onClick={() => toggle(name)}
-              title={name}
-              style={{ backgroundColor: hex }}
-              className={`w-8 h-8 rounded-full flex items-center justify-center transition-all shrink-0 ${
-                isLight ? "border border-border/60" : ""
-              } ${selected ? "ring-2 ring-offset-2 ring-foreground" : "hover:ring-1 hover:ring-offset-1 hover:ring-foreground/40"}`}
-            >
-              {selected && (
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                  <path
-                    d="M2 6l3 3 5-5"
-                    stroke={isLight ? "#2a2318" : "#fff"}
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              )}
-            </button>
-          );
-        })}
-      </div>
-      {values.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
-          {values.map((name) => {
-            const color = PRESET_COLORS.find((c) => c.name === name);
-            return (
-              <span
-                key={name}
-                className="flex items-center gap-1.5 bg-accent text-xs px-2 py-1"
-              >
-                {color && (
-                  <span
-                    className="w-2.5 h-2.5 rounded-full border border-border/30 shrink-0"
-                    style={{ backgroundColor: color.hex }}
-                  />
-                )}
-                {name}
-                <button type="button" onClick={() => toggle(name)}>
-                  <X className="h-3 w-3" />
-                </button>
-              </span>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
-}
 
 const PRESET_SIZES = ["XS", "S", "M", "L", "XL", "XXL", "One Size"] as const;
 
@@ -731,7 +633,6 @@ type ProductFormData = {
   externalId: string;
   imageUrl: string;
   images: string[];
-  colors: string[];
   sizes: string[];
   status: string;
   featured: boolean;
@@ -754,6 +655,578 @@ const PLACEMENT_OPTIONS = [
   { value: "look", label: "Shop The Look" },
   { value: "setup", label: "Shop The Setup" },
 ] as const;
+
+// ─── Shared full-form dialog for creating a product from Look/Setup context ───
+
+function NewProductDialog({
+  open,
+  onOpenChange,
+  onSuccess,
+  contextLabel,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  onSuccess: (id: number, title: string) => void;
+  contextLabel: string;
+}) {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const createMutation = useCreateProduct();
+
+  const makeDefault = (): ProductFormData => ({
+    title: "",
+    brand: "",
+    description: "",
+    source: "SHEIN",
+    category: "women",
+    subcategory: "",
+    price: "",
+    originalPrice: "",
+    affiliateUrl: "",
+    amazonUrl: "",
+    amazonPrice: "",
+    externalId: "",
+    imageUrl: "",
+    images: [],
+    sizes: [],
+    status: "active",
+    featured: false,
+    trending: false,
+    imagePosX: 50,
+    imagePosY: 50,
+    imageScale: 100,
+    imageObjectFit: "cover",
+    placements: [],
+  });
+
+  const [form, setForm] = useState<ProductFormData>(makeDefault);
+  const set = (k: keyof ProductFormData) => (v: ProductFormData[typeof k]) =>
+    setForm((f) => ({ ...f, [k]: v }));
+
+  useEffect(() => {
+    if (open) setForm(makeDefault());
+  }, [open]);
+
+  const { data: subcategories } = useListSubcategories(
+    { category: form.category },
+    { query: { queryKey: getListSubcategoriesQueryKey({ category: form.category }) } },
+  );
+
+  const pBtnClass =
+    "w-8 h-8 border border-border flex items-center justify-center text-sm hover:bg-accent transition-colors select-none";
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const isElectronics = form.category === "electronics";
+    const payload = {
+      ...form,
+      source: form.source as "SHEIN" | "Amazon",
+      status: form.status as "active" | "hidden",
+      subcategory: form.subcategory || undefined,
+      brand: form.brand || undefined,
+      description: form.description || undefined,
+      price: form.price || undefined,
+      originalPrice: form.originalPrice || undefined,
+      imageUrl: form.imageUrl || undefined,
+      amazonUrl: form.amazonUrl || undefined,
+      amazonPrice: form.amazonPrice || undefined,
+      externalId: form.externalId || undefined,
+      placements: form.placements,
+      affiliateUrl: isElectronics
+        ? form.amazonUrl || form.affiliateUrl || ""
+        : form.affiliateUrl,
+    };
+    createMutation.mutate(
+      { data: payload as any },
+      {
+        onSuccess: (created) => {
+          queryClient.invalidateQueries({ queryKey: getListAdminProductsQueryKey() });
+          queryClient.invalidateQueries({ queryKey: getListProductsQueryKey() });
+          toast({ title: "Product created" });
+          onSuccess(created.id, created.title);
+          onOpenChange(false);
+        },
+        onError: () =>
+          toast({ title: "Failed to create product", variant: "destructive" }),
+      },
+    );
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl max-h-[92vh] overflow-y-auto border-border">
+        <DialogHeader>
+          <DialogTitle className="font-serif text-2xl font-light">
+            New Product
+          </DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-5 mt-4">
+          {/* AI Assistant */}
+          <div className="border border-border bg-muted/20 p-4 space-y-3">
+            <div>
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                HOOK AI Assistant
+              </p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Paste your affiliate link and upload your product images. AI
+                will auto-fill title, brand, description, sizes, and category.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                Affiliate Link
+              </label>
+              <Input
+                value={form.affiliateUrl}
+                onChange={(e) => set("affiliateUrl")(e.target.value)}
+                placeholder="Paste Amazon / AliExpress affiliate link"
+                className="border-border"
+              />
+            </div>
+            <Button
+              type="button"
+              className="w-full text-xs tracking-widest uppercase"
+              onClick={async () => {
+                const response = await fetch("/api/ai/generate-product", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ affiliateUrl: form.affiliateUrl, images: form.images }),
+                });
+                const data = await response.json();
+                if (data.success && data.product) {
+                  set("title")(data.product.title || "");
+                  set("brand")(data.product.brand || "");
+                  set("description")(data.product.description || "");
+                  set("sizes")(data.product.sizes || []);
+                  set("category")(data.product.category || "women");
+                }
+              }}
+            >
+              ✨ Generate with HOOK AI
+            </Button>
+          </div>
+
+          {/* Title + Brand */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2 col-span-2 md:col-span-1">
+              <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                Title *
+              </label>
+              <Input
+                required
+                value={form.title}
+                onChange={(e) => set("title")(e.target.value)}
+                className="border-border"
+              />
+            </div>
+            <div className="space-y-2 col-span-2 md:col-span-1">
+              <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                Brand
+              </label>
+              <Input
+                value={form.brand}
+                onChange={(e) => set("brand")(e.target.value)}
+                className="border-border"
+              />
+            </div>
+          </div>
+
+          {/* Source + Status */}
+          <div className="grid grid-cols-2 gap-4">
+            {form.category !== "electronics" && (
+              <div className="space-y-2">
+                <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Product Source *
+                </label>
+                <Select value={form.source} onValueChange={set("source")}>
+                  <SelectTrigger className="border-border">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="SHEIN">SHEIN</SelectItem>
+                    <SelectItem value="Amazon">Amazon</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            <div
+              className={
+                form.category === "electronics"
+                  ? "col-span-2 space-y-2"
+                  : "space-y-2"
+              }
+            >
+              <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                Status
+              </label>
+              <Select value={form.status} onValueChange={set("status")}>
+                <SelectTrigger className="border-border">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="hidden">Hidden</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Category + Subcategory */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                Category *
+              </label>
+              <Select
+                value={form.category}
+                onValueChange={(v) => {
+                  set("category")(v);
+                  set("subcategory")("");
+                }}
+              >
+                <SelectTrigger className="border-border">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {CATEGORIES.map((c) => (
+                    <SelectItem key={c.value} value={c.value}>
+                      {c.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                Subcategory
+              </label>
+              <Select value={form.subcategory} onValueChange={set("subcategory")}>
+                <SelectTrigger className="border-border">
+                  <SelectValue placeholder="Select subcategory" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">None</SelectItem>
+                  {subcategories?.map((s) => (
+                    <SelectItem key={s.id} value={s.name}>
+                      {s.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Product Placement */}
+          <div className="border border-border p-4 space-y-3">
+            <div>
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-0.5">
+                Product Placement
+              </p>
+              <p className="text-[10px] text-muted-foreground/70 leading-relaxed">
+                By default the product appears in its primary category above.
+                Check boxes to <strong>also</strong> show it in other sections,
+                or to <strong>override</strong> placement entirely.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+              {PLACEMENT_OPTIONS.map((opt) => (
+                <label
+                  key={opt.value}
+                  className="flex items-center gap-2 cursor-pointer text-xs text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <input
+                    type="checkbox"
+                    className="accent-foreground"
+                    checked={form.placements.includes(opt.value)}
+                    onChange={(e) => {
+                      const next = e.target.checked
+                        ? [...form.placements, opt.value]
+                        : form.placements.filter((v) => v !== opt.value);
+                      set("placements")(next);
+                    }}
+                  />
+                  {opt.label}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Price — hidden for electronics */}
+          {form.category !== "electronics" && (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Price
+                </label>
+                <Input
+                  value={form.price}
+                  onChange={(e) => set("price")(e.target.value)}
+                  placeholder="AED 89"
+                  className="border-border"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Original Price
+                </label>
+                <Input
+                  value={form.originalPrice}
+                  onChange={(e) => set("originalPrice")(e.target.value)}
+                  placeholder="AED 129"
+                  className="border-border"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Product Link — hidden for electronics */}
+          {form.category !== "electronics" && (
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                Product Link *
+              </label>
+              <Input
+                required={form.category !== "electronics"}
+                value={form.affiliateUrl}
+                onChange={(e) => set("affiliateUrl")(e.target.value)}
+                placeholder="https://..."
+                className="border-border"
+              />
+            </div>
+          )}
+
+          {/* Electronics: Amazon Store Link */}
+          {form.category === "electronics" && (
+            <div className="border border-border/60 p-4 space-y-4">
+              <p className="text-[9px] tracking-widest uppercase text-muted-foreground">
+                Amazon Store
+              </p>
+              <div className="space-y-3">
+                <div className="space-y-2">
+                  <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                    Amazon Price
+                  </label>
+                  <Input
+                    value={form.amazonPrice}
+                    onChange={(e) => set("amazonPrice")(e.target.value)}
+                    placeholder="AED 779"
+                    className="border-border"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                    Amazon URL
+                  </label>
+                  <Input
+                    value={form.amazonUrl}
+                    onChange={(e) => set("amazonUrl")(e.target.value)}
+                    placeholder="https://amzn.to/..."
+                    className="border-border"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* External Product ID — hidden for electronics */}
+          {form.category !== "electronics" && (
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                {form.source === "Amazon" ? "Amazon ASIN" : "SHEIN SKU"}{" "}
+                <span className="normal-case tracking-normal font-normal opacity-60">
+                  (optional)
+                </span>
+              </label>
+              <Input
+                value={form.externalId}
+                onChange={(e) => set("externalId")(e.target.value)}
+                placeholder={
+                  form.source === "Amazon"
+                    ? "e.g. B08N5WRWNW"
+                    : "e.g. 3456789012"
+                }
+                className="border-border"
+              />
+            </div>
+          )}
+
+          {/* Description */}
+          <div className="space-y-2">
+            <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+              Description
+            </label>
+            <Textarea
+              value={form.description}
+              onChange={(e) => set("description")(e.target.value)}
+              rows={3}
+              className="border-border resize-none"
+            />
+          </div>
+
+          {/* Sizes */}
+          <SizePicker values={form.sizes} onChange={set("sizes")} />
+
+          {/* Main Image Upload */}
+          <SingleImageUpload
+            value={form.imageUrl}
+            onChange={set("imageUrl")}
+            label="Main Product Image"
+          />
+
+          {/* Image Positioning */}
+          {form.imageUrl && (
+            <div className="border border-border p-3 flex flex-col gap-2">
+              <p className="text-[9px] tracking-widest uppercase text-muted-foreground">
+                Image Positioning
+              </p>
+              <div className="aspect-[3/4] overflow-hidden relative max-h-40 bg-accent">
+                <img
+                  src={form.imageUrl}
+                  alt=""
+                  className="absolute w-full h-full"
+                  style={{
+                    objectFit: form.imageObjectFit,
+                    objectPosition: `${form.imagePosX}% ${form.imagePosY}%`,
+                    transform: `scale(${form.imageScale / 100})`,
+                    transformOrigin: `${form.imagePosX}% ${form.imagePosY}%`,
+                  }}
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <p className="text-[9px] tracking-widest uppercase text-muted-foreground flex-1">
+                  Fit
+                </p>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setForm((f) => ({
+                      ...f,
+                      imageObjectFit:
+                        f.imageObjectFit === "contain" ? "cover" : "contain",
+                    }))
+                  }
+                  className={`px-3 py-1 text-[9px] tracking-widest uppercase border transition-colors ${form.imageObjectFit === "contain" ? "border-foreground bg-foreground text-background" : "border-border"}`}
+                >
+                  {form.imageObjectFit === "contain" ? "Contain" : "Cover"}
+                </button>
+              </div>
+              <div className="flex flex-col items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setForm((f) => ({ ...f, imagePosY: Math.max(0, f.imagePosY - 5) }))
+                  }
+                  className={pBtnClass}
+                  title="Move up"
+                >
+                  ↑
+                </button>
+                <div className="flex gap-1">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setForm((f) => ({ ...f, imagePosX: Math.max(0, f.imagePosX - 5) }))
+                    }
+                    className={pBtnClass}
+                    title="Move left"
+                  >
+                    ←
+                  </button>
+                  <div className="w-8 h-8 border border-border/40 bg-accent/30 flex items-center justify-center">
+                    <span className="text-[10px] text-muted-foreground/50">·</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setForm((f) => ({ ...f, imagePosX: Math.min(100, f.imagePosX + 5) }))
+                    }
+                    className={pBtnClass}
+                    title="Move right"
+                  >
+                    →
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setForm((f) => ({ ...f, imagePosY: Math.min(100, f.imagePosY + 5) }))
+                  }
+                  className={pBtnClass}
+                  title="Move down"
+                >
+                  ↓
+                </button>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setForm((f) => ({ ...f, imageScale: Math.max(50, f.imageScale - 10) }))
+                  }
+                  className={pBtnClass}
+                  title="Zoom out"
+                >
+                  −
+                </button>
+                <span className="flex-1 text-center text-[9px] tracking-widest text-muted-foreground">
+                  {form.imageScale}%
+                </span>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setForm((f) => ({ ...f, imageScale: Math.min(200, f.imageScale + 10) }))
+                  }
+                  className={pBtnClass}
+                  title="Zoom in"
+                >
+                  +
+                </button>
+              </div>
+              <p className="text-[9px] text-center text-muted-foreground/60">
+                x {form.imagePosX}% · y {form.imagePosY}%
+              </p>
+            </div>
+          )}
+
+          {/* Gallery Images */}
+          <MultiImageUpload
+            values={form.images}
+            onChange={set("images")}
+            label="Gallery Images (back view, close-up, detail shots…)"
+          />
+
+          {/* Featured + Trending */}
+          <div className="grid grid-cols-2 gap-4 pt-2">
+            <div className="flex items-center justify-between border border-border px-4 py-3">
+              <label className="text-xs tracking-widest uppercase">
+                Featured
+              </label>
+              <Switch checked={form.featured} onCheckedChange={set("featured")} />
+            </div>
+            <div className="flex items-center justify-between border border-border px-4 py-3">
+              <label className="text-xs tracking-widest uppercase">
+                Trending
+              </label>
+              <Switch checked={form.trending} onCheckedChange={set("trending")} />
+            </div>
+          </div>
+
+          <div className="flex justify-end pt-2">
+            <Button
+              type="submit"
+              disabled={createMutation.isPending}
+              className="text-xs tracking-widest uppercase"
+            >
+              {createMutation.isPending
+                ? "Creating..."
+                : `Create & Add to ${contextLabel}`}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 function ProductDialog({ product }: { product?: Product }) {
   const [open, setOpen] = useState(false);
@@ -778,7 +1251,6 @@ function ProductDialog({ product }: { product?: Product }) {
     externalId: (product as any)?.externalId ?? "",
     imageUrl: product?.imageUrl ?? "",
     images: Array.isArray(product?.images) ? (product.images as string[]) : [],
-    colors: Array.isArray(product?.colors) ? (product.colors as string[]) : [],
     sizes: Array.isArray(product?.sizes) ? (product.sizes as string[]) : [],
     status: (product as any)?.status ?? "active",
     featured: product?.featured ?? false,
@@ -952,7 +1424,6 @@ if (data.success && data.product) {
   set("title")(data.product.title || "");
   set("brand")(data.product.brand || "");
   set("description")(data.product.description || "");
-  set("colors")(data.product.colors || []);
   set("sizes")(data.product.sizes || []);
   set("category")(data.product.category || "women");
 } else {
@@ -1242,9 +1713,6 @@ if (data.success && data.product) {
                 className="border-border resize-none"
               />
             </div>
-
-            {/* Colors — visual swatches */}
-            <ColorSwatchPicker values={form.colors} onChange={set("colors")} />
 
             {/* Sizes — preset chips + custom */}
             <SizePicker values={form.sizes} onChange={set("sizes")} />
@@ -1695,7 +2163,6 @@ function LookDialog({ look }: { look?: Look }) {
   const { toast } = useToast();
   const createMutation = useCreateLook();
   const updateMutation = useUpdateLook();
-  const createProductMutation = useCreateProduct();
 
   const [form, setForm] = useState({
     title: look?.title ?? "",
@@ -1708,51 +2175,7 @@ function LookDialog({ look }: { look?: Look }) {
     productIds: look?.products?.map((p) => p.id) ?? [],
   });
   const [search, setSearch] = useState("");
-
-  const defaultNewProduct = () => ({
-    title: "",
-    brand: "",
-    affiliateUrl: "",
-    price: "",
-    source: "SHEIN",
-    imageUrl: "",
-    category: "women" as const,
-    placements: [] as string[],
-  });
-  const [showNewProduct, setShowNewProduct] = useState(false);
-  const [newProduct, setNewProduct] = useState(defaultNewProduct);
-
-  const handleCreateProduct = async () => {
-    if (!newProduct.title.trim() || !newProduct.affiliateUrl.trim()) {
-      toast({ title: "Title and affiliate URL are required", variant: "destructive" });
-      return;
-    }
-    createProductMutation.mutate(
-      {
-        data: {
-          title: newProduct.title,
-          brand: newProduct.brand || undefined,
-          affiliateUrl: newProduct.affiliateUrl,
-          price: newProduct.price || undefined,
-          source: newProduct.source as "SHEIN" | "Amazon",
-          category: newProduct.category,
-          imageUrl: newProduct.imageUrl || undefined,
-          placements: newProduct.placements,
-          status: "active",
-        } as any,
-      },
-      {
-        onSuccess: (created) => {
-          setForm((f) => ({ ...f, productIds: [...f.productIds, created.id] }));
-          queryClient.invalidateQueries({ queryKey: getListProductsQueryKey() });
-          setNewProduct(defaultNewProduct());
-          setShowNewProduct(false);
-          toast({ title: `"${created.title}" added to look` });
-        },
-        onError: () => toast({ title: "Failed to create product", variant: "destructive" }),
-      },
-    );
-  };
+  const [newProductOpen, setNewProductOpen] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -2126,83 +2549,17 @@ function LookDialog({ look }: { look?: Look }) {
               </div>
             </div>
 
-            {/* Create New Product inline */}
+            {/* Create New Product — opens full product form */}
             <div className="border border-dashed border-border">
               <button
                 type="button"
-                onClick={() => setShowNewProduct((v) => !v)}
-                className="w-full px-4 py-3 flex items-center justify-between text-[10px] tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors"
+                onClick={() => setNewProductOpen(true)}
+                className="w-full px-4 py-3 flex items-center gap-2 text-[10px] tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors"
                 data-testid="button-toggle-new-product-look"
               >
-                <span className="flex items-center gap-2">
-                  <Plus className="h-3.5 w-3.5" />
-                  Create New Product
-                </span>
-                <span className="text-[9px]">{showNewProduct ? "✕ Cancel" : "Expand"}</span>
+                <Plus className="h-3.5 w-3.5" />
+                Create New Product
               </button>
-              {showNewProduct && (
-                <div className="p-4 border-t border-border space-y-3 bg-muted/20">
-                  <p className="text-[9px] tracking-widest uppercase text-muted-foreground">
-                    New product will be created and added to this look.
-                  </p>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="col-span-2 space-y-1">
-                      <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Title *</label>
-                      <Input value={newProduct.title} onChange={(e) => setNewProduct((f) => ({ ...f, title: e.target.value }))} placeholder="Product name" className="border-border text-sm" />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Brand</label>
-                      <Input value={newProduct.brand} onChange={(e) => setNewProduct((f) => ({ ...f, brand: e.target.value }))} placeholder="e.g. SHEIN" className="border-border text-sm" />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Price</label>
-                      <Input value={newProduct.price} onChange={(e) => setNewProduct((f) => ({ ...f, price: e.target.value }))} placeholder="AED 89" className="border-border text-sm" />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Source</label>
-                      <Select value={newProduct.source} onValueChange={(v) => setNewProduct((f) => ({ ...f, source: v }))}>
-                        <SelectTrigger className="border-border text-sm"><SelectValue /></SelectTrigger>
-                        <SelectContent><SelectItem value="SHEIN">SHEIN</SelectItem><SelectItem value="Amazon">Amazon</SelectItem></SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Primary Category</label>
-                      <Select value={newProduct.category} onValueChange={(v) => setNewProduct((f) => ({ ...f, category: v as typeof f.category }))}>
-                        <SelectTrigger className="border-border text-sm"><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          {CATEGORIES.map((c) => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="col-span-2 space-y-1">
-                      <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Affiliate URL *</label>
-                      <Input value={newProduct.affiliateUrl} onChange={(e) => setNewProduct((f) => ({ ...f, affiliateUrl: e.target.value }))} placeholder="https://..." className="border-border text-sm" />
-                    </div>
-                    <div className="col-span-2 space-y-1">
-                      <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Image URL</label>
-                      <Input value={newProduct.imageUrl} onChange={(e) => setNewProduct((f) => ({ ...f, imageUrl: e.target.value }))} placeholder="https://..." className="border-border text-sm" />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Also show on category pages</p>
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
-                      {PLACEMENT_OPTIONS.map((opt) => (
-                        <label key={opt.value} className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
-                          <input type="checkbox" className="accent-foreground" checked={newProduct.placements.includes(opt.value)}
-                            onChange={(e) => {
-                              const next = e.target.checked ? [...newProduct.placements, opt.value] : newProduct.placements.filter((v) => v !== opt.value);
-                              setNewProduct((f) => ({ ...f, placements: next }));
-                            }} />
-                          {opt.label}
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                  <Button type="button" onClick={() => void handleCreateProduct()} disabled={createProductMutation.isPending} className="w-full text-xs tracking-widest uppercase" data-testid="button-create-product-in-look">
-                    {createProductMutation.isPending ? "Creating..." : "Create & Add to Look"}
-                  </Button>
-                </div>
-              )}
             </div>
 
             <div className="flex items-center justify-between pt-2">
@@ -2227,6 +2584,17 @@ function LookDialog({ look }: { look?: Look }) {
           </form>
         </DialogContent>
       </Dialog>
+
+      <NewProductDialog
+        open={newProductOpen}
+        onOpenChange={setNewProductOpen}
+        contextLabel="Look"
+        onSuccess={(id, title) => {
+          setForm((f) => ({ ...f, productIds: [...f.productIds, id] }));
+          queryClient.invalidateQueries({ queryKey: getListProductsQueryKey() });
+          toast({ title: `"${title}" added to look` });
+        }}
+      />
 
       {/* Full-screen look preview overlay */}
       {previewOpen && (
@@ -2409,7 +2777,6 @@ function SetupDialog({ setup }: { setup?: Setup }) {
   const { toast } = useToast();
   const createMutation = useCreateSetup();
   const updateMutation = useUpdateSetup();
-  const createProductMutation = useCreateProduct();
 
   const [form, setForm] = useState({
     title: setup?.title ?? "",
@@ -2422,51 +2789,7 @@ function SetupDialog({ setup }: { setup?: Setup }) {
     productIds: setup?.products?.map((p) => p.id) ?? [],
   });
   const [search, setSearch] = useState("");
-
-  const defaultNewProduct = () => ({
-    title: "",
-    brand: "",
-    affiliateUrl: "",
-    price: "",
-    source: "SHEIN",
-    imageUrl: "",
-    category: "home" as const,
-    placements: [] as string[],
-  });
-  const [showNewProduct, setShowNewProduct] = useState(false);
-  const [newProduct, setNewProduct] = useState(defaultNewProduct);
-
-  const handleCreateProduct = async () => {
-    if (!newProduct.title.trim() || !newProduct.affiliateUrl.trim()) {
-      toast({ title: "Title and affiliate URL are required", variant: "destructive" });
-      return;
-    }
-    createProductMutation.mutate(
-      {
-        data: {
-          title: newProduct.title,
-          brand: newProduct.brand || undefined,
-          affiliateUrl: newProduct.affiliateUrl,
-          price: newProduct.price || undefined,
-          source: newProduct.source as "SHEIN" | "Amazon",
-          category: newProduct.category,
-          imageUrl: newProduct.imageUrl || undefined,
-          placements: newProduct.placements,
-          status: "active",
-        } as any,
-      },
-      {
-        onSuccess: (created) => {
-          setForm((f) => ({ ...f, productIds: [...f.productIds, created.id] }));
-          queryClient.invalidateQueries({ queryKey: getListProductsQueryKey() });
-          setNewProduct(defaultNewProduct());
-          setShowNewProduct(false);
-          toast({ title: `"${created.title}" added to setup` });
-        },
-        onError: () => toast({ title: "Failed to create product", variant: "destructive" }),
-      },
-    );
-  };
+  const [newProductOpen, setNewProductOpen] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -2802,83 +3125,17 @@ function SetupDialog({ setup }: { setup?: Setup }) {
               </div>
             </div>
 
-            {/* Create New Product inline */}
+            {/* Create New Product — opens full product form */}
             <div className="border border-dashed border-border">
               <button
                 type="button"
-                onClick={() => setShowNewProduct((v) => !v)}
-                className="w-full px-4 py-3 flex items-center justify-between text-[10px] tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors"
+                onClick={() => setNewProductOpen(true)}
+                className="w-full px-4 py-3 flex items-center gap-2 text-[10px] tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors"
                 data-testid="button-toggle-new-product-setup"
               >
-                <span className="flex items-center gap-2">
-                  <Plus className="h-3.5 w-3.5" />
-                  Create New Product
-                </span>
-                <span className="text-[9px]">{showNewProduct ? "✕ Cancel" : "Expand"}</span>
+                <Plus className="h-3.5 w-3.5" />
+                Create New Product
               </button>
-              {showNewProduct && (
-                <div className="p-4 border-t border-border space-y-3 bg-muted/20">
-                  <p className="text-[9px] tracking-widest uppercase text-muted-foreground">
-                    New product will be created and added to this setup.
-                  </p>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="col-span-2 space-y-1">
-                      <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Title *</label>
-                      <Input value={newProduct.title} onChange={(e) => setNewProduct((f) => ({ ...f, title: e.target.value }))} placeholder="Product name" className="border-border text-sm" />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Brand</label>
-                      <Input value={newProduct.brand} onChange={(e) => setNewProduct((f) => ({ ...f, brand: e.target.value }))} placeholder="e.g. Amazon" className="border-border text-sm" />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Price</label>
-                      <Input value={newProduct.price} onChange={(e) => setNewProduct((f) => ({ ...f, price: e.target.value }))} placeholder="AED 149" className="border-border text-sm" />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Source</label>
-                      <Select value={newProduct.source} onValueChange={(v) => setNewProduct((f) => ({ ...f, source: v }))}>
-                        <SelectTrigger className="border-border text-sm"><SelectValue /></SelectTrigger>
-                        <SelectContent><SelectItem value="SHEIN">SHEIN</SelectItem><SelectItem value="Amazon">Amazon</SelectItem></SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Primary Category</label>
-                      <Select value={newProduct.category} onValueChange={(v) => setNewProduct((f) => ({ ...f, category: v as typeof f.category }))}>
-                        <SelectTrigger className="border-border text-sm"><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          {CATEGORIES.map((c) => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="col-span-2 space-y-1">
-                      <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Affiliate URL *</label>
-                      <Input value={newProduct.affiliateUrl} onChange={(e) => setNewProduct((f) => ({ ...f, affiliateUrl: e.target.value }))} placeholder="https://..." className="border-border text-sm" />
-                    </div>
-                    <div className="col-span-2 space-y-1">
-                      <label className="text-[10px] uppercase tracking-widest text-muted-foreground">Image URL</label>
-                      <Input value={newProduct.imageUrl} onChange={(e) => setNewProduct((f) => ({ ...f, imageUrl: e.target.value }))} placeholder="https://..." className="border-border text-sm" />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Also show on category pages</p>
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
-                      {PLACEMENT_OPTIONS.map((opt) => (
-                        <label key={opt.value} className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
-                          <input type="checkbox" className="accent-foreground" checked={newProduct.placements.includes(opt.value)}
-                            onChange={(e) => {
-                              const next = e.target.checked ? [...newProduct.placements, opt.value] : newProduct.placements.filter((v) => v !== opt.value);
-                              setNewProduct((f) => ({ ...f, placements: next }));
-                            }} />
-                          {opt.label}
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                  <Button type="button" onClick={() => void handleCreateProduct()} disabled={createProductMutation.isPending} className="w-full text-xs tracking-widest uppercase" data-testid="button-create-product-in-setup">
-                    {createProductMutation.isPending ? "Creating..." : "Create & Add to Setup"}
-                  </Button>
-                </div>
-              )}
             </div>
 
             <div className="flex items-center justify-between pt-2">
@@ -2903,6 +3160,17 @@ function SetupDialog({ setup }: { setup?: Setup }) {
           </form>
         </DialogContent>
       </Dialog>
+
+      <NewProductDialog
+        open={newProductOpen}
+        onOpenChange={setNewProductOpen}
+        contextLabel="Setup"
+        onSuccess={(id, title) => {
+          setForm((f) => ({ ...f, productIds: [...f.productIds, id] }));
+          queryClient.invalidateQueries({ queryKey: getListProductsQueryKey() });
+          toast({ title: `"${title}" added to setup` });
+        }}
+      />
 
       {/* Full-screen setup preview overlay */}
       {previewOpen && (
