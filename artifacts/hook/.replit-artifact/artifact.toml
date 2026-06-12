@@ -18,9 +18,14 @@ localPort = 23730
 run = "pnpm --filter @workspace/hook run dev"
 
 [services.production]
-build = [ "pnpm", "--filter", "@workspace/hook", "run", "build" ]
 publicDir = "artifacts/hook/dist/public"
 serve = "static"
+
+[services.production.build]
+args = [ "pnpm", "--filter", "@workspace/hook", "run", "build" ]
+
+[services.production.build.env]
+NODE_ENV = "production"
 
 [[services.production.rewrites]]
 from = "/*"

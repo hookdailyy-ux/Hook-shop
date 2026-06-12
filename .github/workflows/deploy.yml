@@ -42,10 +42,9 @@ jobs:
           # GitHub Pages serves from the repo root by default.
           # If your repo is username/hook (not username.github.io), change to /hook/
           BASE_PATH: /
-          # Set this secret in your GitHub repo → Settings → Secrets → Actions.
-          # Value: the URL of your deployed Replit API server, e.g.
-          #   https://hook.yourusername.replit.app
-          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
+          # The deployed Replit API server that backs this static frontend.
+          # All API calls (products, looks, setups, auth) go to this URL.
+          VITE_API_BASE_URL: https://fashion-hook.replit.app
         run: pnpm --filter @workspace/hook run build
 
       # GitHub Pages needs a 404.html = index.html so SPA client-side routing works.
