@@ -6,7 +6,7 @@ import { requireTeamMember } from "../middlewares/requireTeamMember";
 
 const router: IRouter = Router();
 
-const categoryEnum = ["women", "men", "couples", "kids", "electronics", "home", "accessories"] as const;
+const categoryEnum = ["none", "women", "men", "couples", "kids", "electronics", "home", "accessories"] as const;
 const sourceEnum = ["SHEIN", "Amazon"] as const;
 const statusEnum = ["active", "hidden"] as const;
 

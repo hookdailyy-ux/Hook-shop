@@ -10,8 +10,11 @@ export type ProductCategory = typeof ProductCategory[keyof typeof ProductCategor
 
 
 export const ProductCategory = {
+  none: 'none',
   women: 'women',
   men: 'men',
+  couples: 'couples',
+  kids: 'kids',
   electronics: 'electronics',
   home: 'home',
   accessories: 'accessories',

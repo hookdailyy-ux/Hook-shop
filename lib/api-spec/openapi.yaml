@@ -534,7 +534,7 @@ components:
           enum: [SHEIN, Amazon]
         category:
           type: string
-          enum: [women, men, electronics, home, accessories]
+          enum: [none, women, men, couples, kids, electronics, home, accessories]
         subcategory:
           type: ["string", "null"]
         price:
@@ -602,7 +602,7 @@ components:
           enum: [SHEIN, Amazon]
         category:
           type: string
-          enum: [women, men, electronics, home, accessories]
+          enum: [none, women, men, couples, kids, electronics, home, accessories]
         subcategory:
           type: string
         price:
@@ -666,7 +666,7 @@ components:
           enum: [SHEIN, Amazon]
         category:
           type: string
-          enum: [women, men, electronics, home, accessories]
+          enum: [none, women, men, couples, kids, electronics, home, accessories]
         subcategory:
           type: string
         price:

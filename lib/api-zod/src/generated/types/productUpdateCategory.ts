@@ -10,8 +10,11 @@ export type ProductUpdateCategory = typeof ProductUpdateCategory[keyof typeof Pr
 
 
 export const ProductUpdateCategory = {
+  none: 'none',
   women: 'women',
   men: 'men',
+  couples: 'couples',
+  kids: 'kids',
   electronics: 'electronics',
   home: 'home',
   accessories: 'accessories',

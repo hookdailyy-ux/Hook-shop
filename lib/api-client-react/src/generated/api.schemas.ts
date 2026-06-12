@@ -52,8 +52,11 @@ export type ProductCategory = typeof ProductCategory[keyof typeof ProductCategor
 
 
 export const ProductCategory = {
+  none: 'none',
   women: 'women',
   men: 'men',
+  couples: 'couples',
+  kids: 'kids',
   electronics: 'electronics',
   home: 'home',
   accessories: 'accessories',
@@ -125,8 +128,11 @@ export type ProductInputCategory = typeof ProductInputCategory[keyof typeof Prod
 
 
 export const ProductInputCategory = {
+  none: 'none',
   women: 'women',
   men: 'men',
+  couples: 'couples',
+  kids: 'kids',
   electronics: 'electronics',
   home: 'home',
   accessories: 'accessories',
@@ -187,8 +193,11 @@ export type ProductUpdateCategory = typeof ProductUpdateCategory[keyof typeof Pr
 
 
 export const ProductUpdateCategory = {
+  none: 'none',
   women: 'women',
   men: 'men',
+  couples: 'couples',
+  kids: 'kids',
   electronics: 'electronics',
   home: 'home',
   accessories: 'accessories',

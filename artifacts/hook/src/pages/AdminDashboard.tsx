@@ -82,6 +82,7 @@ type Tab =
   | "newsletter";
 
 const CATEGORIES = [
+  { value: "none", label: "None" },
   { value: "women", label: "Women" },
   { value: "men", label: "Men" },
   { value: "couples", label: "Couples" },
