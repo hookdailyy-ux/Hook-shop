@@ -205,16 +205,18 @@ export function QuickViewModal({
                   )}
                 </button>
 
-                {/* View on Store */}
-                <a
-                  href={product.affiliateUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full flex items-center justify-center gap-1.5 text-[10px] tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors py-1"
-                >
-                  <ExternalLink className="h-3 w-3" />
-                  View on Store
-                </a>
+                {/* View on Store — hidden for uncategorised products */}
+                {product.category !== "none" && (
+                  <a
+                    href={product.affiliateUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full flex items-center justify-center gap-1.5 text-[10px] tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors py-1"
+                  >
+                    <ExternalLink className="h-3 w-3" />
+                    View on Store
+                  </a>
+                )}
               </>
             )}
 
