@@ -24,7 +24,7 @@ import { AddToBasketModal } from "@/components/AddToBasketModal";
 import { useBasket, inferStore } from "@/contexts/BasketContext";
 import { useFavorites } from "@/contexts/FavoritesContext";
 
-const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+const BASE = ((import.meta.env.VITE_API_BASE_URL || import.meta.env.BASE_URL) as string).replace(/\/+$/, "");
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

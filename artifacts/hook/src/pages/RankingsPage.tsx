@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import { Trophy, Eye, TrendingUp, Medal, Heart } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+const BASE = ((import.meta.env.VITE_API_BASE_URL || import.meta.env.BASE_URL) as string).replace(/\/+$/, "");
 
 interface RankedMember {
   id: number;

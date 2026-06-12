@@ -1,5 +1,6 @@
 import { Switch, Route, Router as WouterRouter, useLocation, Redirect } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { setBaseUrl } from "@workspace/api-client-react";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
@@ -29,6 +30,11 @@ import { BasketProvider } from "@/contexts/BasketContext";
 import { TeamMemberBar } from "@/components/TeamMemberBar";
 import { BasketDrawer } from "@/components/BasketDrawer";
 import BasketSharePage from "@/pages/BasketSharePage";
+
+// Point all generated API hooks at the deployed server when VITE_API_BASE_URL is set.
+// On Replit dev the var is absent and relative URLs are used (proxied locally).
+const _externalApi = import.meta.env.VITE_API_BASE_URL;
+if (_externalApi) setBaseUrl(_externalApi.replace(/\/+$/, ""));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -175,7 +181,7 @@ function App() {
             <BasketProvider>
               <TooltipProvider>
                 <HeadManager />
-                <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+                <WouterRouter base={((import.meta.env.VITE_API_BASE_URL || import.meta.env.BASE_URL) as string).replace(/\/+$/, "")}>
                   <Router />
                 </WouterRouter>
                 <Toaster />

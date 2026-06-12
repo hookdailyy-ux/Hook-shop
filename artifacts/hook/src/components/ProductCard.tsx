@@ -7,7 +7,7 @@ import { ImageGallery } from "./ImageGallery";
 import type { Product } from "@workspace/api-client-react";
 import { useBasket, inferStore } from "@/contexts/BasketContext";
 
-const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+const BASE = ((import.meta.env.VITE_API_BASE_URL || import.meta.env.BASE_URL) as string).replace(/\/+$/, "");
 
 function trackDirectEvent(productId: number, eventType: "click" | "add_to_basket") {
   void fetch(`${BASE}/api/analytics/event`, {

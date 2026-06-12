@@ -2202,7 +2202,7 @@ function LookDialog({ look }: { look?: Look }) {
   );
 
   const lookImageInputRef = useRef<HTMLInputElement>(null);
-  const lookCardBase = import.meta.env.BASE_URL.replace(/\/$/, "");
+  const lookCardBase = ((import.meta.env.VITE_API_BASE_URL || import.meta.env.BASE_URL) as string).replace(/\/+$/, "");
   const { uploadFile: uploadLookImage, isUploading: isLookImageUploading } =
     useUpload({
       basePath: `${lookCardBase}/api/storage`,
@@ -2848,7 +2848,7 @@ function SetupDialog({ setup }: { setup?: Setup }) {
   );
 
   const setupImageInputRef = useRef<HTMLInputElement>(null);
-  const setupCardBase = import.meta.env.BASE_URL.replace(/\/$/, "");
+  const setupCardBase = ((import.meta.env.VITE_API_BASE_URL || import.meta.env.BASE_URL) as string).replace(/\/+$/, "");
   const { uploadFile: uploadSetupImage, isUploading: isSetupImageUploading } =
     useUpload({
       basePath: `${setupCardBase}/api/storage`,
@@ -3442,7 +3442,7 @@ function CategoriesTab() {
   );
 }
 
-const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+const BASE = ((import.meta.env.VITE_API_BASE_URL || import.meta.env.BASE_URL) as string).replace(/\/+$/, "");
 
 function SettingsTab() {
   const { toast } = useToast();
@@ -4076,7 +4076,7 @@ function WhatsAppSection() {
 
 function IconsSection() {
   const { toast } = useToast();
-  const BASE_PATH = import.meta.env.BASE_URL.replace(/\/$/, "");
+  const BASE_PATH = ((import.meta.env.VITE_API_BASE_URL || import.meta.env.BASE_URL) as string).replace(/\/+$/, "");
   const { uploadFile } = useUpload({ basePath: `${BASE_PATH}/api/storage` });
   const [icons, setIcons] = useState({
     faviconUrl: "",
@@ -4338,7 +4338,7 @@ function SectionImageCard({
   onFitToggle?: () => void;
 }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const cardBase = import.meta.env.BASE_URL.replace(/\/$/, "");
+  const cardBase = ((import.meta.env.VITE_API_BASE_URL || import.meta.env.BASE_URL) as string).replace(/\/+$/, "");
   const { uploadFile, isUploading, progress } = useUpload({
     basePath: `${cardBase}/api/storage`,
     onSuccess: (res) => {

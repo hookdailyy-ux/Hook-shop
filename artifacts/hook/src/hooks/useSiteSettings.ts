@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+const BASE = ((import.meta.env.VITE_API_BASE_URL || import.meta.env.BASE_URL) as string).replace(/\/+$/, "");
 
 export interface FooterLink {
   id: string;

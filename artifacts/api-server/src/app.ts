@@ -27,6 +27,11 @@ app.use(
   }),
 );
 
+const isProd = process.env.NODE_ENV === "production";
+
+// Allow any origin with credentials so GitHub Pages (and other static hosts)
+// can call this API server. In production the Replit deploy runs behind HTTPS
+// so the reflected-origin CORS + SameSite=None cookies work correctly.
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -38,7 +43,9 @@ app.use(
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: false,
+      // SameSite=None + Secure is required for cross-domain cookies (GitHub Pages → Replit).
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     },
   }),

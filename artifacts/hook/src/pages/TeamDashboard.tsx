@@ -13,7 +13,7 @@ import { MyRewards } from "@/components/MyRewards";
 import { SharedBaskets } from "@/components/SharedBaskets";
 import { ScrollableTabBar } from "@/components/ScrollableTabBar";
 
-const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+const BASE = ((import.meta.env.VITE_API_BASE_URL || import.meta.env.BASE_URL) as string).replace(/\/+$/, "");
 
 type TeamPage =
   | "dashboard"

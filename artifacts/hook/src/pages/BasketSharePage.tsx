@@ -5,7 +5,7 @@ import { useBasket, type BasketItem } from "@/contexts/BasketContext";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 
-const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+const BASE = ((import.meta.env.VITE_API_BASE_URL || import.meta.env.BASE_URL) as string).replace(/\/+$/, "");
 
 interface SharedBasketData {
   token: string;

@@ -7,7 +7,7 @@ import { useUpload } from "@workspace/object-storage-web";
 import { Camera, MessageCircle, User, Check, ExternalLink, Loader2, X } from "lucide-react";
 import type { TeamMemberInfo } from "@/contexts/TeamAuthContext";
 
-const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+const BASE = ((import.meta.env.VITE_API_BASE_URL || import.meta.env.BASE_URL) as string).replace(/\/+$/, "");
 
 function toServingUrl(objectPath: string): string {
   return `${BASE}/api/storage${objectPath}`;

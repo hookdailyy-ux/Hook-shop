@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+const BASE = ((import.meta.env.VITE_API_BASE_URL || import.meta.env.BASE_URL) as string).replace(/\/+$/, "");
 
 export const SITE_IMAGE_KEYS = ["hero", "women", "men", "couples", "kids", "accessories", "home", "electronics", "look", "setup", "favorites"] as const;
 export type SiteImageKey = (typeof SITE_IMAGE_KEYS)[number];

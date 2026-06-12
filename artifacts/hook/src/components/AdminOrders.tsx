@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { ChevronDown, ChevronUp, Package, Clock, Check, X, Upload, DollarSign, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+const BASE = ((import.meta.env.VITE_API_BASE_URL || import.meta.env.BASE_URL) as string).replace(/\/+$/, "");
 
 interface OrderItem { id: number; productTitle: string; displayPrice: string | null; quantity: number; brand: string | null; }
 interface OrderProof { id: number; imageUrl: string; proofType: string; adminReviewed: boolean; adminNote: string | null; createdAt: string; }
