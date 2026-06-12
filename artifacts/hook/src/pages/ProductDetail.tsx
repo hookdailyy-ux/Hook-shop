@@ -9,48 +9,14 @@ import { useBasket, inferStore } from "@/contexts/BasketContext";
 import { useTranslation } from "react-i18next";
 import { ShoppingBag, Check } from "lucide-react";
 
-const COLOR_MAP: Record<string, string> = {
-  black: "#1a1a1a",
-  white: "#f5f5f0",
-  beige: "#d4b896",
-  cream: "#f5f0e8",
-  sand: "#c2a882",
-  camel: "#c19a6b",
-  khaki: "#c3b091",
-  navy: "#1b2a4a",
-  olive: "#6b7645",
-  grey: "#888888",
-  gray: "#888888",
-  indigo: "#3a4a7a",
-  natural: "#d4c4a0",
-  oat: "#e8dcc8",
-  slate: "#708090",
-  cognac: "#9b4e2f",
-  tan: "#d2b48c",
-  stone: "#8b8680",
-  "light blue": "#aac4d8",
-  blue: "#3a6a9a",
-  brown: "#8b5e3c",
-  "space grey": "#8a8a8a",
-  silver: "#c0c0c0",
-  "matte white": "#f0ede8",
-  "matte black": "#2a2a2a",
-};
-
-function getColorHex(name: string): string {
-  return COLOR_MAP[name.toLowerCase()] ?? "#d4b896";
-}
 
 export default function ProductDetail() {
   const params = useParams();
   const id = Number(params.id);
   const { t } = useTranslation();
   const [selectedImage, setSelectedImage] = useState(0);
-  const [selectedColor, setSelectedColor] = useState<string | null>(null);
-  const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [addedStore, setAddedStore] = useState<"Noon" | "Amazon" | "fashion" | null>(null);
-  const [variantError, setVariantError] = useState<string | null>(null);
 
   const {
     addItem,
@@ -96,7 +62,6 @@ export default function ProductDetail() {
   ];
   const hasImages = allImages.length > 0;
 
-  const colors = Array.isArray(product.colors) ? product.colors : [];
   const sizes = Array.isArray(product.sizes) ? product.sizes : [];
   const categoryPath =
     product.category === "home"
@@ -299,53 +264,15 @@ export default function ProductDetail() {
               </p>
             )}
 
-            {/* Colors */}
-            {colors.length > 0 && (
-              <div className="mb-6">
-                <p className="text-[10px] tracking-widest uppercase text-muted-foreground mb-3">
-                  {t("product.color")}{selectedColor ? `: ${selectedColor}` : ""}
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {colors.map((color) => (
-                    <button
-                      key={color}
-                      onClick={() => setSelectedColor(selectedColor === color ? null : color)}
-                      title={color}
-                      className={`w-8 h-8 transition-all ${
-                        selectedColor === color
-                          ? "ring-2 ring-offset-2 ring-foreground"
-                          : "ring-1 ring-border hover:ring-foreground/40"
-                      }`}
-                      style={{ backgroundColor: getColorHex(color) }}
-                      data-testid={`swatch-${color}`}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Sizes */}
+            {/* Sizes — display only */}
             {sizes.length > 0 && (
               <div className="mb-8">
                 <p className="text-[10px] tracking-widest uppercase text-muted-foreground mb-3">
-                  {t("product.size")}{selectedSize ? `: ${selectedSize}` : ""}
+                  {t("product.size")}
                 </p>
-                <div className="flex flex-wrap gap-2">
-                  {sizes.map((size) => (
-                    <button
-                      key={size}
-                      onClick={() => setSelectedSize(selectedSize === size ? null : size)}
-                      className={`min-w-[44px] h-11 px-3 text-xs tracking-widest border transition-colors ${
-                        selectedSize === size
-                          ? "bg-foreground text-background border-foreground"
-                          : "bg-background text-foreground border-border hover:border-foreground"
-                      }`}
-                      data-testid={`size-${size}`}
-                    >
-                      {size}
-                    </button>
-                  ))}
-                </div>
+                <p className="text-sm text-foreground tracking-wide">
+                  {sizes.join(" · ")}
+                </p>
               </div>
             )}
 
@@ -408,24 +335,8 @@ export default function ProductDetail() {
             ) : (
               <>
                 {/* Validation error */}
-                {variantError && (
-                  <p className="text-xs text-destructive mb-3 tracking-wide">
-                    {variantError}
-                  </p>
-                )}
                 <button
                   onClick={() => {
-                    // Validate required variants before adding
-                    if (sizes.length > 0 && !selectedSize) {
-                      setVariantError(t("product.selectSizeFirst") || "Please select a size");
-                      return;
-                    }
-                    if (colors.length > 0 && !selectedColor) {
-                      setVariantError(t("product.selectColorFirst") || "Please select a color");
-                      return;
-                    }
-                    setVariantError(null);
-                    // Add directly — no second form
                     addItem({
                       productId: product.id,
                       productTitle: product.title,
@@ -433,8 +344,8 @@ export default function ProductDetail() {
                       displayPrice: product.price ?? null,
                       affiliateUrl: product.affiliateUrl,
                       brand: product.brand ?? null,
-                      size: selectedSize,
-                      color: selectedColor,
+                      size: null,
+                      color: null,
                       productSource: product.source ?? inferStore(product.affiliateUrl),
                       noonUrl: null,
                       amazonUrl: null,

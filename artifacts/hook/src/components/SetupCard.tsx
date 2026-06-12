@@ -34,9 +34,9 @@ function Gallery({ slides, title, setupId, setupImageUrl }: GalleryProps) {
 
   if (slides.length === 0) {
     return (
-      <div className="w-full aspect-[3/4] bg-[#ddd5c8] flex items-center justify-center relative">
+      <div className="w-full bg-[#ddd5c8] flex items-center justify-center relative" style={{ aspectRatio: "3/4", maxHeight: "80dvh" }}>
         <ShoppingBag className="h-12 w-12 text-muted-foreground/20" strokeWidth={1} />
-        <div className="absolute top-3 left-3">
+        <div className="absolute top-4 left-4">
           <HeartButton item={{ id: setupId, type: "setup", title, imageUrl: setupImageUrl }} />
         </div>
       </div>
@@ -45,7 +45,8 @@ function Gallery({ slides, title, setupId, setupImageUrl }: GalleryProps) {
 
   return (
     <div
-      className="w-full aspect-[3/4] relative overflow-hidden bg-[#e8e0d4] select-none"
+      className="w-full relative overflow-hidden bg-[#e8e0d4] select-none"
+      style={{ aspectRatio: "3/4", maxHeight: "80dvh" }}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
@@ -67,45 +68,29 @@ function Gallery({ slides, title, setupId, setupImageUrl }: GalleryProps) {
         <HeartButton item={{ id: setupId, type: "setup", title, imageUrl: setupImageUrl }} />
       </div>
 
-      {/* Counter */}
-      {slides.length > 1 && (
-        <div className="absolute top-4 right-4 z-10 bg-black/40 backdrop-blur-sm text-white text-[10px] tracking-widest px-2.5 py-1">
-          {current + 1} / {slides.length}
-        </div>
-      )}
-
       {/* Prev / Next arrows */}
       {slides.length > 1 && (
         <>
           <button
             onClick={prev}
             aria-label="Previous image"
-            className="absolute left-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 flex items-center justify-center bg-background/80 backdrop-blur-sm text-foreground hover:bg-background transition-colors"
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center bg-background/80 backdrop-blur-sm text-foreground hover:bg-background transition-colors"
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
           <button
             onClick={next}
             aria-label="Next image"
-            className="absolute right-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 flex items-center justify-center bg-background/80 backdrop-blur-sm text-foreground hover:bg-background transition-colors"
+            className="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center bg-background/80 backdrop-blur-sm text-foreground hover:bg-background transition-colors"
           >
             <ChevronRight className="h-5 w-5" />
           </button>
 
-          {/* Dot indicators */}
-          <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 z-10">
-            {slides.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setCurrent(i)}
-                aria-label={`Go to image ${i + 1}`}
-                className={`h-1.5 transition-all duration-300 ${
-                  i === current
-                    ? "bg-white w-4"
-                    : "bg-white/50 w-1.5 hover:bg-white/80"
-                }`}
-              />
-            ))}
+          {/* Counter — bottom center */}
+          <div className="absolute bottom-4 left-0 right-0 flex justify-center z-10">
+            <span className="bg-black/50 backdrop-blur-sm text-white text-[11px] tracking-widest px-3 py-1">
+              {current + 1} / {slides.length}
+            </span>
           </div>
         </>
       )}
@@ -123,7 +108,6 @@ function SetupProductCard({
   onQuickView: (p: QuickViewProduct) => void;
 }) {
   const { t } = useTranslation();
-  const isAmazon = product.source === "Amazon" || product.category === "electronics";
   const qvProduct: QuickViewProduct = {
     id: product.id,
     title: product.title,
@@ -136,7 +120,7 @@ function SetupProductCard({
   };
 
   return (
-    <div className="flex flex-col group">
+    <div className="flex flex-col group" data-testid={`setup-item-${product.id}`}>
       {/* Image */}
       <div
         className="aspect-[3/4] bg-[#e8e0d4] overflow-hidden mb-3 relative cursor-pointer"
@@ -149,7 +133,7 @@ function SetupProductCard({
             src={product.imageUrl}
             alt={product.title}
             loading="lazy"
-            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            className="absolute inset-0 w-full h-full transition-transform duration-700 group-hover:scale-105"
             style={{
               objectFit: (product.imageObjectFit as "cover" | "contain") ?? "cover",
               objectPosition: `${product.imagePosX ?? 50}% ${product.imagePosY ?? 50}%`,
@@ -160,14 +144,36 @@ function SetupProductCard({
             <ShoppingBag className="h-6 w-6 text-muted-foreground/20" strokeWidth={1} />
           </div>
         )}
-        {/* Hover overlay */}
+        {/* Quick view overlay */}
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center">
           <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-white text-[9px] tracking-[0.3em] uppercase bg-black/50 px-4 py-2">
             Quick View
           </span>
         </div>
-        {/* Heart */}
-        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+      </div>
+
+      {/* Info */}
+      <div className="flex flex-col gap-1 px-0.5">
+        <button
+          onClick={() => onQuickView(qvProduct)}
+          className="text-xs font-medium leading-snug line-clamp-2 text-left hover:underline decoration-1 underline-offset-2"
+        >
+          {product.title}
+        </button>
+        <p className="text-sm font-semibold">{product.price || "TBA"}</p>
+
+        {/* Add to Basket */}
+        <button
+          onClick={() => onQuickView(qvProduct)}
+          className="mt-1.5 w-full text-center bg-foreground text-background text-[10px] tracking-widest uppercase py-3 hover:opacity-80 transition-opacity flex items-center justify-center gap-1.5"
+          data-testid={`button-order-${product.id}`}
+        >
+          <ShoppingBag className="h-3 w-3" />
+          {t("addToBasket.title")}
+        </button>
+
+        {/* Heart — always visible below button */}
+        <div className="flex justify-center mt-1">
           <HeartButton
             item={{
               id: product.id,
@@ -179,34 +185,6 @@ function SetupProductCard({
             }}
           />
         </div>
-      </div>
-
-      {/* Info */}
-      <div className="flex flex-col gap-1 px-0.5">
-        {product.brand && (
-          <p className="text-[9px] tracking-widest uppercase text-muted-foreground">{product.brand}</p>
-        )}
-        <button
-          onClick={() => onQuickView(qvProduct)}
-          className="text-xs font-medium leading-snug line-clamp-2 text-left hover:underline decoration-1 underline-offset-2 transition-colors"
-        >
-          {product.title}
-        </button>
-        <p className="text-sm font-semibold">{product.price || "TBA"}</p>
-
-        {/* Add to Basket */}
-        <button
-          onClick={() => onQuickView(qvProduct)}
-          className="mt-1.5 w-full text-center bg-foreground text-background text-[10px] tracking-widest uppercase py-3 hover:opacity-80 transition-opacity flex items-center justify-center gap-1.5"
-          data-testid={`button-add-to-basket-setup-${product.id}`}
-        >
-          <ShoppingBag className="h-3 w-3" />
-          {t("addToBasket.title")}
-        </button>
-
-        <p className="text-[9px] text-center text-muted-foreground tracking-wide mt-0.5">
-          {isAmazon ? t("product.deliveredByAmazon") : t("product.deliveredByShein")}
-        </p>
       </div>
     </div>
   );
@@ -222,7 +200,7 @@ export function SetupCard({ setup }: SetupCardProps) {
   const { t } = useTranslation();
   const [quickViewProduct, setQuickViewProduct] = useState<QuickViewProduct | null>(null);
 
-  // Build gallery slides: cover image + product images
+  // Gallery slides: cover image + unique product images
   const slides: string[] = [];
   if (setup.imageUrl) slides.push(setup.imageUrl);
   (setup.products ?? []).forEach((p) => {
@@ -241,8 +219,8 @@ export function SetupCard({ setup }: SetupCardProps) {
         setupImageUrl={setup.imageUrl ?? null}
       />
 
-      {/* ── Setup details ── */}
-      <div className="mt-6 mb-8">
+      {/* ── Setup title ── */}
+      <div className="text-center mt-8 mb-8">
         <p className="text-[10px] tracking-[0.35em] uppercase text-muted-foreground mb-2">
           {t("shopTheSetup.setup")}
         </p>
@@ -250,38 +228,35 @@ export function SetupCard({ setup }: SetupCardProps) {
           {setup.title}
         </h2>
         {setup.description && (
-          <p className="text-sm text-muted-foreground leading-relaxed max-w-md">
+          <p className="text-sm text-muted-foreground leading-relaxed max-w-md mx-auto">
             {setup.description}
           </p>
         )}
       </div>
 
-      {/* ── Products ── */}
+      {/* ── "Shop This Setup" heading ── */}
       {hasProducts && (
-        <div>
-          <div className="flex items-center gap-4 mb-6">
-            <p className="text-[10px] tracking-[0.35em] uppercase text-muted-foreground shrink-0">
-              {t("shopTheSetup.thisSetupIncludes")}
-            </p>
-            <div className="flex-1 h-px bg-border" />
-            <p className="text-[10px] tracking-widest uppercase text-muted-foreground shrink-0">
-              {setup.products!.length} {t(setup.products!.length !== 1 ? "checkout.items" : "checkout.item")}
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8">
-            {setup.products!.map((product) => (
-              <SetupProductCard
-                key={product.id}
-                product={product}
-                onQuickView={setQuickViewProduct}
-              />
-            ))}
-          </div>
+        <div className="flex items-center gap-5 mb-8">
+          <div className="flex-1 h-px bg-border" />
+          <p className="text-[11px] tracking-[0.4em] uppercase font-medium shrink-0">
+            {t("shopTheSetup.thisSetupIncludes")}
+          </p>
+          <div className="flex-1 h-px bg-border" />
         </div>
       )}
 
-      {!hasProducts && (
+      {/* ── Products ── */}
+      {hasProducts ? (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8">
+          {setup.products!.map((product) => (
+            <SetupProductCard
+              key={product.id}
+              product={product}
+              onQuickView={setQuickViewProduct}
+            />
+          ))}
+        </div>
+      ) : (
         <div className="py-16 text-center border border-dashed border-border">
           <p className="text-[10px] tracking-widest uppercase text-muted-foreground">
             {t("shopTheSetup.noItems")}
