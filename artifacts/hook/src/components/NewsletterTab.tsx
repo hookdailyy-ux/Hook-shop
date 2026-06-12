@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Plus, Trash2, ChevronUp, ChevronDown, Mail, Send, Eye, ArrowLeft, Download, X } from "lucide-react";
-import { API_BASE } from "@/lib/apiBase";
+import { API_BASE, resolveImageUrl } from "@/lib/apiBase";
 
 const BASE = API_BASE;
 
@@ -775,7 +775,7 @@ function BlockEditor({
                 className="border-border text-sm"
               />
               {block.imageUrl && (
-                <img src={block.imageUrl} alt="" className="max-h-32 object-contain border border-border" />
+                <img src={resolveImageUrl(block.imageUrl)} alt="" className="max-h-32 object-contain border border-border" />
               )}
             </div>
           )}
@@ -856,7 +856,7 @@ function EmailPreview({ blocks, subject, senderName }: { blocks: Block[]; subjec
               )}
               {block.type === "image" && (
                 block.imageUrl
-                  ? <img src={block.imageUrl} alt={block.imageAlt ?? ""} className="w-full max-h-64 object-cover" />
+                  ? <img src={resolveImageUrl(block.imageUrl)} alt={block.imageAlt ?? ""} className="w-full max-h-64 object-cover" />
                   : <div className="w-full h-32 bg-accent/40 flex items-center justify-center">
                       <span className="text-xs text-muted-foreground tracking-widest uppercase">No image URL</span>
                     </div>

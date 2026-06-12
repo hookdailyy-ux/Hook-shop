@@ -7,6 +7,7 @@ import {
 } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
+import { resolveImageUrl } from "@/lib/apiBase";
 
 const COLOR_MAP: Record<string, string> = {
   black: "#1a1a1a",
@@ -167,7 +168,7 @@ export function AddToBasketModal({
           <div className="w-14 h-16 shrink-0 overflow-hidden bg-stone-100">
             {product.imageUrl ? (
               <img
-                src={product.imageUrl}
+                src={resolveImageUrl(product.imageUrl)}
                 alt={product.title}
                 className="w-full h-full object-cover"
               />

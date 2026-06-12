@@ -21,6 +21,7 @@ import { QuickViewModal, type QuickViewProduct } from "@/components/QuickViewMod
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useTranslation } from "react-i18next";
 import { useToast } from "@/hooks/use-toast";
+import { resolveImageUrl } from "@/lib/apiBase";
 
 // ── Store display config ──────────────────────────────────────────────────────
 
@@ -70,7 +71,7 @@ function BasketItemRow({
         >
           {item.productImageUrl ? (
             <img
-              src={item.productImageUrl}
+              src={resolveImageUrl(item.productImageUrl)}
               alt={item.productTitle}
               className="w-full h-full object-cover"
             />
@@ -352,7 +353,7 @@ function GroupSection({
         >
           {group.imageUrl ? (
             <img
-              src={group.imageUrl}
+              src={resolveImageUrl(group.imageUrl)}
               alt={group.title}
               className="w-full h-full object-cover"
             />

@@ -4,6 +4,7 @@ import { useFavorites, type FavoriteProduct, type FavoriteLook, type FavoriteSet
 import { HeartButton } from "@/components/HeartButton";
 import { useTranslation } from "react-i18next";
 import { useSiteImages } from "@/hooks/useSiteImages";
+import { resolveImageUrl } from "@/lib/apiBase";
 
 function FavoriteProductCard({ item }: { item: FavoriteProduct }) {
   const { t } = useTranslation();
@@ -15,7 +16,7 @@ function FavoriteProductCard({ item }: { item: FavoriteProduct }) {
       <div className="relative overflow-hidden aspect-[3/4] bg-[#ddd5c8] mb-3">
         {item.imageUrl ? (
           <img
-            src={item.imageUrl}
+            src={resolveImageUrl(item.imageUrl)}
             alt={item.title}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             loading="lazy"
@@ -53,7 +54,7 @@ function FavoriteLookCard({ item }: { item: FavoriteLook }) {
       <div className="relative overflow-hidden aspect-[3/4] bg-[#ddd5c8] mb-3">
         {item.imageUrl ? (
           <img
-            src={item.imageUrl}
+            src={resolveImageUrl(item.imageUrl)}
             alt={item.title}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             loading="lazy"
@@ -86,7 +87,7 @@ function FavoriteSetupCard({ item }: { item: FavoriteSetup }) {
       <div className="relative overflow-hidden aspect-[3/4] bg-[#ddd5c8] mb-3">
         {item.imageUrl ? (
           <img
-            src={item.imageUrl}
+            src={resolveImageUrl(item.imageUrl)}
             alt={item.title}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             loading="lazy"
@@ -133,7 +134,7 @@ export default function Favorites() {
         {hasImage && (
           <>
             <img
-              src={heroImage!.imageUrl}
+              src={resolveImageUrl(heroImage!.imageUrl)}
               alt=""
               className="absolute inset-0 w-full h-full"
               style={{

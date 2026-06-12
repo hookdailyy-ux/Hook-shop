@@ -2,7 +2,7 @@ import { useRef, useState, useCallback } from "react";
 import { useUpload } from "@workspace/object-storage-web";
 import { Upload, X, ImagePlus, Loader2 } from "lucide-react";
 import { CropModal } from "./CropModal";
-import { API_BASE } from "@/lib/apiBase";
+import { API_BASE, resolveImageUrl } from "@/lib/apiBase";
 
 const BASE = API_BASE;
 
@@ -85,7 +85,7 @@ export function SingleImageUpload({ value, onChange, label = "Main Product Image
         {value ? (
           <div className="relative group">
             <div className="aspect-[3/4] w-full max-w-[160px] overflow-hidden bg-[#ddd5c8]">
-              <img src={value} alt="Product" className="w-full h-full object-cover" />
+              <img src={resolveImageUrl(value)} alt="Product" className="w-full h-full object-cover" />
             </div>
             <button
               type="button"
@@ -221,7 +221,7 @@ export function MultiImageUpload({ values, onChange, label = "Gallery Images" }:
           <div className="flex flex-wrap gap-2.5">
             {values.map((url, i) => (
               <div key={i} className="relative group w-20 h-20 bg-[#ddd5c8] overflow-hidden shrink-0">
-                <img src={url} alt={`Gallery ${i + 1}`} className="w-full h-full object-cover" />
+                <img src={resolveImageUrl(url)} alt={`Gallery ${i + 1}`} className="w-full h-full object-cover" />
                 <button
                   type="button"
                   onClick={() => remove(i)}

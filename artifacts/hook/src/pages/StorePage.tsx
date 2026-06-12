@@ -23,7 +23,7 @@ import { useToast } from "@/hooks/use-toast";
 import { AddToBasketModal } from "@/components/AddToBasketModal";
 import { useBasket, inferStore } from "@/contexts/BasketContext";
 import { useFavorites } from "@/contexts/FavoritesContext";
-import { API_BASE } from "@/lib/apiBase";
+import { API_BASE, resolveImageUrl } from "@/lib/apiBase";
 
 const BASE = API_BASE;
 
@@ -278,7 +278,7 @@ export default function StorePage() {
         <div className="h-44 sm:h-60 lg:h-80 overflow-hidden bg-stone-200 dark:bg-stone-800">
           {member.coverImageUrl ? (
             <img
-              src={member.coverImageUrl}
+              src={resolveImageUrl(member.coverImageUrl)}
               alt={`${displayName}'s cover`}
               className="w-full h-full object-cover"
             />
@@ -298,7 +298,7 @@ export default function StorePage() {
         <div className="absolute bottom-0 inset-x-0 flex justify-center translate-y-1/2 z-10">
           <div className="w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 rounded-full border-4 border-white shadow-xl overflow-hidden bg-stone-100 dark:bg-stone-700 shrink-0">
             {member.profilePhotoUrl ? (
-              <img src={member.profilePhotoUrl} alt={displayName} className="w-full h-full object-cover" />
+              <img src={resolveImageUrl(member.profilePhotoUrl)} alt={displayName} className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
                 <User className="h-10 w-10 text-muted-foreground/30" strokeWidth={1} />
@@ -412,7 +412,7 @@ export default function StorePage() {
                       <div className="w-[72vw] max-w-[280px] min-w-[220px] shrink-0 bg-white dark:bg-stone-900 rounded-2xl overflow-hidden shadow-sm border border-border/50 hover:shadow-md transition-shadow">
                         <div className="aspect-[4/3] overflow-hidden bg-stone-100 dark:bg-stone-800">
                           {c.coverImageUrl ? (
-                            <img src={c.coverImageUrl} alt={c.title} className="w-full h-full object-cover" />
+                            <img src={resolveImageUrl(c.coverImageUrl)} alt={c.title} className="w-full h-full object-cover" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center">
                               <FolderOpen className="h-8 w-8 text-muted-foreground/20" strokeWidth={1} />
@@ -435,7 +435,7 @@ export default function StorePage() {
                       <div className="group bg-white dark:bg-stone-900 rounded-2xl overflow-hidden shadow-sm border border-border/50 hover:shadow-md transition-all duration-300">
                         <div className="aspect-[4/3] overflow-hidden bg-stone-100 dark:bg-stone-800">
                           {c.coverImageUrl ? (
-                            <img src={c.coverImageUrl} alt={c.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                            <img src={resolveImageUrl(c.coverImageUrl)} alt={c.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center">
                               <FolderOpen className="h-8 w-8 text-muted-foreground/20" strokeWidth={1} />
@@ -468,7 +468,7 @@ export default function StorePage() {
                       <div className="w-[60vw] max-w-[240px] min-w-[180px] shrink-0 bg-white dark:bg-stone-900 rounded-2xl overflow-hidden shadow-sm border border-border/50 hover:shadow-md transition-shadow">
                         <div className="aspect-[3/4] overflow-hidden bg-stone-100 dark:bg-stone-800">
                           {l.coverImageUrl ? (
-                            <img src={l.coverImageUrl} alt={l.title} className="w-full h-full object-cover" />
+                            <img src={resolveImageUrl(l.coverImageUrl)} alt={l.title} className="w-full h-full object-cover" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center">
                               <Layers className="h-8 w-8 text-muted-foreground/20" strokeWidth={1} />
@@ -491,7 +491,7 @@ export default function StorePage() {
                       <div className="group bg-white dark:bg-stone-900 rounded-2xl overflow-hidden shadow-sm border border-border/50 hover:shadow-md transition-all duration-300">
                         <div className="aspect-[3/4] overflow-hidden bg-stone-100 dark:bg-stone-800">
                           {l.coverImageUrl ? (
-                            <img src={l.coverImageUrl} alt={l.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                            <img src={resolveImageUrl(l.coverImageUrl)} alt={l.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center">
                               <Layers className="h-8 w-8 text-muted-foreground/20" strokeWidth={1} />
@@ -711,7 +711,7 @@ function ProductCard({ product, onAddToBasket, onTrackClick }: {
       <div className="aspect-[3/4] overflow-hidden bg-stone-100 dark:bg-stone-800 relative">
         {product.imageUrl ? (
           <img
-            src={product.imageUrl}
+            src={resolveImageUrl(product.imageUrl)}
             alt={product.title}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             loading="lazy"

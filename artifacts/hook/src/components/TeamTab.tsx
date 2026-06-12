@@ -34,7 +34,7 @@ import {
   Copy,
   RotateCcw,
 } from "lucide-react";
-import { API_BASE } from "@/lib/apiBase";
+import { API_BASE, resolveImageUrl } from "@/lib/apiBase";
 
 const BASE = API_BASE;
 
@@ -1424,7 +1424,7 @@ function CollectionDetailContent({
               <div className="h-9 w-9 overflow-hidden bg-accent/40 border border-border">
                 {c.coverImageUrl ? (
                   <img
-                    src={c.coverImageUrl}
+                    src={resolveImageUrl(c.coverImageUrl)}
                     alt={c.title}
                     className="w-full h-full object-cover"
                   />

@@ -12,6 +12,7 @@ import { useBasket, inferStore } from "@/contexts/BasketContext";
 
 import { ShoppingCart, Check, ArrowLeft, ShoppingBag } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { resolveImageUrl } from "@/lib/apiBase";
 
 // ── Compact mini-card for "You May Also Like" ─────────────────────────────────
 
@@ -25,7 +26,7 @@ function SetupMiniCard({ setup }: { setup: Setup }) {
       <div className="relative aspect-[3/4] bg-[#e8e0d4] overflow-hidden">
         {setup.imageUrl ? (
           <img
-            src={setup.imageUrl}
+            src={resolveImageUrl(setup.imageUrl)}
             alt={setup.title}
             loading="lazy"
             className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import { resolveImageUrl } from "@/lib/apiBase";
 
 interface ImageGalleryProps {
   images: string[];
@@ -82,7 +83,7 @@ export function ImageGallery({ images, startIndex, onClose }: ImageGalleryProps)
 
         <img
           key={current}
-          src={images[current]}
+          src={resolveImageUrl(images[current])}
           alt={`Product image ${current + 1}`}
           className="max-w-full object-contain select-none"
           style={{ maxHeight: "calc(100vh - 160px)" }}
@@ -118,7 +119,7 @@ export function ImageGallery({ images, startIndex, onClose }: ImageGalleryProps)
               style={{ width: 44, height: 58 }}
               aria-label={`Go to image ${i + 1}`}
             >
-              <img src={img} alt="" className="w-full h-full object-cover" draggable={false} />
+              <img src={resolveImageUrl(img)} alt="" className="w-full h-full object-cover" draggable={false} />
             </button>
           ))}
         </div>

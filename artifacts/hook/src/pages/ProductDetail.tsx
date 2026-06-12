@@ -8,6 +8,7 @@ import { ImageGallery } from "@/components/ImageGallery";
 import { useBasket, inferStore } from "@/contexts/BasketContext";
 import { useTranslation } from "react-i18next";
 import { ShoppingBag, Check } from "lucide-react";
+import { resolveImageUrl } from "@/lib/apiBase";
 
 
 export default function ProductDetail() {
@@ -165,7 +166,7 @@ export default function ProductDetail() {
                       style={{ aspectRatio: "3/4" }}
                       data-testid={`thumb-${i}`}
                     >
-                      <img src={img} alt="" className="w-full h-full object-cover" />
+                      <img src={resolveImageUrl(img)} alt="" className="w-full h-full object-cover" />
                     </button>
                   ))}
                 </div>
@@ -179,7 +180,7 @@ export default function ProductDetail() {
               >
                 {hasImages ? (
                   <img
-                    src={allImages[selectedImage]}
+                    src={resolveImageUrl(allImages[selectedImage])}
                     alt={product.title}
                     className="w-full h-full transition-opacity duration-200"
                     style={{
@@ -225,7 +226,7 @@ export default function ProductDetail() {
                     style={{ width: 72, aspectRatio: "3/4" }}
                     data-testid={`thumb-mobile-${i}`}
                   >
-                    <img src={img} alt="" className="w-full h-full object-cover" />
+                    <img src={resolveImageUrl(img)} alt="" className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>

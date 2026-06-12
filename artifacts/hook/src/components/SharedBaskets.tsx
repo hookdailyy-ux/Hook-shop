@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ShoppingBag, Package, ChevronDown, ChevronUp, ExternalLink, Clock } from "lucide-react";
-import { API_BASE } from "@/lib/apiBase";
+import { API_BASE, resolveImageUrl } from "@/lib/apiBase";
 
 const BASE = API_BASE;
 
@@ -84,7 +84,7 @@ function ProductSummaryCard({ item }: { item: ProductSummaryItem }) {
       <div className="w-14 h-18 shrink-0 overflow-hidden bg-stone-100">
         {item.productImageUrl ? (
           <img
-            src={item.productImageUrl}
+            src={resolveImageUrl(item.productImageUrl)}
             alt={item.productTitle}
             className="w-full h-full object-cover"
           />
@@ -171,7 +171,7 @@ function BasketCard({ basket }: { basket: SharedBasket }) {
               <div className="w-12 h-14 shrink-0 overflow-hidden bg-stone-100">
                 {item.productImageUrl ? (
                   <img
-                    src={item.productImageUrl}
+                    src={resolveImageUrl(item.productImageUrl)}
                     alt={item.productTitle}
                     className="w-full h-full object-cover"
                   />

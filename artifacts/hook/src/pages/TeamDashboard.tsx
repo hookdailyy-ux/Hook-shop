@@ -12,7 +12,7 @@ import { MyAnalytics } from "@/components/MyAnalytics";
 import { MyRewards } from "@/components/MyRewards";
 import { SharedBaskets } from "@/components/SharedBaskets";
 import { ScrollableTabBar } from "@/components/ScrollableTabBar";
-import { API_BASE } from "@/lib/apiBase";
+import { API_BASE, resolveImageUrl } from "@/lib/apiBase";
 
 const BASE = API_BASE;
 
@@ -189,7 +189,7 @@ function DashboardPage({
         <div className="flex items-center gap-4 mb-6">
           {member.profilePhotoUrl ? (
             <div className="h-14 w-14 border border-border overflow-hidden shrink-0">
-              <img src={member.profilePhotoUrl} alt={member.displayName ?? member.fullName} className="w-full h-full object-cover" />
+              <img src={resolveImageUrl(member.profilePhotoUrl)} alt={member.displayName ?? member.fullName} className="w-full h-full object-cover" />
             </div>
           ) : (
             <div className="h-14 w-14 border border-border flex items-center justify-center font-serif text-xl font-light bg-accent/30 shrink-0">

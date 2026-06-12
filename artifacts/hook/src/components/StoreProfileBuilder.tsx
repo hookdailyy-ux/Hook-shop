@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useUpload } from "@workspace/object-storage-web";
 import { Camera, MessageCircle, User, Check, ExternalLink, Loader2, X } from "lucide-react";
 import type { TeamMemberInfo } from "@/contexts/TeamAuthContext";
-import { API_BASE } from "@/lib/apiBase";
+import { API_BASE, resolveImageUrl } from "@/lib/apiBase";
 
 const BASE = API_BASE;
 
@@ -179,7 +179,7 @@ export function StoreProfileBuilder({
                   {form.coverImageUrl ? (
                     <>
                       <img
-                        src={form.coverImageUrl}
+                        src={resolveImageUrl(form.coverImageUrl)}
                         alt="Cover"
                         className="w-full h-full object-cover"
                       />
@@ -260,7 +260,7 @@ export function StoreProfileBuilder({
                 >
                   {form.profilePhotoUrl ? (
                     <img
-                      src={form.profilePhotoUrl}
+                      src={resolveImageUrl(form.profilePhotoUrl)}
                       alt="Profile"
                       className="w-full h-full object-cover"
                     />

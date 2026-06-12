@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { API_BASE } from "@/lib/apiBase";
+import { API_BASE, resolveImageUrl } from "@/lib/apiBase";
 
 const BASE = API_BASE;
 
@@ -252,7 +252,7 @@ export function MyOrders() {
                             <div className="w-10 h-10 shrink-0 overflow-hidden bg-stone-100">
                               {item.productImageUrl ? (
                                 <img
-                                  src={item.productImageUrl}
+                                  src={resolveImageUrl(item.productImageUrl)}
                                   alt={item.productTitle}
                                   className="w-full h-full object-cover"
                                 />
@@ -322,7 +322,7 @@ export function MyOrders() {
                             <div key={proof.id} className="relative group">
                               <div className="aspect-square overflow-hidden border border-border bg-stone-100">
                                 <img
-                                  src={proof.imageUrl}
+                                  src={resolveImageUrl(proof.imageUrl)}
                                   alt="Proof"
                                   className="w-full h-full object-cover"
                                 />

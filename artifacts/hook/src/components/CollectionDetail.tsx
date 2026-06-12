@@ -49,7 +49,7 @@ import {
   ShoppingBag,
   ExternalLink,
 } from "lucide-react";
-import { API_BASE } from "@/lib/apiBase";
+import { API_BASE, resolveImageUrl } from "@/lib/apiBase";
 
 const BASE = API_BASE;
 
@@ -309,7 +309,7 @@ export function CollectionDetail({
         <div className="shrink-0 w-28 h-28 sm:w-36 sm:h-36 bg-accent/30 overflow-hidden">
           {collection.coverImageUrl ? (
             <img
-              src={collection.coverImageUrl}
+              src={resolveImageUrl(collection.coverImageUrl)}
               alt={collection.title}
               className="w-full h-full object-cover"
             />
@@ -554,7 +554,7 @@ function SortableProductRow({
         {/* Product image */}
         <div className="shrink-0 h-12 w-12 bg-accent/30 overflow-hidden">
           {item.imageUrl ? (
-            <img src={item.imageUrl} alt={item.title} className="h-full w-full object-cover" />
+            <img src={resolveImageUrl(item.imageUrl)} alt={item.title} className="h-full w-full object-cover" />
           ) : (
             <div className="h-full w-full flex items-center justify-center">
               <ShoppingBag className="h-4 w-4 text-muted-foreground/30" strokeWidth={1} />
@@ -735,7 +735,7 @@ function ProductPickerDialog({
                   <div className="aspect-square bg-accent/20 overflow-hidden">
                     {p.imageUrl ? (
                       <img
-                        src={p.imageUrl}
+                        src={resolveImageUrl(p.imageUrl)}
                         alt={p.title}
                         className="w-full h-full object-cover"
                       />

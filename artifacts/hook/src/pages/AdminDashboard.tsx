@@ -66,7 +66,7 @@ import { AdminRewards } from "@/components/AdminRewards";
 import { AdminAnalytics } from "@/components/AdminAnalytics";
 import { NewsletterTab } from "@/components/NewsletterTab";
 import { ScrollableTabBar } from "@/components/ScrollableTabBar";
-import { API_BASE } from "@/lib/apiBase";
+import { API_BASE, resolveImageUrl } from "@/lib/apiBase";
 
 type Tab =
   | "dashboard"
@@ -400,7 +400,7 @@ function ProductsTab() {
                       <div className="w-10 h-12 bg-accent shrink-0 overflow-hidden">
                         {product.imageUrl && (
                           <img
-                            src={product.imageUrl}
+                            src={resolveImageUrl(product.imageUrl)}
                             alt=""
                             className="w-full h-full object-cover"
                           />
@@ -1084,7 +1084,7 @@ function NewProductDialog({
               </p>
               <div className="aspect-[3/4] overflow-hidden relative max-h-40 bg-accent">
                 <img
-                  src={form.imageUrl}
+                  src={resolveImageUrl(form.imageUrl)}
                   alt=""
                   className="absolute w-full h-full"
                   style={{
@@ -1739,7 +1739,7 @@ if (data.success && data.product) {
                     </p>
                     <div className="aspect-[3/4] overflow-hidden relative max-h-40 bg-accent">
                       <img
-                        src={form.imageUrl}
+                        src={resolveImageUrl(form.imageUrl)}
                         alt=""
                         className="absolute w-full h-full"
                         style={{
@@ -1943,7 +1943,7 @@ if (data.success && data.product) {
               <div className="aspect-[3/4] bg-accent overflow-hidden relative">
                 {form.imageUrl ? (
                   <img
-                    src={form.imageUrl}
+                    src={resolveImageUrl(form.imageUrl)}
                     alt={form.title}
                     className="absolute w-full h-full"
                     style={{
@@ -2034,7 +2034,7 @@ if (data.success && data.product) {
                         className="shrink-0 w-24 aspect-[3/4] bg-accent overflow-hidden"
                       >
                         <img
-                          src={img}
+                          src={resolveImageUrl(img)}
                           alt=""
                           className="w-full h-full object-cover"
                         />
@@ -2118,7 +2118,7 @@ function LooksTab() {
                       <div className="w-10 h-12 bg-accent shrink-0">
                         {look.imageUrl && (
                           <img
-                            src={look.imageUrl}
+                            src={resolveImageUrl(look.imageUrl)}
                             alt=""
                             className="w-full h-full object-cover"
                           />
@@ -2382,7 +2382,7 @@ function LookDialog({ look }: { look?: Look }) {
                 <div className="border border-border p-3 flex flex-col gap-2">
                   <div className="aspect-[3/4] overflow-hidden relative max-h-40 bg-accent">
                     <img
-                      src={form.imageUrl}
+                      src={resolveImageUrl(form.imageUrl)}
                       alt=""
                       className="absolute w-full h-full"
                       style={{
@@ -2651,7 +2651,7 @@ function LookDialog({ look }: { look?: Look }) {
               <div className="aspect-[3/4] bg-accent overflow-hidden relative">
                 {form.imageUrl ? (
                   <img
-                    src={form.imageUrl}
+                    src={resolveImageUrl(form.imageUrl)}
                     alt={form.title}
                     className="absolute w-full h-full"
                     style={{
@@ -2764,7 +2764,7 @@ function SetupsTab() {
                       <div className="w-10 h-12 bg-accent shrink-0">
                         {setup.imageUrl && (
                           <img
-                            src={setup.imageUrl}
+                            src={resolveImageUrl(setup.imageUrl)}
                             alt=""
                             className="w-full h-full object-cover"
                           />
@@ -3026,7 +3026,7 @@ function SetupDialog({ setup }: { setup?: Setup }) {
                 <div className="border border-border p-3 flex flex-col gap-2">
                   <div className="aspect-[3/4] overflow-hidden relative max-h-40 bg-accent">
                     <img
-                      src={form.imageUrl}
+                      src={resolveImageUrl(form.imageUrl)}
                       alt=""
                       className="absolute w-full h-full"
                       style={{
@@ -3258,7 +3258,7 @@ function SetupDialog({ setup }: { setup?: Setup }) {
               <div className="aspect-[3/4] bg-accent overflow-hidden relative">
                 {form.imageUrl ? (
                   <img
-                    src={form.imageUrl}
+                    src={resolveImageUrl(form.imageUrl)}
                     alt={form.title}
                     className="absolute w-full h-full"
                     style={{
@@ -4190,7 +4190,7 @@ function IconsSection() {
               <div className="flex items-center gap-3">
                 {icons[field] ? (
                   <img
-                    src={icons[field]}
+                    src={resolveImageUrl(icons[field])}
                     alt={label}
                     className="w-10 h-10 object-contain border border-border"
                   />
@@ -4407,7 +4407,7 @@ function SectionImageCard({
               </p>
               <div className="w-72 h-44 relative overflow-hidden bg-[#e8e0d4] shadow-2xl">
                 <img
-                  src={image.imageUrl}
+                  src={resolveImageUrl(image.imageUrl)}
                   alt=""
                   className="absolute w-full h-full"
                   style={{
@@ -4435,7 +4435,7 @@ function SectionImageCard({
               </p>
               <div className="w-full max-w-2xl h-52 relative overflow-hidden bg-[#e8e0d4] shadow-2xl">
                 <img
-                  src={image.imageUrl}
+                  src={resolveImageUrl(image.imageUrl)}
                   alt=""
                   className="absolute w-full h-full"
                   style={{
@@ -4472,7 +4472,7 @@ function SectionImageCard({
         <div className="aspect-video bg-accent overflow-hidden relative">
           {image?.imageUrl ? (
             <img
-              src={image.imageUrl}
+              src={resolveImageUrl(image.imageUrl)}
               alt=""
               className="absolute w-full h-full"
               style={{

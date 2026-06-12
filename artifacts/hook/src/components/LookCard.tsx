@@ -4,6 +4,7 @@ import { HeartButton } from "./HeartButton";
 import { QuickViewModal, type QuickViewProduct } from "./QuickViewModal";
 import type { Look, Product } from "@workspace/api-client-react";
 import { useTranslation } from "react-i18next";
+import { resolveImageUrl } from "@/lib/apiBase";
 
 // ── Gallery ────────────────────────────────────────────────────────────────────
 
@@ -54,7 +55,7 @@ function Gallery({ slides, title, lookId, lookImageUrl }: GalleryProps) {
       {slides.map((url, i) => (
         <img
           key={url + i}
-          src={url}
+          src={resolveImageUrl(url)}
           alt={i === 0 ? title : `${title} ${i + 1}`}
           loading={i === 0 ? "eager" : "lazy"}
           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
@@ -130,7 +131,7 @@ function LookProductCard({
       >
         {product.imageUrl ? (
           <img
-            src={product.imageUrl}
+            src={resolveImageUrl(product.imageUrl)}
             alt={product.title}
             loading="lazy"
             className="absolute inset-0 w-full h-full transition-transform duration-700 group-hover:scale-105"

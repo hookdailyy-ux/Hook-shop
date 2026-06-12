@@ -5,6 +5,7 @@ import { Link } from "wouter";
 import { useTranslation } from "react-i18next";
 import type { Look } from "@workspace/api-client-react";
 import { ShoppingBag } from "lucide-react";
+import { resolveImageUrl } from "@/lib/apiBase";
 
 // ── Look grid card ────────────────────────────────────────────────────────────
 
@@ -20,7 +21,7 @@ function LookGridCard({ look }: { look: Look }) {
       <div className="relative aspect-[3/4] bg-[#e8e0d4] overflow-hidden">
         {look.imageUrl ? (
           <img
-            src={look.imageUrl}
+            src={resolveImageUrl(look.imageUrl)}
             alt={look.title}
             loading="lazy"
             className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
@@ -96,7 +97,7 @@ export default function ShopTheLook() {
         {hasImage && (
           <>
             <img
-              src={sectionImage!.imageUrl}
+              src={resolveImageUrl(sectionImage!.imageUrl)}
               alt=""
               className="absolute inset-0 w-full h-full"
               style={{

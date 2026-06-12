@@ -28,7 +28,7 @@ import {
   EyeOff,
   ChevronRight,
 } from "lucide-react";
-import { API_BASE } from "@/lib/apiBase";
+import { API_BASE, resolveImageUrl } from "@/lib/apiBase";
 
 const BASE = API_BASE;
 
@@ -288,7 +288,7 @@ function CollectionCard({
         <div className="aspect-[4/3] bg-accent/30 overflow-hidden relative">
           {c.coverImageUrl ? (
             <img
-              src={c.coverImageUrl}
+              src={resolveImageUrl(c.coverImageUrl)}
               alt={c.title}
               className="w-full h-full object-cover group-hover:scale-[1.01] transition-transform duration-300"
             />

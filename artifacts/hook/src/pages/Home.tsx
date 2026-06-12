@@ -6,6 +6,7 @@ import { HeartButton } from "@/components/HeartButton";
 import type { FavoriteItem } from "@/contexts/FavoritesContext";
 import { Truck, RotateCcw, ShieldCheck, Globe } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { resolveImageUrl } from "@/lib/apiBase";
 
 export default function Home() {
   const { data: latestLooks } = useListLooks({ limit: 4 });
@@ -42,7 +43,7 @@ export default function Home() {
         {heroImage ? (
           <div className="absolute inset-0 overflow-hidden">
             <img
-              src={heroImage.imageUrl}
+              src={resolveImageUrl(heroImage.imageUrl)}
               alt=""
               className="absolute w-full h-full"
               style={{
@@ -233,7 +234,7 @@ function HomeEditorialCard({
         <Link href={href} className="block w-full h-full">
           {imageUrl ? (
             <img
-              src={imageUrl}
+              src={resolveImageUrl(imageUrl)}
               alt={title}
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
               loading="lazy"

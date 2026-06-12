@@ -5,6 +5,7 @@ import { HeartButton } from "@/components/HeartButton";
 import { useBasket, inferStore, type AddItemInput } from "@/contexts/BasketContext";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
+import { resolveImageUrl } from "@/lib/apiBase";
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 
@@ -130,7 +131,7 @@ export function QuickViewModal({
             <div className="aspect-[4/3] relative">
               {product.imageUrl ? (
                 <img
-                  src={product.imageUrl}
+                  src={resolveImageUrl(product.imageUrl)}
                   alt={product.title}
                   className="absolute inset-0 w-full h-full object-cover"
                 />

@@ -13,7 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { AddToBasketModal } from "@/components/AddToBasketModal";
 import { ImageGallery } from "@/components/ImageGallery";
 import { inferStore } from "@/contexts/BasketContext";
-import { API_BASE } from "@/lib/apiBase";
+import { API_BASE, resolveImageUrl } from "@/lib/apiBase";
 
 const BASE = API_BASE;
 
@@ -155,7 +155,7 @@ export default function CollectionShare() {
         {collection.coverImageUrl && (
           <>
             <img
-              src={collection.coverImageUrl}
+              src={resolveImageUrl(collection.coverImageUrl)}
               alt={collection.title}
               className="absolute inset-0 w-full h-full"
               style={{
@@ -325,7 +325,7 @@ function CollectionProductCard({
           >
             {product.imageUrl ? (
               <img
-                src={product.imageUrl}
+                src={resolveImageUrl(product.imageUrl)}
                 alt={product.title}
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 loading="lazy"

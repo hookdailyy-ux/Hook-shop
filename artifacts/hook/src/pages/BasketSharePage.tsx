@@ -4,7 +4,7 @@ import { ShoppingBag, ExternalLink, ArrowRight } from "lucide-react";
 import { useBasket, type BasketItem } from "@/contexts/BasketContext";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { API_BASE } from "@/lib/apiBase";
+import { API_BASE, resolveImageUrl } from "@/lib/apiBase";
 
 const BASE = API_BASE;
 
@@ -110,7 +110,7 @@ export default function BasketSharePage() {
             <div className="w-16 h-20 shrink-0 overflow-hidden bg-stone-100">
               {item.productImageUrl ? (
                 <img
-                  src={item.productImageUrl}
+                  src={resolveImageUrl(item.productImageUrl)}
                   alt={item.productTitle}
                   className="w-full h-full object-cover"
                 />

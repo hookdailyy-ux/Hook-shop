@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { ChevronDown, ChevronUp, Package, Clock, Check, X, Upload, DollarSign, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { API_BASE } from "@/lib/apiBase";
+import { API_BASE, resolveImageUrl } from "@/lib/apiBase";
 
 const BASE = API_BASE;
 
@@ -175,7 +175,7 @@ export function AdminOrders() {
                           {order.proofs.map((proof) => (
                             <div key={proof.id}>
                               <div className="aspect-square overflow-hidden rounded-lg border border-border bg-stone-100 relative">
-                                <img src={proof.imageUrl} alt="Proof" className="w-full h-full object-cover" />
+                                <img src={resolveImageUrl(proof.imageUrl)} alt="Proof" className="w-full h-full object-cover" />
                                 {proof.adminReviewed && (
                                   <div className="absolute inset-0 bg-green-600/20 flex items-center justify-center">
                                     <CheckCircle className="h-6 w-6 text-green-600" />

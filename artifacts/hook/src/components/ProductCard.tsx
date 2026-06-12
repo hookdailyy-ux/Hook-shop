@@ -6,7 +6,7 @@ import { HeartButton } from "./HeartButton";
 import { ImageGallery } from "./ImageGallery";
 import type { Product } from "@workspace/api-client-react";
 import { useBasket, inferStore } from "@/contexts/BasketContext";
-import { API_BASE } from "@/lib/apiBase";
+import { API_BASE, resolveImageUrl } from "@/lib/apiBase";
 
 const BASE = API_BASE;
 
@@ -70,7 +70,7 @@ export function ProductCard({ product }: ProductCardProps) {
         >
           {product.imageUrl ? (
             <img
-              src={product.imageUrl}
+              src={resolveImageUrl(product.imageUrl)}
               alt={product.title}
               className="absolute w-full h-full transition-transform duration-700 group-hover:scale-105"
               style={{

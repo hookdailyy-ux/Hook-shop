@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "wouter";
 import { Trophy, Eye, TrendingUp, Medal, Heart } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { API_BASE } from "@/lib/apiBase";
+import { API_BASE, resolveImageUrl } from "@/lib/apiBase";
 
 const BASE = API_BASE;
 
@@ -115,7 +115,7 @@ export default function RankingsPage() {
                   {/* Photo */}
                   <div className="w-12 h-12 sm:w-14 sm:h-14 shrink-0 rounded-full overflow-hidden bg-stone-100 border-2 border-white shadow-sm">
                     {member.profilePhotoUrl
-                      ? <img src={member.profilePhotoUrl} alt={displayName} className="w-full h-full object-cover" />
+                      ? <img src={resolveImageUrl(member.profilePhotoUrl)} alt={displayName} className="w-full h-full object-cover" />
                       : <div className="w-full h-full flex items-center justify-center font-serif text-lg font-light text-muted-foreground/40">
                           {displayName[0]?.toUpperCase()}
                         </div>

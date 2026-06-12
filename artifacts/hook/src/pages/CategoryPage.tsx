@@ -7,6 +7,7 @@ import { useSiteImages } from "@/hooks/useSiteImages";
 import type { SiteImageKey } from "@/hooks/useSiteImages";
 import { useTranslation } from "react-i18next";
 import { ScrollableTabBar } from "@/components/ScrollableTabBar";
+import { resolveImageUrl } from "@/lib/apiBase";
 
 // To add a new SHEIN-powered section, set showDiscoverMore: true below.
 // The "Explore More via SHEIN" button only appears when showDiscoverMore is true
@@ -94,7 +95,7 @@ export default function CategoryPage({ category }: CategoryPageProps) {
         {hasImage && (
           <>
             <img
-              src={categoryImage!.imageUrl}
+              src={resolveImageUrl(categoryImage!.imageUrl)}
               alt=""
               className="absolute inset-0 w-full h-full"
               style={{

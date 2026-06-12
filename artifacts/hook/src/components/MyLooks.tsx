@@ -19,7 +19,7 @@ import {
   Pencil,
   ExternalLink,
 } from "lucide-react";
-import { API_BASE } from "@/lib/apiBase";
+import { API_BASE, resolveImageUrl } from "@/lib/apiBase";
 
 const BASE = API_BASE;
 
@@ -211,7 +211,7 @@ function LookCard({
       >
         {look.coverImageUrl ? (
           <img
-            src={look.coverImageUrl}
+            src={resolveImageUrl(look.coverImageUrl)}
             alt={look.title}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />

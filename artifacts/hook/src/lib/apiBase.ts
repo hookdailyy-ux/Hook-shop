@@ -27,3 +27,24 @@ export const API_BASE: string = (
   // 2. Replit host → use relative URL (Replit proxy handles /api routing)
   (REPLIT_HOST ? import.meta.env.BASE_URL : DEPLOYED_API)
 ).replace(/\/+$/, "");
+
+/**
+ * Resolves an image URL to an absolute URL suitable for the current host.
+ *
+ * Images are stored in the DB as relative paths like `/api/storage/objects/…`.
+ * On Replit, the browser proxy forwards those to the local API server.
+ * On GitHub Pages (or any other host), they must be prefixed with the
+ * deployed Replit API base URL so the browser fetches them from the right server.
+ *
+ * - Absolute URLs (http/https) and data URIs pass through unchanged.
+ * - Null / undefined / empty string return undefined (renders no src attribute).
+ * - Relative paths get prefixed with API_BASE.
+ */
+export function resolveImageUrl(url: string | null | undefined): string | undefined {
+  if (!url) return undefined;
+  if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("data:")) {
+    return url;
+  }
+  const separator = url.startsWith("/") ? "" : "/";
+  return `${API_BASE}${separator}${url}`;
+}
