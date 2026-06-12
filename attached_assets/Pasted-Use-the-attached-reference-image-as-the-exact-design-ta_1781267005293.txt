@@ -1,0 +1,80 @@
+Use the attached reference image as the exact design target.
+
+Please redesign both **Shop The Look** and **Shop The Setup** to match the reference image as closely as possible.
+
+## Top Gallery
+
+* Use a single large hero image.
+* Remove the thumbnail strip completely.
+* Users should navigate between images using clear left and right arrows.
+* Support swipe gestures on mobile.
+* Show an image counter (1/4, 2/4, etc.).
+* Use smooth transitions between images.
+* Keep the gallery minimal, elegant, and premium.
+
+The images should represent:
+
+* Full outfit/setup.
+* Alternate angle.
+* Flat lay.
+* Back view or detail shot.
+
+## Shop This Look / Shop This Setup
+
+Below the large gallery, create a separate section displaying the products used in the outfit or setup.
+
+Each product card should contain:
+
+* Product image.
+* Product name.
+* Price.
+* Add to Basket button.
+* Favorite icon.
+
+## Product Interaction
+
+When users click the product image or product name:
+
+**Do NOT navigate to a separate page.**
+
+Instead, open a luxury Quick View modal similar to the reference image.
+
+The Quick View modal should include:
+
+* Product image.
+* Product name.
+* Price.
+* Description.
+* Available colors.
+* Available sizes (if applicable).
+* Add to Basket button.
+* Delivered by SHEIN text.
+
+## Add to Basket
+
+* Add items directly without leaving the page.
+* Update the basket count immediately.
+* Show a small confirmation toast after adding.
+
+## Apply the same experience to:
+
+* Shop The Look.
+* Shop The Setup.
+
+Both sections should share exactly the same gallery behavior, layout, animations, Quick View modal, and interactions.
+
+## Design Requirements
+
+* Match the attached reference image closely.
+* Minimal luxury HOOK aesthetic.
+* Beige and cream color palette.
+* Clean spacing and typography.
+* Premium animations.
+* Responsive on mobile and desktop.
+* No Pinterest collage layout.
+* No separate product pages.
+* Images should occupy most of the screen width.
+* Large visible arrows should indicate additional images.
+* The overall experience should feel inspired by COS, Zara, and premium editorial fashion websites.
+
+The goal is to make Shop The Look and Shop The Setup feel like premium interactive editorial pages rather than traditional collection pages.

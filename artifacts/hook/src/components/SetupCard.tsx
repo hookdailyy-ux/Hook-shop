@@ -1,177 +1,302 @@
-import { PlaceholderImage } from "./PlaceholderImage";
+import { useState, useRef, useCallback } from "react";
+import { ChevronLeft, ChevronRight, ShoppingBag } from "lucide-react";
 import { HeartButton } from "./HeartButton";
+import { QuickViewModal, type QuickViewProduct } from "./QuickViewModal";
 import type { Setup, Product } from "@workspace/api-client-react";
 import { useTranslation } from "react-i18next";
 
-interface SetupCardProps {
-  setup: Setup;
+// ── Gallery ────────────────────────────────────────────────────────────────────
+
+interface GalleryProps {
+  slides: string[];
+  title: string;
+  setupId: number;
+  setupImageUrl: string | null;
 }
 
-function SetupProductCard({ product }: { product: Product }) {
-  const { t } = useTranslation();
-  const deliveryLabel =
-    product.source === "Amazon" || product.category === "electronics"
-      ? t("product.deliveredByAmazon")
-      : t("product.deliveredByShein");
+function Gallery({ slides, title, setupId, setupImageUrl }: GalleryProps) {
+  const [current, setCurrent] = useState(0);
+  const touchRef = useRef({ x: 0, y: 0 });
+
+  const prev = useCallback(() => setCurrent((c) => (c === 0 ? slides.length - 1 : c - 1)), [slides.length]);
+  const next = useCallback(() => setCurrent((c) => (c === slides.length - 1 ? 0 : c + 1)), [slides.length]);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  };
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const dx = touchRef.current.x - e.changedTouches[0].clientX;
+    const dy = Math.abs(touchRef.current.y - e.changedTouches[0].clientY);
+    if (Math.abs(dx) > 48 && dy < 80) {
+      if (dx > 0) next(); else prev();
+    }
+  };
+
+  if (slides.length === 0) {
+    return (
+      <div className="w-full aspect-[3/4] bg-[#ddd5c8] flex items-center justify-center relative">
+        <ShoppingBag className="h-12 w-12 text-muted-foreground/20" strokeWidth={1} />
+        <div className="absolute top-3 left-3">
+          <HeartButton item={{ id: setupId, type: "setup", title, imageUrl: setupImageUrl }} />
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col" data-testid={`setup-item-${product.id}`}>
-      <div className="aspect-[4/5] bg-[#ddd5c8] overflow-hidden mb-3 relative">
+    <div
+      className="w-full aspect-[3/4] relative overflow-hidden bg-[#e8e0d4] select-none"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
+      {/* Slides */}
+      {slides.map((url, i) => (
+        <img
+          key={url + i}
+          src={url}
+          alt={i === 0 ? title : `${title} ${i + 1}`}
+          loading={i === 0 ? "eager" : "lazy"}
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
+            i === current ? "opacity-100" : "opacity-0 pointer-events-none"
+          }`}
+        />
+      ))}
+
+      {/* Heart button */}
+      <div className="absolute top-4 left-4 z-10">
+        <HeartButton item={{ id: setupId, type: "setup", title, imageUrl: setupImageUrl }} />
+      </div>
+
+      {/* Counter */}
+      {slides.length > 1 && (
+        <div className="absolute top-4 right-4 z-10 bg-black/40 backdrop-blur-sm text-white text-[10px] tracking-widest px-2.5 py-1">
+          {current + 1} / {slides.length}
+        </div>
+      )}
+
+      {/* Prev / Next arrows */}
+      {slides.length > 1 && (
+        <>
+          <button
+            onClick={prev}
+            aria-label="Previous image"
+            className="absolute left-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 flex items-center justify-center bg-background/80 backdrop-blur-sm text-foreground hover:bg-background transition-colors"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          <button
+            onClick={next}
+            aria-label="Next image"
+            className="absolute right-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 flex items-center justify-center bg-background/80 backdrop-blur-sm text-foreground hover:bg-background transition-colors"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </button>
+
+          {/* Dot indicators */}
+          <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 z-10">
+            {slides.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrent(i)}
+                aria-label={`Go to image ${i + 1}`}
+                className={`h-1.5 transition-all duration-300 ${
+                  i === current
+                    ? "bg-white w-4"
+                    : "bg-white/50 w-1.5 hover:bg-white/80"
+                }`}
+              />
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+// ── Product card ───────────────────────────────────────────────────────────────
+
+function SetupProductCard({
+  product,
+  onQuickView,
+}: {
+  product: Product;
+  onQuickView: (p: QuickViewProduct) => void;
+}) {
+  const { t } = useTranslation();
+  const isAmazon = product.source === "Amazon" || product.category === "electronics";
+  const qvProduct: QuickViewProduct = {
+    id: product.id,
+    title: product.title,
+    imageUrl: product.imageUrl ?? null,
+    price: product.price ?? null,
+    brand: product.brand ?? null,
+    affiliateUrl: product.affiliateUrl,
+    category: product.category,
+    source: product.source ?? null,
+  };
+
+  return (
+    <div className="flex flex-col group">
+      {/* Image */}
+      <div
+        className="aspect-[3/4] bg-[#e8e0d4] overflow-hidden mb-3 relative cursor-pointer"
+        onClick={() => onQuickView(qvProduct)}
+        role="button"
+        aria-label={`Quick view ${product.title}`}
+      >
         {product.imageUrl ? (
           <img
             src={product.imageUrl}
             alt={product.title}
-            className="absolute w-full h-full"
+            loading="lazy"
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             style={{
               objectFit: (product.imageObjectFit as "cover" | "contain") ?? "cover",
               objectPosition: `${product.imagePosX ?? 50}% ${product.imagePosY ?? 50}%`,
             }}
-            loading="lazy"
           />
         ) : (
-          <div className="w-full h-full bg-[#ddd5c8] flex items-center justify-center">
-            <span className="text-[9px] tracking-widest uppercase text-[#8b7355]/50">{t("common.noImage")}</span>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <ShoppingBag className="h-6 w-6 text-muted-foreground/20" strokeWidth={1} />
           </div>
         )}
+        {/* Hover overlay */}
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center">
+          <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-white text-[9px] tracking-[0.3em] uppercase bg-black/50 px-4 py-2">
+            Quick View
+          </span>
+        </div>
+        {/* Heart */}
+        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <HeartButton
+            item={{
+              id: product.id,
+              type: "product",
+              title: product.title,
+              imageUrl: product.imageUrl,
+              affiliateUrl: product.affiliateUrl,
+              category: product.category,
+            }}
+          />
+        </div>
       </div>
-      <div className="flex flex-col gap-1">
+
+      {/* Info */}
+      <div className="flex flex-col gap-1 px-0.5">
         {product.brand && (
           <p className="text-[9px] tracking-widest uppercase text-muted-foreground">{product.brand}</p>
         )}
-        <p className="text-xs font-medium leading-snug line-clamp-2">{product.title}</p>
-        <p className="text-sm font-medium mt-0.5">{product.price || "TBA"}</p>
-        <a
-          href={product.affiliateUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-2 block w-full text-center bg-[#2a2318] text-[#f0ebe3] text-[10px] tracking-widest uppercase py-3 hover:opacity-90 transition-opacity"
-          data-testid={`button-order-${product.id}`}
+        <button
+          onClick={() => onQuickView(qvProduct)}
+          className="text-xs font-medium leading-snug line-clamp-2 text-left hover:underline decoration-1 underline-offset-2 transition-colors"
         >
-          {t("product.orderNow")}
-        </a>
-        <p className="text-[9px] text-center text-muted-foreground mt-1 tracking-wide">
-          {deliveryLabel}
+          {product.title}
+        </button>
+        <p className="text-sm font-semibold">{product.price || "TBA"}</p>
+
+        {/* Add to Basket */}
+        <button
+          onClick={() => onQuickView(qvProduct)}
+          className="mt-1.5 w-full text-center bg-foreground text-background text-[10px] tracking-widest uppercase py-3 hover:opacity-80 transition-opacity flex items-center justify-center gap-1.5"
+          data-testid={`button-add-to-basket-setup-${product.id}`}
+        >
+          <ShoppingBag className="h-3 w-3" />
+          {t("addToBasket.title")}
+        </button>
+
+        <p className="text-[9px] text-center text-muted-foreground tracking-wide mt-0.5">
+          {isAmazon ? t("product.deliveredByAmazon") : t("product.deliveredByShein")}
         </p>
       </div>
     </div>
   );
 }
 
+// ── Main SetupCard ─────────────────────────────────────────────────────────────
+
+interface SetupCardProps {
+  setup: Setup;
+}
+
 export function SetupCard({ setup }: SetupCardProps) {
   const { t } = useTranslation();
-  const hasProducts = setup.products && setup.products.length > 0;
-  const itemsId = `setup-items-${setup.id}`;
+  const [quickViewProduct, setQuickViewProduct] = useState<QuickViewProduct | null>(null);
 
-  const posX = setup.imagePosX ?? 50;
-  const posY = setup.imagePosY ?? 50;
-  const scale = setup.imageScale ?? 100;
+  // Build gallery slides: cover image + product images
+  const slides: string[] = [];
+  if (setup.imageUrl) slides.push(setup.imageUrl);
+  (setup.products ?? []).forEach((p) => {
+    if (p.imageUrl && !slides.includes(p.imageUrl)) slides.push(p.imageUrl);
+  });
+
+  const hasProducts = (setup.products?.length ?? 0) > 0;
 
   return (
-    <section data-testid={`card-setup-${setup.id}`}>
+    <section data-testid={`card-setup-${setup.id}`} className="w-full">
+      {/* ── Gallery ── */}
+      <Gallery
+        slides={slides}
+        title={setup.title}
+        setupId={setup.id}
+        setupImageUrl={setup.imageUrl ?? null}
+      />
 
-      {/* ── Hero Image + Details ── */}
-      <div className="flex flex-col md:flex-row md:gap-12 md:items-start">
-
-        {/* Setup image */}
-        <div className="w-full md:w-[42%] shrink-0 relative">
-          {setup.imageUrl ? (
-            <div
-              className="relative overflow-hidden"
-              style={{ aspectRatio: "3/4", maxHeight: "78dvh" }}
-            >
-              <img
-                src={setup.imageUrl}
-                alt={setup.title}
-                className="absolute w-full h-full object-cover"
-                style={{
-                  objectPosition: `${posX}% ${posY}%`,
-                  transform: `scale(${scale / 100})`,
-                  transformOrigin: `${posX}% ${posY}%`,
-                }}
-                loading="lazy"
-              />
-            </div>
-          ) : (
-            <div
-              className="w-full bg-[#ddd5c8] flex items-center justify-center"
-              style={{ aspectRatio: "3/4", maxHeight: "78dvh" }}
-            >
-              <PlaceholderImage aspectRatio="tall" className="w-full h-full" />
-            </div>
-          )}
-          <div className="absolute top-3 right-3">
-            <HeartButton
-              item={{
-                id: setup.id,
-                type: "setup",
-                title: setup.title,
-                imageUrl: setup.imageUrl,
-              }}
-            />
-          </div>
-        </div>
-
-        {/* Setup details */}
-        <div className="flex-1 min-w-0 pt-7 md:pt-2 md:sticky md:top-24 md:self-start">
-          <p className="text-[10px] tracking-[0.35em] uppercase text-muted-foreground mb-3">{t("shopTheSetup.setup")}</p>
-          <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl font-light leading-tight mb-4">
-            {setup.title}
-          </h2>
-          {setup.description && (
-            <p className="text-sm text-muted-foreground leading-relaxed mb-7 max-w-sm">
-              {setup.description}
-            </p>
-          )}
-
-          <a
-            href={`#${itemsId}`}
-            className="block w-full md:inline-block md:w-auto text-center bg-[#2a2318] text-[#f0ebe3] text-xs tracking-[0.25em] uppercase px-10 py-4 hover:opacity-90 transition-opacity"
-          >
-            {t("shopTheSetup.shopTheSetup")}
-          </a>
-
-          {hasProducts && (
-            <p className="text-[10px] text-muted-foreground tracking-wide mt-3">
-              {setup.products!.length} {t(setup.products!.length !== 1 ? "checkout.items" : "checkout.item")}
-            </p>
-          )}
-        </div>
-      </div>
-
-      {/* ── This Setup Includes ── */}
-      <div id={itemsId} className="mt-12 md:mt-16 scroll-mt-24">
-        <div className="flex items-center gap-4 mb-6">
-          <p className="text-[10px] tracking-[0.35em] uppercase text-muted-foreground shrink-0">
-            {t("shopTheSetup.thisSetupIncludes")}
-          </p>
-          <div className="flex-1 h-px bg-border" />
-        </div>
-
-        {hasProducts ? (
-          <>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-              {setup.products!.map((product) => (
-                <SetupProductCard key={product.id} product={product} />
-              ))}
-            </div>
-
-            <div className="mt-10 pt-8 border-t border-border flex flex-col items-center gap-3">
-              <p className="text-[10px] tracking-[0.35em] uppercase text-muted-foreground">
-                {t("shopTheSetup.completeSetup")}
-              </p>
-              <a
-                href={`#${itemsId}`}
-                className="block w-full md:w-auto md:inline-block text-center border border-[#2a2318] text-[#2a2318] text-xs tracking-[0.25em] uppercase px-12 py-4 hover:bg-[#2a2318] hover:text-[#f0ebe3] transition-colors"
-              >
-                {t("shopTheSetup.shopCompleteSetup")}
-              </a>
-            </div>
-          </>
-        ) : (
-          <p className="text-sm text-muted-foreground tracking-wide py-10 text-center border border-dashed border-border">
-            {t("shopTheSetup.noItems")}
+      {/* ── Setup details ── */}
+      <div className="mt-6 mb-8">
+        <p className="text-[10px] tracking-[0.35em] uppercase text-muted-foreground mb-2">
+          {t("shopTheSetup.setup")}
+        </p>
+        <h2 className="font-serif text-3xl md:text-4xl font-light leading-tight mb-2">
+          {setup.title}
+        </h2>
+        {setup.description && (
+          <p className="text-sm text-muted-foreground leading-relaxed max-w-md">
+            {setup.description}
           </p>
         )}
       </div>
+
+      {/* ── Products ── */}
+      {hasProducts && (
+        <div>
+          <div className="flex items-center gap-4 mb-6">
+            <p className="text-[10px] tracking-[0.35em] uppercase text-muted-foreground shrink-0">
+              {t("shopTheSetup.thisSetupIncludes")}
+            </p>
+            <div className="flex-1 h-px bg-border" />
+            <p className="text-[10px] tracking-widest uppercase text-muted-foreground shrink-0">
+              {setup.products!.length} {t(setup.products!.length !== 1 ? "checkout.items" : "checkout.item")}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8">
+            {setup.products!.map((product) => (
+              <SetupProductCard
+                key={product.id}
+                product={product}
+                onQuickView={setQuickViewProduct}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {!hasProducts && (
+        <div className="py-16 text-center border border-dashed border-border">
+          <p className="text-[10px] tracking-widest uppercase text-muted-foreground">
+            {t("shopTheSetup.noItems")}
+          </p>
+        </div>
+      )}
+
+      {/* Quick View Modal */}
+      {quickViewProduct && (
+        <QuickViewModal
+          product={quickViewProduct}
+          sourceContext="look"
+          onClose={() => setQuickViewProduct(null)}
+        />
+      )}
     </section>
   );
 }
