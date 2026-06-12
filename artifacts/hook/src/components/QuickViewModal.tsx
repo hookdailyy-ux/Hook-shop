@@ -25,6 +25,8 @@ interface Props {
   sourceMemberUsername?: string;
   sourceMemberName?: string;
   sourceContext?: "store" | "collection" | "look";
+  /** When true, shows ORDER NOW link instead of Add to Basket (for basket quick-view) */
+  fromBasket?: boolean;
   onClose: () => void;
 }
 
@@ -36,6 +38,7 @@ export function QuickViewModal({
   sourceMemberUsername = "",
   sourceMemberName = "",
   sourceContext = "look",
+  fromBasket = false,
   onClose,
 }: Props) {
   const { addItem, openBasket } = useBasket();
@@ -179,29 +182,43 @@ export function QuickViewModal({
               </div>
             )}
 
-            {/* Add to Basket */}
-            <button
-              onClick={handleAdd}
-              disabled={added}
-              className="w-full flex items-center justify-center gap-2 bg-foreground text-background text-xs tracking-widest uppercase py-4 hover:opacity-90 transition-opacity disabled:opacity-60"
-            >
-              {added ? (
-                <><Check className="h-3.5 w-3.5" />Added!</>
-              ) : (
-                <><ShoppingBag className="h-3.5 w-3.5" />Add to Basket</>
-              )}
-            </button>
+            {/* Add to Basket — or ORDER NOW when opened from basket */}
+            {fromBasket ? (
+              <a
+                href={product.affiliateUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full flex items-center justify-center gap-2 bg-foreground text-background text-xs tracking-widest uppercase py-4 hover:opacity-90 transition-opacity"
+              >
+                <ExternalLink className="h-3.5 w-3.5" />
+                Order Now
+              </a>
+            ) : (
+              <>
+                <button
+                  onClick={handleAdd}
+                  disabled={added}
+                  className="w-full flex items-center justify-center gap-2 bg-foreground text-background text-xs tracking-widest uppercase py-4 hover:opacity-90 transition-opacity disabled:opacity-60"
+                >
+                  {added ? (
+                    <><Check className="h-3.5 w-3.5" />Added!</>
+                  ) : (
+                    <><ShoppingBag className="h-3.5 w-3.5" />Add to Basket</>
+                  )}
+                </button>
 
-            {/* View on Store */}
-            <a
-              href={product.affiliateUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full flex items-center justify-center gap-1.5 text-[10px] tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors py-1"
-            >
-              <ExternalLink className="h-3 w-3" />
-              View on Store
-            </a>
+                {/* View on Store */}
+                <a
+                  href={product.affiliateUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full flex items-center justify-center gap-1.5 text-[10px] tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors py-1"
+                >
+                  <ExternalLink className="h-3 w-3" />
+                  View on Store
+                </a>
+              </>
+            )}
 
             {/* Delivery label */}
             <p className="text-[9px] text-center text-muted-foreground tracking-wide">

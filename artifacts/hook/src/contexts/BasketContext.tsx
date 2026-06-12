@@ -41,6 +41,7 @@ export interface BasketItem {
   sourceMemberName: string;
   sourceContext: "store" | "collection" | "look";
   sourceToken: string | null;
+  availableSizes?: string[] | null;
 }
 
 export type AddItemInput = Omit<BasketItem, "id" | "key" | "numericPrice" | "quantity">;

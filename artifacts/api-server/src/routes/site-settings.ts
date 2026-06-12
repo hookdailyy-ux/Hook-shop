@@ -21,6 +21,9 @@ const DEFAULTS: Record<string, string> = {
   apple_touch_icon_url: "",
   pwa_icon_192_url: "",
   pwa_icon_512_url: "",
+  shein_general_url: "",
+  amazon_general_url: "",
+  noon_general_url: "",
 };
 
 async function getAllSettings(): Promise<Record<string, string>> {
@@ -56,6 +59,9 @@ function buildResponse(all: Record<string, string>) {
     appleTouchIconUrl: all["apple_touch_icon_url"] ?? "",
     pwaIcon192Url: all["pwa_icon_192_url"] ?? "",
     pwaIcon512Url: all["pwa_icon_512_url"] ?? "",
+    sheinGeneralUrl: all["shein_general_url"] ?? "",
+    amazonGeneralUrl: all["amazon_general_url"] ?? "",
+    noonGeneralUrl: all["noon_general_url"] ?? "",
   };
 }
 
@@ -92,6 +98,9 @@ router.put("/site-settings", requireAdmin, async (req, res) => {
       appleTouchIconUrl: z.string().optional(),
       pwaIcon192Url: z.string().optional(),
       pwaIcon512Url: z.string().optional(),
+      sheinGeneralUrl: z.string().optional(),
+      amazonGeneralUrl: z.string().optional(),
+      noonGeneralUrl: z.string().optional(),
     });
     const data = schema.parse(req.body);
 
@@ -110,6 +119,9 @@ router.put("/site-settings", requireAdmin, async (req, res) => {
     if (data.appleTouchIconUrl !== undefined) updates.push({ key: "apple_touch_icon_url", value: data.appleTouchIconUrl });
     if (data.pwaIcon192Url !== undefined) updates.push({ key: "pwa_icon_192_url", value: data.pwaIcon192Url });
     if (data.pwaIcon512Url !== undefined) updates.push({ key: "pwa_icon_512_url", value: data.pwaIcon512Url });
+    if (data.sheinGeneralUrl !== undefined) updates.push({ key: "shein_general_url", value: data.sheinGeneralUrl });
+    if (data.amazonGeneralUrl !== undefined) updates.push({ key: "amazon_general_url", value: data.amazonGeneralUrl });
+    if (data.noonGeneralUrl !== undefined) updates.push({ key: "noon_general_url", value: data.noonGeneralUrl });
 
     for (const { key, value } of updates) {
       await db

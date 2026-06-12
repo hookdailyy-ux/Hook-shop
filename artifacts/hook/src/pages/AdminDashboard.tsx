@@ -2871,11 +2871,19 @@ function SettingsTab() {
   const [discoverLoading, setDiscoverLoading] = useState(false);
   const [discoverFetched, setDiscoverFetched] = useState(false);
 
+  const [sheinGeneralUrl, setSheinGeneralUrl] = useState("");
+  const [amazonGeneralUrl, setAmazonGeneralUrl] = useState("");
+  const [noonGeneralUrl, setNoonGeneralUrl] = useState("");
+  const [supplierLinksLoading, setSupplierLinksLoading] = useState(false);
+
   useEffect(() => {
     fetch(`${BASE}/api/site-settings`)
       .then((r) => r.json())
-      .then((d: { discoverMoreUrl?: string }) => {
+      .then((d: { discoverMoreUrl?: string; sheinGeneralUrl?: string; amazonGeneralUrl?: string; noonGeneralUrl?: string }) => {
         setDiscoverUrl(d.discoverMoreUrl ?? "");
+        setSheinGeneralUrl(d.sheinGeneralUrl ?? "");
+        setAmazonGeneralUrl(d.amazonGeneralUrl ?? "");
+        setNoonGeneralUrl(d.noonGeneralUrl ?? "");
         setDiscoverFetched(true);
       })
       .catch(() => setDiscoverFetched(true));
@@ -2925,6 +2933,28 @@ function SettingsTab() {
     }
   };
 
+  const handleSupplierLinksSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSupplierLinksLoading(true);
+    try {
+      const res = await fetch(`${BASE}/api/site-settings`, {
+        method: "PUT",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sheinGeneralUrl, amazonGeneralUrl, noonGeneralUrl }),
+      });
+      if (res.ok) {
+        toast({ title: "Supplier links saved" });
+      } else {
+        toast({ title: "Failed to save links", variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Network error. Please try again.", variant: "destructive" });
+    } finally {
+      setSupplierLinksLoading(false);
+    }
+  };
+
   const handleDiscoverSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setDiscoverLoading(true);
@@ -2957,6 +2987,70 @@ function SettingsTab() {
         <p className="text-xs text-muted-foreground tracking-wide">
           Manage links and admin credentials.
         </p>
+      </div>
+
+      {/* Supplier General Links */}
+      <div className="border border-border p-6">
+        <h3 className="text-xs tracking-widest uppercase font-medium mb-2">
+          Supplier General Links
+        </h3>
+        <p className="text-[10px] text-muted-foreground tracking-wide mb-5 leading-relaxed">
+          These links appear as <strong>"Explore More via SHEIN / Amazon / Noon"</strong> buttons in the basket under each supplier group.
+        </p>
+        <form onSubmit={handleSupplierLinksSave} className="space-y-4">
+          <div className="space-y-2">
+            <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+              SHEIN General Link
+            </label>
+            <Input
+              type="url"
+              value={sheinGeneralUrl}
+              onChange={(e) => setSheinGeneralUrl(e.target.value)}
+              placeholder="https://shein.com/..."
+              disabled={!discoverFetched}
+              className="border-border"
+              data-testid="input-shein-general-url"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+              Amazon General Link
+            </label>
+            <Input
+              type="url"
+              value={amazonGeneralUrl}
+              onChange={(e) => setAmazonGeneralUrl(e.target.value)}
+              placeholder="https://amazon.com/..."
+              disabled={!discoverFetched}
+              className="border-border"
+              data-testid="input-amazon-general-url"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+              Noon General Link
+            </label>
+            <Input
+              type="url"
+              value={noonGeneralUrl}
+              onChange={(e) => setNoonGeneralUrl(e.target.value)}
+              placeholder="https://noon.com/..."
+              disabled={!discoverFetched}
+              className="border-border"
+              data-testid="input-noon-general-url"
+            />
+          </div>
+          <div className="pt-1">
+            <Button
+              type="submit"
+              disabled={supplierLinksLoading || !discoverFetched}
+              className="text-xs tracking-widest uppercase"
+              data-testid="button-save-supplier-links"
+            >
+              {supplierLinksLoading ? "Saving..." : "Save Links"}
+            </Button>
+          </div>
+        </form>
       </div>
 
       {/* SHEIN Referral Link */}

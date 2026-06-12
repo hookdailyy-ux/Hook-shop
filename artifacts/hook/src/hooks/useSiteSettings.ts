@@ -23,6 +23,9 @@ export interface SiteSettings {
   appleTouchIconUrl: string;
   pwaIcon192Url: string;
   pwaIcon512Url: string;
+  sheinGeneralUrl: string;
+  amazonGeneralUrl: string;
+  noonGeneralUrl: string;
 }
 
 export function useSiteSettings() {
