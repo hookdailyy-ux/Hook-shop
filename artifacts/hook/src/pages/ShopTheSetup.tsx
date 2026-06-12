@@ -36,33 +36,58 @@ export default function ShopTheSetup() {
   const { data: siteImages } = useSiteImages();
   const sectionImage = siteImages?.setup;
   const { t } = useTranslation();
+  const hasImage = !!sectionImage?.imageUrl;
 
   return (
     <div className="pb-24">
-      {sectionImage?.imageUrl && (
-        <div className="w-full h-52 md:h-80 overflow-hidden relative">
-          <img
-            src={sectionImage.imageUrl}
-            alt=""
-            className="absolute w-full h-full"
-            style={{
-              objectFit: sectionImage.objectFit ?? "cover",
-              objectPosition: `${sectionImage.posX}% ${sectionImage.posY}%`,
-              transform: `scale(${sectionImage.scale / 100})`,
-              transformOrigin: `${sectionImage.posX}% ${sectionImage.posY}%`,
-            }}
-          />
+      {/* ── Unified hero: image + text overlay ── */}
+      <div
+        className={`relative w-full overflow-hidden border-b border-border bg-[#e8e0d4] ${
+          hasImage ? "min-h-[220px] md:min-h-[340px]" : ""
+        }`}
+      >
+        {hasImage && (
+          <>
+            <img
+              src={sectionImage!.imageUrl}
+              alt=""
+              className="absolute inset-0 w-full h-full"
+              style={{
+                objectFit: sectionImage!.objectFit ?? "cover",
+                objectPosition: `${sectionImage!.posX}% ${sectionImage!.posY}%`,
+                transform: `scale(${sectionImage!.scale / 100})`,
+                transformOrigin: `${sectionImage!.posX}% ${sectionImage!.posY}%`,
+              }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-black/10" />
+          </>
+        )}
+        <div className="relative z-10 container mx-auto px-4 sm:px-6 py-12 md:py-20">
+          <p
+            className={`text-[10px] tracking-[0.35em] uppercase mb-2 ${
+              hasImage ? "text-white/60" : "text-muted-foreground"
+            }`}
+          >
+            {t("shopTheSetup.badge")}
+          </p>
+          <h1
+            className={`font-serif text-4xl md:text-6xl font-light mb-2 ${
+              hasImage ? "text-white" : ""
+            }`}
+          >
+            {t("shopTheSetup.title")}
+          </h1>
+          <p
+            className={`text-xs tracking-widest uppercase max-w-sm leading-relaxed ${
+              hasImage ? "text-white/70" : "text-muted-foreground"
+            }`}
+          >
+            {t("shopTheSetup.description")}
+          </p>
         </div>
-      )}
-      <div className="container mx-auto px-4 sm:px-6 pt-10 pb-8 md:pt-14 md:pb-12 border-b border-border mb-12">
-        <p className="text-[10px] tracking-[0.35em] uppercase text-muted-foreground mb-2">{t("shopTheSetup.badge")}</p>
-        <h1 className="font-serif text-4xl md:text-6xl font-light mb-2">{t("shopTheSetup.title")}</h1>
-        <p className="text-xs tracking-widest uppercase text-muted-foreground max-w-sm leading-relaxed">
-          {t("shopTheSetup.description")}
-        </p>
       </div>
 
-      <div className="container mx-auto px-4 sm:px-6">
+      <div className="container mx-auto px-4 sm:px-6 mt-12">
         {isLoading ? (
           <div className="space-y-20">
             <SetupSkeleton />

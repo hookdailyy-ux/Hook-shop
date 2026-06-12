@@ -145,72 +145,75 @@ export default function CollectionShare() {
 
   return (
     <div>
-      {/* ── Hero cover image ── */}
-      {collection.coverImageUrl ? (
-        <div className="w-full aspect-[3/1] sm:aspect-[4/1] overflow-hidden -mx-0 mb-0">
-          <img
-            src={collection.coverImageUrl}
-            alt={collection.title}
-            className="w-full h-full"
-            style={{
-              objectFit: (collection.coverImageObjectFit as "cover" | "contain") || "cover",
-              objectPosition: `${collection.coverImagePosX ?? 50}% ${collection.coverImagePosY ?? 50}%`,
-              transform: `scale(${(collection.coverImageScale ?? 100) / 100})`,
-              transformOrigin: `${collection.coverImagePosX ?? 50}% ${collection.coverImagePosY ?? 50}%`,
-            }}
-          />
+      {/* ── Hero: image + text overlay ── */}
+      <div
+        className={`relative w-full overflow-hidden border-b border-border bg-[#e8e0d4] ${
+          collection.coverImageUrl ? "min-h-[260px] md:min-h-[400px]" : "min-h-[160px]"
+        }`}
+      >
+        {collection.coverImageUrl && (
+          <>
+            <img
+              src={collection.coverImageUrl}
+              alt={collection.title}
+              className="absolute inset-0 w-full h-full"
+              style={{
+                objectFit: (collection.coverImageObjectFit as "cover" | "contain") || "cover",
+                objectPosition: `${collection.coverImagePosX ?? 50}% ${collection.coverImagePosY ?? 50}%`,
+                transform: `scale(${(collection.coverImageScale ?? 100) / 100})`,
+                transformOrigin: `${collection.coverImagePosX ?? 50}% ${collection.coverImagePosY ?? 50}%`,
+              }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/20 to-black/70" />
+          </>
+        )}
+        <div className="absolute inset-0 flex flex-col justify-end">
+          <div className="container mx-auto px-4 sm:px-6 max-w-6xl pb-10">
+            <p
+              className={`text-[10px] tracking-[0.3em] uppercase mb-3 ${
+                collection.coverImageUrl ? "text-white/70" : "text-muted-foreground"
+              }`}
+            >
+              {collection.member.fullName} · Collection
+            </p>
+            <h1
+              className={`font-serif text-4xl sm:text-5xl font-light leading-tight mb-2 ${
+                collection.coverImageUrl ? "text-white" : ""
+              }`}
+            >
+              {collection.title}
+            </h1>
+            {collection.description && (
+              <p
+                className={`text-sm leading-relaxed max-w-lg ${
+                  collection.coverImageUrl ? "text-white/70" : "text-muted-foreground"
+                }`}
+              >
+                {collection.description}
+              </p>
+            )}
+          </div>
         </div>
-      ) : (
-        <div className="w-full aspect-[5/1] bg-accent/40" />
-      )}
+      </div>
 
       <div className="container mx-auto px-4 sm:px-6 max-w-6xl">
 
-        {/* ── Collection meta ── */}
-        <div className="pt-10 pb-8 border-b border-border">
-          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
-            <div className="max-w-xl">
-              <p className="text-[10px] tracking-[0.3em] uppercase text-muted-foreground mb-3">
-                {collection.member.fullName} · Collection
-              </p>
-              <h1 className="font-serif text-4xl sm:text-5xl font-light leading-tight mb-4">
-                {collection.title}
-              </h1>
-              {collection.description && (
-                <p className="text-sm text-muted-foreground leading-relaxed max-w-lg">
-                  {collection.description}
-                </p>
-              )}
+        {/* ── Stats + Share bar ── */}
+        <div className="py-5 flex flex-wrap items-center gap-3 border-b border-border">
+          {/* Stats */}
+          <div className="flex items-center gap-5 mr-auto">
+            <div className="text-center">
+              <p className="font-serif text-2xl font-light leading-none">{collection.productCount}</p>
+              <p className="text-[9px] tracking-widest uppercase text-muted-foreground mt-0.5">Products</p>
             </div>
-
-            {/* Stats */}
-            <div className="flex items-center gap-6 shrink-0">
-              <div className="text-center">
-                <p className="font-serif text-3xl font-light leading-none">
-                  {collection.productCount}
-                </p>
-                <p className="text-[9px] tracking-widest uppercase text-muted-foreground mt-1">
-                  Products
-                </p>
-              </div>
-              <div className="w-px h-10 bg-border" />
-              <div className="text-center">
-                <p className="font-serif text-3xl font-light leading-none">
-                  {collection.views.toLocaleString()}
-                </p>
-                <p className="text-[9px] tracking-widest uppercase text-muted-foreground mt-1">
-                  Views
-                </p>
-              </div>
+            <div className="w-px h-8 bg-border" />
+            <div className="text-center">
+              <p className="font-serif text-2xl font-light leading-none">{collection.views.toLocaleString()}</p>
+              <p className="text-[9px] tracking-widest uppercase text-muted-foreground mt-0.5">Views</p>
             </div>
           </div>
-        </div>
 
-        {/* ── Share bar ── */}
-        <div className="py-5 flex items-center gap-3 border-b border-border">
-          <p className="text-[10px] tracking-widest uppercase text-muted-foreground mr-1">
-            Share
-          </p>
+          {/* Share buttons */}
           <button
             onClick={() => void copyLink()}
             className="flex items-center gap-1.5 text-[10px] tracking-widest uppercase px-4 py-2 border border-border hover:border-foreground/40 transition-colors text-muted-foreground hover:text-foreground"
@@ -229,10 +232,10 @@ export default function CollectionShare() {
           </button>
           <button
             onClick={() => void share()}
-            className="flex items-center gap-1.5 text-[10px] tracking-widest uppercase px-4 py-2 border border-border hover:border-foreground/40 transition-colors text-muted-foreground hover:text-foreground"
+            className="flex items-center gap-1.5 text-[10px] tracking-widest uppercase px-4 py-2 border border-foreground/60 text-foreground hover:bg-foreground hover:text-background transition-colors"
           >
             <Share2 className="h-3 w-3" />
-            Share
+            Share This Collection
           </button>
         </div>
 

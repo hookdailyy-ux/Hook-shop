@@ -145,65 +145,88 @@ export default function LookShare() {
 
   return (
     <div>
-      {/* ── Hero ── */}
-      {look.coverImageUrl ? (
-        <div className="w-full aspect-[3/1] sm:aspect-[4/1] overflow-hidden">
-          <img src={look.coverImageUrl} alt={look.title} className="w-full h-full object-cover" />
-        </div>
-      ) : (
-        <div className="w-full aspect-[5/1] bg-accent/40" />
-      )}
-
-      <div className="container mx-auto px-4 sm:px-6 max-w-6xl">
-        {/* ── Meta ── */}
-        <div className="pt-10 pb-8 border-b border-border">
-          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
-            <div className="max-w-xl">
-              <p className="text-[10px] tracking-[0.3em] uppercase text-muted-foreground mb-3">
-                {look.member.fullName} · Look
+      {/* ── Hero: image + text overlay ── */}
+      <div
+        className={`relative w-full overflow-hidden border-b border-border bg-[#e8e0d4] ${
+          look.coverImageUrl ? "min-h-[260px] md:min-h-[400px]" : "min-h-[160px]"
+        }`}
+      >
+        {look.coverImageUrl && (
+          <>
+            <img
+              src={look.coverImageUrl}
+              alt={look.title}
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/20 to-black/70" />
+          </>
+        )}
+        <div className="absolute inset-0 flex flex-col justify-end">
+          <div className="container mx-auto px-4 sm:px-6 max-w-6xl pb-10">
+            <p
+              className={`text-[10px] tracking-[0.3em] uppercase mb-3 ${
+                look.coverImageUrl ? "text-white/70" : "text-muted-foreground"
+              }`}
+            >
+              {look.member.fullName} · Look
+            </p>
+            <h1
+              className={`font-serif text-4xl sm:text-5xl font-light leading-tight mb-2 ${
+                look.coverImageUrl ? "text-white" : ""
+              }`}
+            >
+              {look.title}
+            </h1>
+            {look.price && (
+              <p
+                className={`text-sm font-mono ${
+                  look.coverImageUrl ? "text-white/70" : "text-muted-foreground"
+                }`}
+              >
+                {look.price}
               </p>
-              <h1 className="font-serif text-4xl sm:text-5xl font-light leading-tight mb-3">
-                {look.title}
-              </h1>
-              {look.price && (
-                <p className="text-sm font-mono text-muted-foreground">{look.price}</p>
-              )}
-            </div>
-
-            {/* Stats */}
-            <div className="flex items-center gap-6 shrink-0">
-              <div className="text-center">
-                <p className="font-serif text-3xl font-light leading-none">{look.productCount}</p>
-                <p className="text-[9px] tracking-widest uppercase text-muted-foreground mt-1">Products</p>
-              </div>
-              <div className="w-px h-10 bg-border" />
-              <div className="text-center">
-                <p className="font-serif text-3xl font-light leading-none">{look.views.toLocaleString()}</p>
-                <p className="text-[9px] tracking-widest uppercase text-muted-foreground mt-1">Views</p>
-              </div>
-            </div>
+            )}
           </div>
         </div>
+      </div>
 
-        {/* ── Share bar ── */}
-        <div className="py-5 flex items-center gap-3 border-b border-border">
-          <p className="text-[10px] tracking-widest uppercase text-muted-foreground mr-1">Share</p>
+      <div className="container mx-auto px-4 sm:px-6 max-w-6xl">
+        {/* ── Stats + Share bar ── */}
+        <div className="py-5 flex flex-wrap items-center gap-3 border-b border-border">
+          {/* Stats */}
+          <div className="flex items-center gap-5 mr-auto">
+            <div className="text-center">
+              <p className="font-serif text-2xl font-light leading-none">{look.productCount}</p>
+              <p className="text-[9px] tracking-widest uppercase text-muted-foreground mt-0.5">Products</p>
+            </div>
+            <div className="w-px h-8 bg-border" />
+            <div className="text-center">
+              <p className="font-serif text-2xl font-light leading-none">{look.views.toLocaleString()}</p>
+              <p className="text-[9px] tracking-widest uppercase text-muted-foreground mt-0.5">Views</p>
+            </div>
+          </div>
+
+          {/* Share buttons */}
           <button
             onClick={() => void copyLink()}
             className="flex items-center gap-1.5 text-[10px] tracking-widest uppercase px-4 py-2 border border-border hover:border-foreground/40 transition-colors text-muted-foreground hover:text-foreground"
           >
-            {copiedLink ? <><Check className="h-3 w-3 text-green-600" /><span className="text-green-600">Copied!</span></> : <><Link2 className="h-3 w-3" />Copy Link</>}
+            {copiedLink ? (
+              <><Check className="h-3 w-3 text-green-600" /><span className="text-green-600">Copied!</span></>
+            ) : (
+              <><Link2 className="h-3 w-3" />Copy Link</>
+            )}
           </button>
           <button
             onClick={() => void share()}
-            className="flex items-center gap-1.5 text-[10px] tracking-widest uppercase px-4 py-2 border border-border hover:border-foreground/40 transition-colors text-muted-foreground hover:text-foreground"
+            className="flex items-center gap-1.5 text-[10px] tracking-widest uppercase px-4 py-2 border border-foreground/60 text-foreground hover:bg-foreground hover:text-background transition-colors"
           >
             <Share2 className="h-3 w-3" />
-            Share
+            Share This Look
           </button>
           <Link
             href={`/store/${look.member.username}`}
-            className="ml-auto flex items-center gap-1.5 text-[10px] tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors"
+            className="flex items-center gap-1.5 text-[10px] tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors"
           >
             <Eye className="h-3 w-3" />
             View Store

@@ -39,45 +39,74 @@ export default function ShopTheLook() {
   const sectionImage = siteImages?.look;
   const discoverMoreUrl = siteSettings?.discoverMoreUrl;
   const { t } = useTranslation();
+  const hasImage = !!sectionImage?.imageUrl;
 
   return (
     <div className="pb-24">
-      {sectionImage?.imageUrl && (
-        <div className="w-full h-52 md:h-80 overflow-hidden relative">
-          <img
-            src={sectionImage.imageUrl}
-            alt=""
-            className="absolute w-full h-full"
-            style={{
-              objectFit: sectionImage.objectFit ?? "cover",
-              objectPosition: `${sectionImage.posX}% ${sectionImage.posY}%`,
-              transform: `scale(${sectionImage.scale / 100})`,
-              transformOrigin: `${sectionImage.posX}% ${sectionImage.posY}%`,
-            }}
-          />
-        </div>
-      )}
-      <div className="container mx-auto px-4 sm:px-6 pt-10 pb-8 md:pt-14 md:pb-12 border-b border-border mb-12">
-        <p className="text-[10px] tracking-[0.35em] uppercase text-muted-foreground mb-2">{t("shopTheLook.badge")}</p>
-        <h1 className="font-serif text-4xl md:text-6xl font-light mb-2">{t("shopTheLook.title")}</h1>
-        <p className="text-xs tracking-widest uppercase text-muted-foreground max-w-sm leading-relaxed mb-5">
-          {t("shopTheLook.description")}
-        </p>
-        {discoverMoreUrl && (
-          <a
-            href={discoverMoreUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-[10px] tracking-[0.25em] uppercase border border-foreground/60 px-6 py-2.5 text-foreground/80 hover:bg-foreground hover:text-background transition-colors"
-            data-testid="button-discover-more-look"
-          >
-            <span>✨</span>
-            <span>{t("shopTheLook.exploreMore")}</span>
-          </a>
+      {/* ── Unified hero: image + text overlay ── */}
+      <div
+        className={`relative w-full overflow-hidden border-b border-border bg-[#e8e0d4] ${
+          hasImage ? "min-h-[220px] md:min-h-[340px]" : ""
+        }`}
+      >
+        {hasImage && (
+          <>
+            <img
+              src={sectionImage!.imageUrl}
+              alt=""
+              className="absolute inset-0 w-full h-full"
+              style={{
+                objectFit: sectionImage!.objectFit ?? "cover",
+                objectPosition: `${sectionImage!.posX}% ${sectionImage!.posY}%`,
+                transform: `scale(${sectionImage!.scale / 100})`,
+                transformOrigin: `${sectionImage!.posX}% ${sectionImage!.posY}%`,
+              }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-black/10" />
+          </>
         )}
+        <div className="relative z-10 container mx-auto px-4 sm:px-6 py-12 md:py-20">
+          <p
+            className={`text-[10px] tracking-[0.35em] uppercase mb-2 ${
+              hasImage ? "text-white/60" : "text-muted-foreground"
+            }`}
+          >
+            {t("shopTheLook.badge")}
+          </p>
+          <h1
+            className={`font-serif text-4xl md:text-6xl font-light mb-2 ${
+              hasImage ? "text-white" : ""
+            }`}
+          >
+            {t("shopTheLook.title")}
+          </h1>
+          <p
+            className={`text-xs tracking-widest uppercase max-w-sm leading-relaxed mb-5 ${
+              hasImage ? "text-white/70" : "text-muted-foreground"
+            }`}
+          >
+            {t("shopTheLook.description")}
+          </p>
+          {discoverMoreUrl && (
+            <a
+              href={discoverMoreUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`inline-flex items-center gap-2 text-[10px] tracking-[0.25em] uppercase border px-6 py-2.5 transition-colors ${
+                hasImage
+                  ? "border-white/60 text-white/80 hover:bg-white hover:text-foreground"
+                  : "border-foreground/60 text-foreground/80 hover:bg-foreground hover:text-background"
+              }`}
+              data-testid="button-discover-more-look"
+            >
+              <span>✨</span>
+              <span>{t("shopTheLook.exploreMore")}</span>
+            </a>
+          )}
+        </div>
       </div>
 
-      <div className="container mx-auto px-4 sm:px-6">
+      <div className="container mx-auto px-4 sm:px-6 mt-12">
         {isLoading ? (
           <div className="space-y-20">
             <LookSkeleton />

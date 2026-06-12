@@ -6,7 +6,7 @@ import { z } from "zod";
 
 const router: IRouter = Router();
 
-const VALID_KEYS = ["hero", "women", "men", "accessories", "home", "electronics", "look", "setup"] as const;
+const VALID_KEYS = ["hero", "women", "men", "couples", "kids", "accessories", "home", "electronics", "look", "setup", "favorites"] as const;
 type ImageKey = (typeof VALID_KEYS)[number];
 
 function isValidKey(key: string): key is ImageKey {
