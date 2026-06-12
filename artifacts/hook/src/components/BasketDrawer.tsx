@@ -9,8 +9,14 @@ import {
   ChevronUp,
   Check,
   Loader2,
+  Images,
 } from "lucide-react";
-import { useBasket, inferStore, type BasketItem } from "@/contexts/BasketContext";
+import {
+  useBasket,
+  inferStore,
+  type BasketItem,
+  type BasketGroup,
+} from "@/contexts/BasketContext";
 import { QuickViewModal, type QuickViewProduct } from "@/components/QuickViewModal";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useTranslation } from "react-i18next";
@@ -31,14 +37,31 @@ function BasketItemRow({
   item,
   onRemove,
   onQuickView,
+  checked,
+  onToggle,
 }: {
   item: BasketItem;
   onRemove: (key: string) => void;
   onQuickView: (item: BasketItem) => void;
+  checked?: boolean;
+  onToggle?: () => void;
 }) {
   return (
     <div className="py-5 px-4">
       <div className="flex gap-3 items-start">
+        {/* Subtle checkbox */}
+        {onToggle !== undefined && (
+          <button
+            type="button"
+            onClick={onToggle}
+            aria-label={checked ? "Deselect item" : "Select item"}
+            className="shrink-0 mt-1 w-4 h-4 border border-border flex items-center justify-center transition-colors hover:border-foreground/60"
+            style={{ background: checked ? "currentColor" : "transparent" }}
+          >
+            {checked && <Check className="h-2.5 w-2.5 text-background" strokeWidth={3} />}
+          </button>
+        )}
+
         {/* Image — clickable → QuickView */}
         <button
           onClick={() => onQuickView(item)}
@@ -54,10 +77,7 @@ function BasketItemRow({
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
-              <ShoppingBag
-                className="h-4 w-4 text-muted-foreground/20"
-                strokeWidth={1}
-              />
+              <ShoppingBag className="h-4 w-4 text-muted-foreground/20" strokeWidth={1} />
             </div>
           )}
         </button>
@@ -69,20 +89,15 @@ function BasketItemRow({
               {item.brand}
             </p>
           )}
-
-          {/* Name — clickable → QuickView */}
           <button
             onClick={() => onQuickView(item)}
             className="text-left text-xs font-medium leading-snug line-clamp-2 hover:underline decoration-1 underline-offset-2 transition-all w-full"
           >
             {item.productTitle}
           </button>
-
           {item.displayPrice && (
             <p className="text-xs font-semibold mt-1">{item.displayPrice}</p>
           )}
-
-          {/* Available Sizes — display only, no interaction */}
           {(item.availableSizes?.length ?? 0) > 0 && (
             <div className="mt-2">
               <p className="text-[9px] tracking-[0.25em] uppercase text-muted-foreground mb-0.5">
@@ -106,7 +121,7 @@ function BasketItemRow({
       </div>
 
       {/* ORDER NOW */}
-      <div className="mt-3 ml-[84px]">
+      <div className={`mt-3 ${onToggle !== undefined ? "ml-[104px]" : "ml-[84px]"}`}>
         <a
           href={item.affiliateUrl}
           target="_blank"
@@ -122,28 +137,55 @@ function BasketItemRow({
   );
 }
 
-// ── Store section (collapsible) ───────────────────────────────────────────────
+// ── Store section (collapsible + multi-select) ────────────────────────────────
 
 function StoreSection({
   storeName,
   items,
   onRemove,
+  onRemoveMultiple,
   onQuickView,
   exploreUrl,
 }: {
   storeName: string;
   items: BasketItem[];
   onRemove: (key: string) => void;
+  onRemoveMultiple: (keys: string[]) => void;
   onQuickView: (item: BasketItem) => void;
   exploreUrl: string;
 }) {
   const [expanded, setExpanded] = useState(true);
   const [sharing, setSharing] = useState(false);
   const [shared, setShared] = useState(false);
+  const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
   const { toast } = useToast();
 
   const meta = STORE_META[storeName] ?? STORE_META.Other;
   const totalItems = items.length;
+  const allSelected = totalItems > 0 && selectedKeys.size === totalItems;
+
+  const toggleItem = (key: string) => {
+    setSelectedKeys((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (allSelected) {
+      setSelectedKeys(new Set());
+    } else {
+      setSelectedKeys(new Set(items.map((i) => i.key)));
+    }
+  };
+
+  const deleteSelected = () => {
+    const keys = Array.from(selectedKeys);
+    onRemoveMultiple(keys);
+    setSelectedKeys(new Set());
+  };
 
   const handleShare = async () => {
     setSharing(true);
@@ -158,13 +200,8 @@ function StoreSection({
         setShared(true);
         setTimeout(() => setShared(false), 2500);
       } else {
-        // Fallback: open WhatsApp
         const encoded = encodeURIComponent(text);
-        window.open(
-          `https://wa.me/?text=${encoded}`,
-          "_blank",
-          "noopener,noreferrer"
-        );
+        window.open(`https://wa.me/?text=${encoded}`, "_blank", "noopener,noreferrer");
         setShared(true);
         setTimeout(() => setShared(false), 2500);
       }
@@ -203,21 +240,54 @@ function StoreSection({
       {/* Expanded content */}
       {expanded && (
         <>
+          {/* Select All row */}
+          <div className="px-4 py-2 border-b border-border/40 flex items-center justify-between">
+            <label className="flex items-center gap-2 cursor-pointer text-[10px] tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors select-none">
+              <button
+                type="button"
+                onClick={toggleSelectAll}
+                aria-label={allSelected ? "Deselect all" : "Select all"}
+                className="w-4 h-4 border border-border flex items-center justify-center transition-colors hover:border-foreground/60"
+                style={{ background: allSelected ? "currentColor" : "transparent" }}
+              >
+                {allSelected && <Check className="h-2.5 w-2.5 text-background" strokeWidth={3} />}
+              </button>
+              Select All
+            </label>
+            {selectedKeys.size > 0 && (
+              <button
+                onClick={deleteSelected}
+                className="text-[9px] tracking-widest uppercase text-destructive hover:opacity-70 transition-opacity"
+                data-testid={`button-delete-selected-${storeName}`}
+              >
+                Delete Selected ({selectedKeys.size})
+              </button>
+            )}
+          </div>
+
           {/* Items */}
           <div className="divide-y divide-border/40">
             {items.map((item) => (
               <BasketItemRow
                 key={item.key}
                 item={item}
-                onRemove={onRemove}
+                onRemove={(key) => {
+                  setSelectedKeys((prev) => {
+                    const next = new Set(prev);
+                    next.delete(key);
+                    return next;
+                  });
+                  onRemove(key);
+                }}
                 onQuickView={onQuickView}
+                checked={selectedKeys.has(item.key)}
+                onToggle={() => toggleItem(item.key)}
               />
             ))}
           </div>
 
           {/* Footer: share + explore */}
           <div className="p-4 space-y-2 border-t border-border/60">
-            {/* Share Basket */}
             <button
               onClick={() => void handleShare()}
               disabled={sharing}
@@ -238,8 +308,6 @@ function StoreSection({
                 </>
               )}
             </button>
-
-            {/* Explore More via Store */}
             {exploreUrl && (
               <a
                 href={exploreUrl}
@@ -259,14 +327,106 @@ function StoreSection({
   );
 }
 
+// ── Look / Setup group section ────────────────────────────────────────────────
+
+function GroupSection({
+  group,
+  onRemoveGroup,
+  onRemoveGroupItem,
+  onQuickView,
+}: {
+  group: BasketGroup;
+  onRemoveGroup: (groupId: string) => void;
+  onRemoveGroupItem: (groupId: string, key: string) => void;
+  onQuickView: (item: BasketItem) => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const label = group.type === "look" ? "SHOP THE LOOK" : "SHOP THE SETUP";
+
+  return (
+    <div className="border border-border">
+      {/* Group header */}
+      <div className="px-4 py-3.5 bg-accent/30 flex items-start gap-3">
+        {/* Thumbnail */}
+        <div
+          className="w-12 h-14 shrink-0 overflow-hidden bg-[#e8e0d4]"
+        >
+          {group.imageUrl ? (
+            <img
+              src={group.imageUrl}
+              alt={group.title}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <Images className="h-4 w-4 text-muted-foreground/30" strokeWidth={1} />
+            </div>
+          )}
+        </div>
+
+        {/* Info + controls */}
+        <div className="flex-1 min-w-0">
+          <p className="text-[9px] tracking-[0.3em] uppercase text-muted-foreground mb-0.5">
+            {label}
+          </p>
+          <p className="text-xs font-medium line-clamp-1 leading-snug">{group.title}</p>
+          <p className="text-[9px] text-muted-foreground mt-0.5">
+            {group.items.length} {group.items.length === 1 ? "item" : "items"}
+          </p>
+        </div>
+
+        {/* Expand toggle + delete */}
+        <div className="flex items-center gap-1 shrink-0 mt-0.5">
+          <button
+            onClick={() => setExpanded((v) => !v)}
+            aria-label={expanded ? "Collapse group" : "Expand group"}
+            className="text-muted-foreground hover:text-foreground transition-colors p-1"
+          >
+            {expanded ? (
+              <ChevronUp className="h-3.5 w-3.5" />
+            ) : (
+              <ChevronDown className="h-3.5 w-3.5" />
+            )}
+          </button>
+          <button
+            onClick={() => onRemoveGroup(group.id)}
+            aria-label="Remove group"
+            className="text-muted-foreground hover:text-destructive transition-colors p-1"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      </div>
+
+      {/* Expanded items */}
+      {expanded && (
+        <div className="divide-y divide-border/40">
+          {group.items.map((item) => (
+            <BasketItemRow
+              key={item.key}
+              item={item}
+              onRemove={(key) => onRemoveGroupItem(group.id, key)}
+              onQuickView={onQuickView}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Basket drawer ─────────────────────────────────────────────────────────────
 
 export function BasketDrawer() {
   const {
     items,
+    groups,
     isOpen,
     closeBasket,
     removeItem,
+    removeItems,
+    removeGroup,
+    removeGroupItem,
     clearBasket,
     totalItems,
     currentMemberUsername,
@@ -275,10 +435,8 @@ export function BasketDrawer() {
   const { t } = useTranslation();
   const { data: settings } = useSiteSettings();
 
-  // QuickView state — null = closed
   const [quickViewItem, setQuickViewItem] = useState<BasketItem | null>(null);
 
-  // Per-store general affiliate links from admin settings
   const generalLinks: Record<string, string> = {
     SHEIN: settings?.sheinGeneralUrl ?? "",
     Amazon: settings?.amazonGeneralUrl ?? "",
@@ -286,7 +444,7 @@ export function BasketDrawer() {
     Other: settings?.sheinGeneralUrl ?? "",
   };
 
-  // Group items by store
+  // Group individual items by store
   const storeGroups = items.reduce<Record<string, BasketItem[]>>(
     (acc, item) => {
       const store = item.productSource || inferStore(item.affiliateUrl);
@@ -300,7 +458,8 @@ export function BasketDrawer() {
   const storeOrder = ["SHEIN", "Amazon", "Noon", "Other"];
   const activeStores = storeOrder.filter((s) => storeGroups[s]?.length);
 
-  // Build QuickViewProduct from a basket item
+  const hasContent = totalItems > 0;
+
   const quickViewProduct: QuickViewProduct | null = quickViewItem
     ? {
         id: quickViewItem.productId,
@@ -340,7 +499,7 @@ export function BasketDrawer() {
             )}
           </div>
           <div className="flex items-center gap-1">
-            {items.length > 0 && (
+            {hasContent && (
               <button
                 onClick={clearBasket}
                 className="text-[9px] tracking-widest uppercase text-muted-foreground hover:text-destructive transition-colors px-2 py-1"
@@ -361,7 +520,7 @@ export function BasketDrawer() {
 
         {/* Body */}
         <div className="flex-1 overflow-y-auto">
-          {items.length === 0 ? (
+          {!hasContent ? (
             <div className="flex flex-col items-center justify-center h-full pb-20 text-center px-8">
               <ShoppingBag
                 className="h-14 w-14 text-muted-foreground/10 mb-4"
@@ -386,13 +545,25 @@ export function BasketDrawer() {
                 )}
               </p>
 
-              {/* Collapsible store sections */}
+              {/* Look / Setup groups */}
+              {groups.map((group) => (
+                <GroupSection
+                  key={group.id}
+                  group={group}
+                  onRemoveGroup={removeGroup}
+                  onRemoveGroupItem={removeGroupItem}
+                  onQuickView={setQuickViewItem}
+                />
+              ))}
+
+              {/* Individual store sections */}
               {activeStores.map((store) => (
                 <StoreSection
                   key={store}
                   storeName={store}
                   items={storeGroups[store]}
                   onRemove={removeItem}
+                  onRemoveMultiple={removeItems}
                   onQuickView={setQuickViewItem}
                   exploreUrl={generalLinks[store] ?? ""}
                 />
@@ -402,7 +573,7 @@ export function BasketDrawer() {
         </div>
       </div>
 
-      {/* QuickView modal — rendered after drawer in DOM, appears on top */}
+      {/* QuickView modal */}
       {quickViewProduct && (
         <QuickViewModal
           product={quickViewProduct}

@@ -9,6 +9,7 @@ import {
 import type { Look } from "@workspace/api-client-react";
 import { LookCard } from "@/components/LookCard";
 import { useBasket, inferStore } from "@/contexts/BasketContext";
+
 import { ShoppingCart, Check, ArrowLeft, ShoppingBag } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -56,7 +57,7 @@ export default function LookDetail() {
   const id = Number(params.id);
   const { t } = useTranslation();
   const [addedAll, setAddedAll] = useState(false);
-  const { addItem, openBasket } = useBasket();
+  const { addGroup, openBasket } = useBasket();
 
   const { data: look, isLoading, isError } = useGetLook(id, {
     query: { queryKey: getGetLookQueryKey(id), enabled: !!id && !isNaN(id) },
@@ -70,8 +71,12 @@ export default function LookDetail() {
 
   const handleAddAll = () => {
     if (!look?.products?.length) return;
-    look.products.forEach((product) => {
-      addItem({
+    addGroup({
+      type: "look",
+      title: look.title,
+      imageUrl: look.imageUrl ?? null,
+      collectionId: look.id,
+      items: look.products.map((product) => ({
         productId: product.id,
         productTitle: product.title,
         productImageUrl: product.imageUrl ?? null,
@@ -88,9 +93,9 @@ export default function LookDetail() {
         sourceMemberId: 0,
         sourceMemberUsername: "",
         sourceMemberName: "",
-        sourceContext: "look",
+        sourceContext: "look" as const,
         sourceToken: null,
-      });
+      })),
     });
     setAddedAll(true);
     setTimeout(() => {

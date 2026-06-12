@@ -9,6 +9,7 @@ import {
 import type { Setup } from "@workspace/api-client-react";
 import { SetupCard } from "@/components/SetupCard";
 import { useBasket, inferStore } from "@/contexts/BasketContext";
+
 import { ShoppingCart, Check, ArrowLeft, ShoppingBag } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -56,7 +57,7 @@ export default function SetupDetail() {
   const id = Number(params.id);
   const { t } = useTranslation();
   const [addedAll, setAddedAll] = useState(false);
-  const { addItem, openBasket } = useBasket();
+  const { addGroup, openBasket } = useBasket();
 
   const { data: setup, isLoading, isError } = useGetSetup(id, {
     query: { queryKey: getGetSetupQueryKey(id), enabled: !!id && !isNaN(id) },
@@ -70,8 +71,12 @@ export default function SetupDetail() {
 
   const handleAddAll = () => {
     if (!setup?.products?.length) return;
-    setup.products.forEach((product) => {
-      addItem({
+    addGroup({
+      type: "setup",
+      title: setup.title,
+      imageUrl: setup.imageUrl ?? null,
+      collectionId: setup.id,
+      items: setup.products.map((product) => ({
         productId: product.id,
         productTitle: product.title,
         productImageUrl: product.imageUrl ?? null,
@@ -88,9 +93,9 @@ export default function SetupDetail() {
         sourceMemberId: 0,
         sourceMemberUsername: "",
         sourceMemberName: "",
-        sourceContext: "look",
+        sourceContext: "look" as const,
         sourceToken: null,
-      });
+      })),
     });
     setAddedAll(true);
     setTimeout(() => {
