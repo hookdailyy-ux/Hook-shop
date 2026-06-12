@@ -105,7 +105,7 @@ export default function Home() {
           <div className="flex items-end justify-between mb-10 md:mb-12">
             <div>
               <p className="text-[10px] tracking-[0.3em] uppercase text-muted-foreground mb-1.5">{t("home.editorialBadge")}</p>
-              <h2 className="font-serif text-3xl md:text-4xl font-light">{t("home.shopTheLook")}</h2>
+              <Link href="/shop-the-look"><h2 className="font-serif text-3xl md:text-4xl font-light hover:opacity-70 transition-opacity">{t("home.shopTheLook")}</h2></Link>
             </div>
             <Link href="/shop-the-look" className="text-[10px] tracking-[0.2em] uppercase border-b border-foreground pb-0.5 hover:opacity-70 transition-opacity">
               View All
@@ -152,7 +152,7 @@ export default function Home() {
           <div className="flex items-end justify-between mb-10 md:mb-12">
             <div>
               <p className="text-[10px] tracking-[0.3em] uppercase text-muted-foreground mb-1.5">{t("home.interiorsBadge")}</p>
-              <h2 className="font-serif text-3xl md:text-4xl font-light">{t("home.shopTheSetup")}</h2>
+              <Link href="/shop-the-setup"><h2 className="font-serif text-3xl md:text-4xl font-light hover:opacity-70 transition-opacity">{t("home.shopTheSetup")}</h2></Link>
             </div>
             <Link href="/shop-the-setup" className="text-[10px] tracking-[0.2em] uppercase border-b border-foreground pb-0.5 hover:opacity-70 transition-opacity">
               View All

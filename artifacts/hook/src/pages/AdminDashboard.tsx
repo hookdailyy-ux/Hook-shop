@@ -4345,9 +4345,30 @@ function SectionImageCard({
     },
   });
 
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+
   const handleFile = (file: File) => {
     if (!file.type.startsWith("image/")) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setCropSrc(e.target?.result as string);
+      setPendingFile(file);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleCropConfirm = (blob: Blob) => {
+    const file = new File([blob], pendingFile?.name ?? "image.jpg", { type: "image/jpeg" });
     void uploadFile(file);
+    setCropSrc(null);
+    setPendingFile(null);
+  };
+
+  const handleCropSkip = () => {
+    if (pendingFile) void uploadFile(pendingFile);
+    setCropSrc(null);
+    setPendingFile(null);
   };
 
   const btnClass =
@@ -4597,6 +4618,13 @@ function SectionImageCard({
           }}
         />
       </div>
+      {cropSrc && (
+        <CropModal
+          imageSrc={cropSrc}
+          onConfirm={handleCropConfirm}
+          onSkip={handleCropSkip}
+        />
+      )}
     </>
   );
 }
