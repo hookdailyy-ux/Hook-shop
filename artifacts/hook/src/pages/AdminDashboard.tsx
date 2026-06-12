@@ -50,6 +50,7 @@ import {
   SingleImageUpload,
   MultiImageUpload,
 } from "@/components/ImageUploadField";
+import { CropModal } from "@/components/CropModal";
 import { useUpload } from "@workspace/object-storage-web";
 import {
   useSiteImages,
@@ -2168,6 +2169,7 @@ function LookDialog({ look }: { look?: Look }) {
     title: look?.title ?? "",
     description: look?.description ?? "",
     imageUrl: look?.imageUrl ?? "",
+    images: Array.isArray((look as any)?.images) ? (look as any).images as string[] : [],
     imagePosX: look?.imagePosX ?? 50,
     imagePosY: look?.imagePosY ?? 50,
     imageScale: look?.imageScale ?? 100,
@@ -2183,6 +2185,7 @@ function LookDialog({ look }: { look?: Look }) {
         title: look?.title ?? "",
         description: look?.description ?? "",
         imageUrl: look?.imageUrl ?? "",
+        images: Array.isArray((look as any)?.images) ? (look as any).images as string[] : [],
         imagePosX: look?.imagePosX ?? 50,
         imagePosY: look?.imagePosY ?? 50,
         imageScale: look?.imageScale ?? 100,
@@ -2208,6 +2211,13 @@ function LookDialog({ look }: { look?: Look }) {
           imageUrl: `${lookCardBase}/api/storage${res.objectPath}`,
         })),
     });
+  const [lookCropSrc, setLookCropSrc] = useState<string | null>(null);
+  const [lookPendingFile, setLookPendingFile] = useState<File | null>(null);
+  const openLookCrop = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = (e) => { setLookPendingFile(file); setLookCropSrc(e.target?.result as string); };
+    reader.readAsDataURL(file);
+  };
   const lookBtnClass =
     "w-8 h-8 border border-border flex items-center justify-center text-sm hover:bg-accent transition-colors select-none";
 
@@ -2232,6 +2242,7 @@ function LookDialog({ look }: { look?: Look }) {
       title: form.title,
       description: form.description || undefined,
       imageUrl: form.imageUrl || undefined,
+      images: form.images,
       imagePosX: form.imagePosX,
       imagePosY: form.imagePosY,
       imageScale: form.imageScale,
@@ -2337,6 +2348,23 @@ function LookDialog({ look }: { look?: Look }) {
                   </button>
                 )}
               </div>
+              {lookCropSrc && (
+                <CropModal
+                  imageSrc={lookCropSrc}
+                  onConfirm={async (blob) => {
+                    setLookCropSrc(null);
+                    const file = new File([blob], lookPendingFile?.name ?? "cover.jpg", { type: "image/jpeg" });
+                    setLookPendingFile(null);
+                    await uploadLookImage(file);
+                  }}
+                  onSkip={async () => {
+                    const file = lookPendingFile;
+                    setLookCropSrc(null);
+                    setLookPendingFile(null);
+                    if (file) await uploadLookImage(file);
+                  }}
+                />
+              )}
               <input
                 ref={lookImageInputRef}
                 type="file"
@@ -2344,7 +2372,7 @@ function LookDialog({ look }: { look?: Look }) {
                 className="hidden"
                 onChange={(e) => {
                   const f = e.target.files?.[0];
-                  if (f) void uploadLookImage(f);
+                  if (f) openLookCrop(f);
                   e.target.value = "";
                 }}
               />
@@ -2486,6 +2514,11 @@ function LookDialog({ look }: { look?: Look }) {
                 </div>
               )}
             </div>
+            <MultiImageUpload
+              label="Gallery Images"
+              values={form.images}
+              onChange={(urls) => setForm((f) => ({ ...f, images: urls }))}
+            />
             <div className="space-y-2">
               <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
                 Description
@@ -2782,6 +2815,7 @@ function SetupDialog({ setup }: { setup?: Setup }) {
     title: setup?.title ?? "",
     description: setup?.description ?? "",
     imageUrl: setup?.imageUrl ?? "",
+    images: Array.isArray((setup as any)?.images) ? (setup as any).images as string[] : [],
     imagePosX: setup?.imagePosX ?? 50,
     imagePosY: setup?.imagePosY ?? 50,
     imageScale: setup?.imageScale ?? 100,
@@ -2797,6 +2831,7 @@ function SetupDialog({ setup }: { setup?: Setup }) {
         title: setup?.title ?? "",
         description: setup?.description ?? "",
         imageUrl: setup?.imageUrl ?? "",
+        images: Array.isArray((setup as any)?.images) ? (setup as any).images as string[] : [],
         imagePosX: setup?.imagePosX ?? 50,
         imagePosY: setup?.imagePosY ?? 50,
         imageScale: setup?.imageScale ?? 100,
@@ -2822,6 +2857,13 @@ function SetupDialog({ setup }: { setup?: Setup }) {
           imageUrl: `${setupCardBase}/api/storage${res.objectPath}`,
         })),
     });
+  const [setupCropSrc, setSetupCropSrc] = useState<string | null>(null);
+  const [setupPendingFile, setSetupPendingFile] = useState<File | null>(null);
+  const openSetupCrop = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = (e) => { setSetupPendingFile(file); setSetupCropSrc(e.target?.result as string); };
+    reader.readAsDataURL(file);
+  };
   const setupBtnClass =
     "w-8 h-8 border border-border flex items-center justify-center text-sm hover:bg-accent transition-colors select-none";
 
@@ -2846,6 +2888,7 @@ function SetupDialog({ setup }: { setup?: Setup }) {
       title: form.title,
       description: form.description || undefined,
       imageUrl: form.imageUrl || undefined,
+      images: form.images,
       imagePosX: form.imagePosX,
       imagePosY: form.imagePosY,
       imageScale: form.imageScale,
@@ -2949,6 +2992,23 @@ function SetupDialog({ setup }: { setup?: Setup }) {
                   </button>
                 )}
               </div>
+              {setupCropSrc && (
+                <CropModal
+                  imageSrc={setupCropSrc}
+                  onConfirm={async (blob) => {
+                    setSetupCropSrc(null);
+                    const file = new File([blob], setupPendingFile?.name ?? "cover.jpg", { type: "image/jpeg" });
+                    setSetupPendingFile(null);
+                    await uploadSetupImage(file);
+                  }}
+                  onSkip={async () => {
+                    const file = setupPendingFile;
+                    setSetupCropSrc(null);
+                    setSetupPendingFile(null);
+                    if (file) await uploadSetupImage(file);
+                  }}
+                />
+              )}
               <input
                 ref={setupImageInputRef}
                 type="file"
@@ -2956,7 +3016,7 @@ function SetupDialog({ setup }: { setup?: Setup }) {
                 className="hidden"
                 onChange={(e) => {
                   const f = e.target.files?.[0];
-                  if (f) void uploadSetupImage(f);
+                  if (f) openSetupCrop(f);
                   e.target.value = "";
                 }}
               />
@@ -3064,6 +3124,11 @@ function SetupDialog({ setup }: { setup?: Setup }) {
                 </div>
               )}
             </div>
+            <MultiImageUpload
+              label="Gallery Images"
+              values={form.images}
+              onChange={(urls) => setForm((f) => ({ ...f, images: urls }))}
+            />
             <div className="space-y-2">
               <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
                 Description

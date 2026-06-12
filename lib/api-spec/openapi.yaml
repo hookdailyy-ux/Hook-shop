@@ -730,6 +730,10 @@ components:
           type: ["string", "null"]
         imageUrl:
           type: ["string", "null"]
+        images:
+          type: array
+          items:
+            type: string
         imagePosX:
           type: integer
         imagePosY:
@@ -753,6 +757,10 @@ components:
           type: string
         imageUrl:
           type: string
+        images:
+          type: array
+          items:
+            type: string
         imagePosX:
           type: integer
         imagePosY:
@@ -773,6 +781,10 @@ components:
           type: string
         imageUrl:
           type: string
+        images:
+          type: array
+          items:
+            type: string
         imagePosX:
           type: integer
         imagePosY:
@@ -796,6 +808,10 @@ components:
           type: ["string", "null"]
         imageUrl:
           type: ["string", "null"]
+        images:
+          type: array
+          items:
+            type: string
         imagePosX:
           type: integer
         imagePosY:
@@ -819,6 +835,10 @@ components:
           type: string
         imageUrl:
           type: string
+        images:
+          type: array
+          items:
+            type: string
         imagePosX:
           type: integer
         imagePosY:
@@ -839,6 +859,10 @@ components:
           type: string
         imageUrl:
           type: string
+        images:
+          type: array
+          items:
+            type: string
         imagePosX:
           type: integer
         imagePosY:

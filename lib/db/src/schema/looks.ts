@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, timestamp, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { teamMembersTable } from "./team";
@@ -9,6 +9,7 @@ export const looksTable = pgTable("looks", {
   title: text("title").notNull(),
   description: text("description"),
   imageUrl: text("image_url"),
+  images: jsonb("images").$type<string[]>().notNull().default([]),
   imagePosX: integer("image_pos_x").notNull().default(50),
   imagePosY: integer("image_pos_y").notNull().default(50),
   imageScale: integer("image_scale").notNull().default(100),

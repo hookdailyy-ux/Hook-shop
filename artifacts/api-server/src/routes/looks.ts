@@ -41,6 +41,7 @@ router.post("/looks", async (req, res) => {
       title: z.string().min(1),
       description: z.string().optional(),
       imageUrl: z.string().optional(),
+      images: z.array(z.string()).optional(),
       imagePosX: z.number().int().min(0).max(100).optional(),
       imagePosY: z.number().int().min(0).max(100).optional(),
       imageScale: z.number().int().min(50).max(200).optional(),
@@ -52,6 +53,7 @@ router.post("/looks", async (req, res) => {
       title: data.title,
       description: data.description ?? null,
       imageUrl: data.imageUrl ?? null,
+      images: data.images ?? [],
       imagePosX: data.imagePosX ?? 50,
       imagePosY: data.imagePosY ?? 50,
       imageScale: data.imageScale ?? 100,
@@ -89,6 +91,7 @@ router.patch("/looks/:id", async (req, res) => {
       title: z.string().optional(),
       description: z.string().optional(),
       imageUrl: z.string().optional(),
+      images: z.array(z.string()).optional(),
       imagePosX: z.number().int().min(0).max(100).optional(),
       imagePosY: z.number().int().min(0).max(100).optional(),
       imageScale: z.number().int().min(50).max(200).optional(),
@@ -100,6 +103,7 @@ router.patch("/looks/:id", async (req, res) => {
     if (data.title) updateData.title = data.title;
     if (data.description !== undefined) updateData.description = data.description;
     if (data.imageUrl !== undefined) updateData.imageUrl = data.imageUrl;
+    if (data.images !== undefined) updateData.images = data.images;
     if (data.imagePosX !== undefined) updateData.imagePosX = data.imagePosX;
     if (data.imagePosY !== undefined) updateData.imagePosY = data.imagePosY;
     if (data.imageScale !== undefined) updateData.imageScale = data.imageScale;

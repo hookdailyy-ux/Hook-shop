@@ -14,6 +14,7 @@ export interface Setup {
   description?: string | null;
   /** @nullable */
   imageUrl?: string | null;
+  images?: string[];
   imagePosX?: number;
   imagePosY?: number;
   imageScale?: number;

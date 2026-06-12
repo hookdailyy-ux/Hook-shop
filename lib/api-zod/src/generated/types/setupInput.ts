@@ -10,6 +10,7 @@ export interface SetupInput {
   title: string;
   description?: string;
   imageUrl?: string;
+  images?: string[];
   imagePosX?: number;
   imagePosY?: number;
   imageScale?: number;

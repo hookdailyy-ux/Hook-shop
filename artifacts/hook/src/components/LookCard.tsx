@@ -200,11 +200,11 @@ export function LookCard({ look }: LookCardProps) {
   const { t } = useTranslation();
   const [quickViewProduct, setQuickViewProduct] = useState<QuickViewProduct | null>(null);
 
-  // Gallery slides: cover image + unique product images
+  // Gallery slides: cover image + look's own gallery images (no product images)
   const slides: string[] = [];
   if (look.imageUrl) slides.push(look.imageUrl);
-  (look.products ?? []).forEach((p) => {
-    if (p.imageUrl && !slides.includes(p.imageUrl)) slides.push(p.imageUrl);
+  ((look as any).images ?? []).forEach((url: string) => {
+    if (url && !slides.includes(url)) slides.push(url);
   });
 
   const hasProducts = (look.products?.length ?? 0) > 0;

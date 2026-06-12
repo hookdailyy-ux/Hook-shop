@@ -244,6 +244,7 @@ export interface Look {
   description?: string | null;
   /** @nullable */
   imageUrl?: string | null;
+  images?: string[];
   imagePosX?: number;
   imagePosY?: number;
   imageScale?: number;
@@ -255,6 +256,7 @@ export interface LookInput {
   title: string;
   description?: string;
   imageUrl?: string;
+  images?: string[];
   imagePosX?: number;
   imagePosY?: number;
   imageScale?: number;
@@ -265,6 +267,7 @@ export interface LookUpdate {
   title?: string;
   description?: string;
   imageUrl?: string;
+  images?: string[];
   imagePosX?: number;
   imagePosY?: number;
   imageScale?: number;
@@ -278,6 +281,7 @@ export interface Setup {
   description?: string | null;
   /** @nullable */
   imageUrl?: string | null;
+  images?: string[];
   imagePosX?: number;
   imagePosY?: number;
   imageScale?: number;
@@ -289,6 +293,7 @@ export interface SetupInput {
   title: string;
   description?: string;
   imageUrl?: string;
+  images?: string[];
   imagePosX?: number;
   imagePosY?: number;
   imageScale?: number;
@@ -299,6 +304,7 @@ export interface SetupUpdate {
   title?: string;
   description?: string;
   imageUrl?: string;
+  images?: string[];
   imagePosX?: number;
   imagePosY?: number;
   imageScale?: number;
