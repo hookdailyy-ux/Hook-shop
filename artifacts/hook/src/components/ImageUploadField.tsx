@@ -2,8 +2,9 @@ import { useRef, useState, useCallback } from "react";
 import { useUpload } from "@workspace/object-storage-web";
 import { Upload, X, ImagePlus, Loader2 } from "lucide-react";
 import { CropModal } from "./CropModal";
+import { API_BASE } from "@/lib/apiBase";
 
-const BASE = ((import.meta.env.VITE_API_BASE_URL || import.meta.env.BASE_URL) as string).replace(/\/+$/, "");
+const BASE = API_BASE;
 
 function toServingUrl(objectPath: string): string {
   return `${BASE}/api/storage${objectPath}`;

@@ -1,5 +1,6 @@
 import { createContext, useContext, useCallback, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { API_BASE } from "@/lib/apiBase";
 
 export interface TeamMemberInfo {
   id: number;
@@ -35,7 +36,7 @@ interface TeamAuthState {
   refetch: () => void;
 }
 
-const BASE = ((import.meta.env.VITE_API_BASE_URL || import.meta.env.BASE_URL) as string).replace(/\/+$/, "");
+const BASE = API_BASE;
 
 async function fetchTeamMe(): Promise<MeResponse> {
   const res = await fetch(`${BASE}/api/team/auth/me`, { credentials: "include" });

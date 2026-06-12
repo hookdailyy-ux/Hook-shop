@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useCallback, ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { API_BASE } from "@/lib/apiBase";
 
 interface AdminAuthState {
   authenticated: boolean;
@@ -9,7 +10,7 @@ interface AdminAuthState {
   refetch: () => void;
 }
 
-const BASE = ((import.meta.env.VITE_API_BASE_URL || import.meta.env.BASE_URL) as string).replace(/\/+$/, "");
+const BASE = API_BASE;
 
 async function fetchMe(): Promise<{ authenticated: boolean }> {
   const res = await fetch(`${BASE}/api/auth/me`, { credentials: "include" });

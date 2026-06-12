@@ -4,8 +4,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Plus, Trash2, ChevronUp, ChevronDown, Mail, Send, Eye, ArrowLeft, Download, X } from "lucide-react";
+import { API_BASE } from "@/lib/apiBase";
 
-const BASE = ((import.meta.env.VITE_API_BASE_URL || import.meta.env.BASE_URL) as string).replace(/\/+$/, "");
+const BASE = API_BASE;
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 

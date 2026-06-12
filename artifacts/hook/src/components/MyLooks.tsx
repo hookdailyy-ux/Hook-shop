@@ -19,8 +19,9 @@ import {
   Pencil,
   ExternalLink,
 } from "lucide-react";
+import { API_BASE } from "@/lib/apiBase";
 
-const BASE = ((import.meta.env.VITE_API_BASE_URL || import.meta.env.BASE_URL) as string).replace(/\/+$/, "");
+const BASE = API_BASE;
 
 export interface Look {
   id: number;

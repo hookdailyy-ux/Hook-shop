@@ -5,8 +5,9 @@ import { useToast } from "@/hooks/use-toast";
 import { AddToBasketModal } from "@/components/AddToBasketModal";
 import { ImageGallery } from "@/components/ImageGallery";
 import { useBasket, inferStore } from "@/contexts/BasketContext";
+import { API_BASE } from "@/lib/apiBase";
 
-const BASE = ((import.meta.env.VITE_API_BASE_URL || import.meta.env.BASE_URL) as string).replace(/\/+$/, "");
+const BASE = API_BASE;
 
 interface PublicLookProduct {
   id: number;

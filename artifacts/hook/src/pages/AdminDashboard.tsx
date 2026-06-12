@@ -66,6 +66,7 @@ import { AdminRewards } from "@/components/AdminRewards";
 import { AdminAnalytics } from "@/components/AdminAnalytics";
 import { NewsletterTab } from "@/components/NewsletterTab";
 import { ScrollableTabBar } from "@/components/ScrollableTabBar";
+import { API_BASE } from "@/lib/apiBase";
 
 type Tab =
   | "dashboard"
@@ -2202,7 +2203,7 @@ function LookDialog({ look }: { look?: Look }) {
   );
 
   const lookImageInputRef = useRef<HTMLInputElement>(null);
-  const lookCardBase = ((import.meta.env.VITE_API_BASE_URL || import.meta.env.BASE_URL) as string).replace(/\/+$/, "");
+  const lookCardBase = API_BASE;
   const { uploadFile: uploadLookImage, isUploading: isLookImageUploading } =
     useUpload({
       basePath: `${lookCardBase}/api/storage`,
@@ -2848,7 +2849,7 @@ function SetupDialog({ setup }: { setup?: Setup }) {
   );
 
   const setupImageInputRef = useRef<HTMLInputElement>(null);
-  const setupCardBase = ((import.meta.env.VITE_API_BASE_URL || import.meta.env.BASE_URL) as string).replace(/\/+$/, "");
+  const setupCardBase = API_BASE;
   const { uploadFile: uploadSetupImage, isUploading: isSetupImageUploading } =
     useUpload({
       basePath: `${setupCardBase}/api/storage`,
@@ -3442,7 +3443,7 @@ function CategoriesTab() {
   );
 }
 
-const BASE = ((import.meta.env.VITE_API_BASE_URL || import.meta.env.BASE_URL) as string).replace(/\/+$/, "");
+const BASE = API_BASE;
 
 function SettingsTab() {
   const { toast } = useToast();
@@ -4076,7 +4077,7 @@ function WhatsAppSection() {
 
 function IconsSection() {
   const { toast } = useToast();
-  const BASE_PATH = ((import.meta.env.VITE_API_BASE_URL || import.meta.env.BASE_URL) as string).replace(/\/+$/, "");
+  const BASE_PATH = API_BASE;
   const { uploadFile } = useUpload({ basePath: `${BASE_PATH}/api/storage` });
   const [icons, setIcons] = useState({
     faviconUrl: "",
@@ -4338,7 +4339,7 @@ function SectionImageCard({
   onFitToggle?: () => void;
 }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const cardBase = ((import.meta.env.VITE_API_BASE_URL || import.meta.env.BASE_URL) as string).replace(/\/+$/, "");
+  const cardBase = API_BASE;
   const { uploadFile, isUploading, progress } = useUpload({
     basePath: `${cardBase}/api/storage`,
     onSuccess: (res) => {

@@ -34,8 +34,9 @@ import {
   Copy,
   RotateCcw,
 } from "lucide-react";
+import { API_BASE } from "@/lib/apiBase";
 
-const BASE = ((import.meta.env.VITE_API_BASE_URL || import.meta.env.BASE_URL) as string).replace(/\/+$/, "");
+const BASE = API_BASE;
 
 interface TeamMember {
   id: number;

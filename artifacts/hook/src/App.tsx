@@ -30,11 +30,11 @@ import { BasketProvider } from "@/contexts/BasketContext";
 import { TeamMemberBar } from "@/components/TeamMemberBar";
 import { BasketDrawer } from "@/components/BasketDrawer";
 import BasketSharePage from "@/pages/BasketSharePage";
+import { API_BASE } from "@/lib/apiBase";
 
-// Point all generated API hooks at the deployed server when VITE_API_BASE_URL is set.
-// On Replit dev the var is absent and relative URLs are used (proxied locally).
-const _externalApi = import.meta.env.VITE_API_BASE_URL;
-if (_externalApi) setBaseUrl(_externalApi.replace(/\/+$/, ""));
+// When API_BASE is an absolute URL (non-Replit host or explicit VITE_API_BASE_URL),
+// configure generated API hooks to call that server directly.
+if (API_BASE.startsWith("http")) setBaseUrl(API_BASE);
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -181,7 +181,7 @@ function App() {
             <BasketProvider>
               <TooltipProvider>
                 <HeadManager />
-                <WouterRouter base={((import.meta.env.VITE_API_BASE_URL || import.meta.env.BASE_URL) as string).replace(/\/+$/, "")}>
+                <WouterRouter base={import.meta.env.BASE_URL.replace(/\/+$/, "")}>
                   <Router />
                 </WouterRouter>
                 <Toaster />
