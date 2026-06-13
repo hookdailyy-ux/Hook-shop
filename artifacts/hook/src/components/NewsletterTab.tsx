@@ -109,9 +109,10 @@ function SubscribersView() {
       const params = new URLSearchParams({ limit: "200" });
       if (q) params.set("search", q);
       const res = await fetch(`${BASE}/api/admin/newsletter/subscribers?${params}`, { credentials: "include" });
+      if (!res.ok) throw new Error(`${res.status}`);
       const data = await res.json() as { subscribers: Subscriber[]; total: number };
-      setSubscribers(data.subscribers);
-      setTotal(data.total);
+      setSubscribers(data.subscribers ?? []);
+      setTotal(data.total ?? 0);
     } catch {
       toast({ title: "Failed to load subscribers", variant: "destructive" });
     } finally {
@@ -277,7 +278,9 @@ function CampaignsView({ onEdit }: { onEdit: (c: Campaign | null) => void }) {
     setLoading(true);
     try {
       const res = await fetch(`${BASE}/api/admin/newsletter/campaigns`, { credentials: "include" });
-      setCampaigns(await res.json() as Campaign[]);
+      if (!res.ok) throw new Error(`${res.status}`);
+      const data = await res.json() as Campaign[];
+      setCampaigns(Array.isArray(data) ? data : []);
     } catch {
       toast({ title: "Failed to load campaigns", variant: "destructive" });
     } finally {
