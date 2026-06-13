@@ -3,6 +3,7 @@ import { useUpload } from "@workspace/object-storage-web";
 import { Upload, X, ImagePlus, Loader2 } from "lucide-react";
 import { CropModal } from "./CropModal";
 import { API_BASE, resolveImageUrl, toStorageUrl } from "@/lib/apiBase";
+import { useToast } from "@/hooks/use-toast";
 
 const BASE = API_BASE;
 
@@ -26,11 +27,15 @@ export function SingleImageUpload({ value, onChange, label = "Main Product Image
   const [isDragging, setIsDragging] = useState(false);
   const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const { toast } = useToast();
 
   const { uploadFile, isUploading, progress } = useUpload({
     basePath: `${BASE}/api/storage`,
     onSuccess: (res) => {
       onChange(toStorageUrl(res.objectPath));
+    },
+    onError: () => {
+      toast({ title: "Image upload failed. Please try again.", variant: "destructive" });
     },
   });
 
@@ -157,11 +162,15 @@ export function MultiImageUpload({ values, onChange, label = "Gallery Images" }:
   const [isDragging, setIsDragging] = useState(false);
   const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const { toast } = useToast();
 
   const { uploadFile, isUploading, progress } = useUpload({
     basePath: `${BASE}/api/storage`,
     onSuccess: (res) => {
       onChange([...values, toStorageUrl(res.objectPath)]);
+    },
+    onError: () => {
+      toast({ title: "Image upload failed. Please try again.", variant: "destructive" });
     },
   });
 

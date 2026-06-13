@@ -30,6 +30,11 @@ export function invalidateAdminTokenCache(): void {
   _cachedToken = undefined;
 }
 
+export async function checkAdminToken(token: string): Promise<boolean> {
+  const expected = await getExpectedToken();
+  return token === expected;
+}
+
 export async function requireAdmin(req: Request, res: Response, next: NextFunction) {
   if (req.session?.adminAuthenticated === true) {
     return next();

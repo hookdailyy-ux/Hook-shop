@@ -6,7 +6,7 @@ import {
 } from "@workspace/api-zod";
 import { ObjectStorageService, ObjectNotFoundError } from "../lib/objectStorage";
 import { ObjectPermission } from "../lib/objectAcl";
-import { requireAdmin } from "../middlewares/requireAdmin";
+import { checkAdminToken } from "../middlewares/requireAdmin";
 
 const router: IRouter = Router();
 const objectStorageService = new ObjectStorageService();
@@ -20,8 +20,13 @@ const objectStorageService = new ObjectStorageService();
  */
 router.post(
   "/storage/uploads/request-url",
-  (req, res, next) => {
+  async (req, res, next) => {
     if (req.session?.adminAuthenticated === true || Boolean(req.session?.teamMemberId)) {
+      next();
+      return;
+    }
+    const tokenHeader = req.headers["x-hook-admin"] as string | undefined;
+    if (tokenHeader && (await checkAdminToken(tokenHeader))) {
       next();
       return;
     }

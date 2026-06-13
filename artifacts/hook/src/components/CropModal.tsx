@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import Cropper from "react-easy-crop";
 import type { Area, Point } from "react-easy-crop";
 import { ZoomIn, ZoomOut } from "lucide-react";
@@ -48,6 +48,14 @@ interface CropModalProps {
 export function CropModal({ imageSrc, onConfirm, onSkip }: CropModalProps) {
   const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
+
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, []);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -67,7 +75,7 @@ export function CropModal({ imageSrc, onConfirm, onSkip }: CropModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-[700] bg-black/95 flex flex-col select-none">
+    <div className="fixed inset-0 z-[700] bg-black/95 flex flex-col select-none" style={{ paddingTop: "env(safe-area-inset-top)", paddingBottom: "env(safe-area-inset-bottom)" }}>
       <div className="flex items-center justify-between px-6 py-4 shrink-0">
         <p className="text-[10px] tracking-[0.35em] uppercase text-white/50">Crop Image</p>
         <p className="text-[9px] text-white/30 tracking-wide hidden sm:block">
