@@ -22,19 +22,6 @@ export default function Home() {
     { icon: Globe, label: t("benefits.worldwide") },
   ];
 
-  const LOOK_PLACEHOLDERS = [
-    { id: -1, title: "Weekend Casual" },
-    { id: -2, title: "Office Ready" },
-    { id: -3, title: "Evening Edit" },
-    { id: -4, title: "Street Style" },
-  ];
-  const SETUP_PLACEHOLDERS = [
-    { id: -1, title: "Bedroom Setup" },
-    { id: -2, title: "Setup" },
-    { id: -3, title: "Living Room" },
-    { id: -4, title: "Office Edit" },
-  ];
-
   return (
     <div className="flex flex-col">
 
@@ -101,98 +88,70 @@ export default function Home() {
       </section>
 
       {/* ── Shop The Look ── */}
-      <section className="py-16 md:py-24">
-        <div className="container mx-auto px-4 sm:px-6">
-          <div className="flex items-end justify-between mb-10 md:mb-12">
-            <div>
-              <p className="text-[10px] tracking-[0.3em] uppercase text-muted-foreground mb-1.5">{t("home.editorialBadge")}</p>
-              <Link href="/shop-the-look"><h2 className="font-serif text-3xl md:text-4xl font-light hover:opacity-70 transition-opacity">{t("home.shopTheLook")}</h2></Link>
+      {latestLooks && latestLooks.length > 0 && (
+        <section className="py-16 md:py-24">
+          <div className="container mx-auto px-4 sm:px-6">
+            <div className="flex items-end justify-between mb-10 md:mb-12">
+              <div>
+                <p className="text-[10px] tracking-[0.3em] uppercase text-muted-foreground mb-1.5">{t("home.editorialBadge")}</p>
+                <Link href="/shop-the-look"><h2 className="font-serif text-3xl md:text-4xl font-light hover:opacity-70 transition-opacity">{t("home.shopTheLook")}</h2></Link>
+              </div>
+              <Link href="/shop-the-look" className="text-[10px] tracking-[0.2em] uppercase border-b border-foreground pb-0.5 hover:opacity-70 transition-opacity">
+                View All
+              </Link>
             </div>
-            <Link href="/shop-the-look" className="text-[10px] tracking-[0.2em] uppercase border-b border-foreground pb-0.5 hover:opacity-70 transition-opacity">
-              View All
-            </Link>
-          </div>
-          <div className="no-scrollbar overflow-x-auto -mx-4 px-4 sm:-mx-6 sm:px-6 md:mx-0 md:px-0">
-            <div className="flex gap-3 w-max md:w-auto md:grid md:grid-cols-4 md:gap-5">
-              {(latestLooks && latestLooks.length > 0
-                ? latestLooks.slice(0, 4).map((look) => ({
-                    key: String(look.id),
-                    props: {
-                      title: look.title,
-                      href: `/shop-the-look/${look.id}`,
-                      imageUrl: look.imageUrl ?? undefined,
-                      label: t("shopTheLook.outfit"),
-                      cta: t("hero.cta"),
-                      favoriteItem: { id: look.id, type: "look" as const, title: look.title, imageUrl: look.imageUrl },
-                    },
-                  }))
-                : LOOK_PLACEHOLDERS.map((p) => ({
-                    key: String(p.id),
-                    props: {
-                      title: p.title,
-                      href: "/shop-the-look" as const,
-                      imageUrl: undefined,
-                      label: t("shopTheLook.outfit"),
-                      cta: t("hero.cta"),
-                      favoriteItem: { id: p.id, type: "look" as const, title: p.title },
-                    },
-                  }))
-              ).map(({ key, props }) => (
-                <div key={key} className="shrink-0 w-[calc(50vw-22px)] sm:w-[calc(50vw-28px)] md:w-auto md:shrink">
-                  <HomeEditorialCard {...props} />
-                </div>
-              ))}
+            <div className="no-scrollbar overflow-x-auto -mx-4 px-4 sm:-mx-6 sm:px-6 md:mx-0 md:px-0">
+              <div className="flex gap-3 w-max md:w-auto md:grid md:grid-cols-4 md:gap-5">
+                {latestLooks.slice(0, 4).map((look) => (
+                  <div key={look.id} className="shrink-0 w-[calc(50vw-22px)] sm:w-[calc(50vw-28px)] md:w-auto md:shrink">
+                    <HomeEditorialCard
+                      title={look.title}
+                      href={`/shop-the-look/${look.id}`}
+                      imageUrl={look.imageUrl ?? undefined}
+                      label={t("shopTheLook.outfit")}
+                      cta={t("hero.cta")}
+                      favoriteItem={{ id: look.id, type: "look", title: look.title, imageUrl: look.imageUrl }}
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* ── Shop The Setup ── */}
-      <section className="py-16 md:py-24 bg-[#f5f0e8]">
-        <div className="container mx-auto px-4 sm:px-6">
-          <div className="flex items-end justify-between mb-10 md:mb-12">
-            <div>
-              <p className="text-[10px] tracking-[0.3em] uppercase text-muted-foreground mb-1.5">{t("home.interiorsBadge")}</p>
-              <Link href="/shop-the-setup"><h2 className="font-serif text-3xl md:text-4xl font-light hover:opacity-70 transition-opacity">{t("home.shopTheSetup")}</h2></Link>
+      {latestSetups && latestSetups.length > 0 && (
+        <section className="py-16 md:py-24 bg-[#f5f0e8]">
+          <div className="container mx-auto px-4 sm:px-6">
+            <div className="flex items-end justify-between mb-10 md:mb-12">
+              <div>
+                <p className="text-[10px] tracking-[0.3em] uppercase text-muted-foreground mb-1.5">{t("home.interiorsBadge")}</p>
+                <Link href="/shop-the-setup"><h2 className="font-serif text-3xl md:text-4xl font-light hover:opacity-70 transition-opacity">{t("home.shopTheSetup")}</h2></Link>
+              </div>
+              <Link href="/shop-the-setup" className="text-[10px] tracking-[0.2em] uppercase border-b border-foreground pb-0.5 hover:opacity-70 transition-opacity">
+                View All
+              </Link>
             </div>
-            <Link href="/shop-the-setup" className="text-[10px] tracking-[0.2em] uppercase border-b border-foreground pb-0.5 hover:opacity-70 transition-opacity">
-              View All
-            </Link>
-          </div>
-          <div className="no-scrollbar overflow-x-auto -mx-4 px-4 sm:-mx-6 sm:px-6 md:mx-0 md:px-0">
-            <div className="flex gap-3 w-max md:w-auto md:grid md:grid-cols-4 md:gap-5">
-              {(latestSetups && latestSetups.length > 0
-                ? latestSetups.slice(0, 4).map((setup) => ({
-                    key: String(setup.id),
-                    props: {
-                      title: setup.title,
-                      href: `/shop-the-setup/${setup.id}`,
-                      imageUrl: setup.imageUrl ?? undefined,
-                      label: t("shopTheSetup.setup"),
-                      cta: t("home.shopTheSetup"),
-                      favoriteItem: { id: setup.id, type: "setup" as const, title: setup.title, imageUrl: setup.imageUrl },
-                    },
-                  }))
-                : SETUP_PLACEHOLDERS.map((p) => ({
-                    key: String(p.id),
-                    props: {
-                      title: p.title,
-                      href: "/shop-the-setup" as const,
-                      imageUrl: undefined,
-                      label: t("shopTheSetup.setup"),
-                      cta: t("home.shopTheSetup"),
-                      favoriteItem: { id: p.id, type: "setup" as const, title: p.title },
-                    },
-                  }))
-              ).map(({ key, props }) => (
-                <div key={key} className="shrink-0 w-[calc(50vw-22px)] sm:w-[calc(50vw-28px)] md:w-auto md:shrink">
-                  <HomeEditorialCard {...props} />
-                </div>
-              ))}
+            <div className="no-scrollbar overflow-x-auto -mx-4 px-4 sm:-mx-6 sm:px-6 md:mx-0 md:px-0">
+              <div className="flex gap-3 w-max md:w-auto md:grid md:grid-cols-4 md:gap-5">
+                {latestSetups.slice(0, 4).map((setup) => (
+                  <div key={setup.id} className="shrink-0 w-[calc(50vw-22px)] sm:w-[calc(50vw-28px)] md:w-auto md:shrink">
+                    <HomeEditorialCard
+                      title={setup.title}
+                      href={`/shop-the-setup/${setup.id}`}
+                      imageUrl={setup.imageUrl ?? undefined}
+                      label={t("shopTheSetup.setup")}
+                      cta={t("home.shopTheSetup")}
+                      favoriteItem={{ id: setup.id, type: "setup", title: setup.title, imageUrl: setup.imageUrl }}
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* ── Newsletter ── */}
       <section className="py-20 md:py-28 bg-[#2a2318] text-[#f0ebe3]">
