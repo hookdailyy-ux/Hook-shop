@@ -66,7 +66,7 @@ import { AdminRewards } from "@/components/AdminRewards";
 import { AdminAnalytics } from "@/components/AdminAnalytics";
 import { NewsletterTab } from "@/components/NewsletterTab";
 import { ScrollableTabBar } from "@/components/ScrollableTabBar";
-import { API_BASE, resolveImageUrl, toStorageUrl } from "@/lib/apiBase";
+import { API_BASE, resolveImageUrl, toStorageUrl, getAdminToken } from "@/lib/apiBase";
 
 type Tab =
   | "dashboard"
@@ -97,6 +97,38 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<Tab>("dashboard");
   const { logout } = useAdminAuth();
   const [, navigate] = useLocation();
+
+  useEffect(() => {
+    const originalFetch = window.fetch.bind(window);
+    window.fetch = function patchedFetch(input: RequestInfo | URL, init: RequestInit = {}) {
+      const url =
+        typeof input === "string"
+          ? input
+          : input instanceof URL
+            ? input.href
+            : (input as Request).url;
+      const token = getAdminToken();
+      if (
+        token &&
+        (url.includes("/api/") ||
+          url.startsWith(API_BASE) ||
+          url.startsWith("/api"))
+      ) {
+        const base =
+          init.headers instanceof Headers
+            ? Object.fromEntries((init.headers as Headers).entries())
+            : ((init.headers as Record<string, string> | undefined) ?? {});
+        return originalFetch(input, {
+          ...init,
+          headers: { ...base, "x-hook-admin": token },
+        });
+      }
+      return originalFetch(input, init);
+    };
+    return () => {
+      window.fetch = originalFetch;
+    };
+  }, []);
 
   const handleLogout = async () => {
     await logout();

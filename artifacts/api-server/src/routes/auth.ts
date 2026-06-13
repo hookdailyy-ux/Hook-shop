@@ -3,7 +3,7 @@ import { createHash } from "crypto";
 import { db } from "@workspace/db";
 import { settingsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
-import { requireAdmin } from "../middlewares/requireAdmin";
+import { requireAdmin, invalidateAdminTokenCache } from "../middlewares/requireAdmin";
 
 const router: IRouter = Router();
 
@@ -50,7 +50,8 @@ router.post("/auth/login", async (req, res) => {
     }
 
     req.session.adminAuthenticated = true;
-    res.json({ ok: true });
+    const token = createHash("sha256").update(storedHash + "hook-admin-v1").digest("hex");
+    res.json({ ok: true, token });
   } catch (err) {
     req.log.error({ err }, "Login failed");
     res.status(500).json({ error: "Internal server error" });
@@ -64,10 +65,19 @@ router.post("/auth/logout", (req, res) => {
   });
 });
 
-router.get("/auth/me", (req, res) => {
+router.get("/auth/me", async (req, res) => {
   if (req.session?.adminAuthenticated === true) {
     res.json({ authenticated: true });
     return;
+  }
+  const header = req.headers["x-hook-admin"] as string | undefined;
+  if (header) {
+    const storedHash = await getAdminPasswordHash();
+    const expected = createHash("sha256").update(storedHash + "hook-admin-v1").digest("hex");
+    if (header === expected) {
+      res.json({ authenticated: true });
+      return;
+    }
   }
   res.status(401).json({ authenticated: false });
 });
@@ -101,6 +111,7 @@ router.put("/auth/password", requireAdmin, async (req, res) => {
       .values({ key: ADMIN_PASSWORD_KEY, value: newHash })
       .onConflictDoUpdate({ target: settingsTable.key, set: { value: newHash } });
 
+    invalidateAdminTokenCache();
     res.json({ ok: true });
   } catch (err) {
     req.log.error({ err }, "Password change failed");

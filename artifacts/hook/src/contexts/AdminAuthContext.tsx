@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useCallback, ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { API_BASE } from "@/lib/apiBase";
+import { API_BASE, getAdminToken, setAdminToken, clearAdminToken } from "@/lib/apiBase";
 
 interface AdminAuthState {
   authenticated: boolean;
@@ -13,7 +13,10 @@ interface AdminAuthState {
 const BASE = API_BASE;
 
 async function fetchMe(): Promise<{ authenticated: boolean }> {
-  const res = await fetch(`${BASE}/api/auth/me`, { credentials: "include" });
+  const token = getAdminToken();
+  const headers: HeadersInit = {};
+  if (token) headers["x-hook-admin"] = token;
+  const res = await fetch(`${BASE}/api/auth/me`, { credentials: "include", headers });
   if (res.status === 401) return { authenticated: false };
   if (!res.ok) return { authenticated: false };
   return res.json() as Promise<{ authenticated: boolean }>;
@@ -39,8 +42,9 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ password }),
     });
-    const body = await res.json() as { ok?: boolean; error?: string };
+    const body = await res.json() as { ok?: boolean; error?: string; token?: string };
     if (res.ok && body.ok) {
+      if (body.token) setAdminToken(body.token);
       queryClient.setQueryData(["admin-auth-me"], { authenticated: true });
       return { ok: true };
     }
@@ -48,6 +52,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
   }, [queryClient]);
 
   const logout = useCallback(async () => {
+    clearAdminToken();
     queryClient.setQueryData(["admin-auth-me"], { authenticated: false });
     fetch(`${BASE}/api/auth/logout`, { method: "POST", credentials: "include" }).catch(() => null);
   }, [queryClient]);
