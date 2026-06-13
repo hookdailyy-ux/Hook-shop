@@ -2,13 +2,9 @@ import { useRef, useState, useCallback } from "react";
 import { useUpload } from "@workspace/object-storage-web";
 import { Upload, X, ImagePlus, Loader2 } from "lucide-react";
 import { CropModal } from "./CropModal";
-import { API_BASE, resolveImageUrl } from "@/lib/apiBase";
+import { API_BASE, resolveImageUrl, toStorageUrl } from "@/lib/apiBase";
 
 const BASE = API_BASE;
-
-function toServingUrl(objectPath: string): string {
-  return `${BASE}/api/storage${objectPath}`;
-}
 
 function readAsDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -34,7 +30,7 @@ export function SingleImageUpload({ value, onChange, label = "Main Product Image
   const { uploadFile, isUploading, progress } = useUpload({
     basePath: `${BASE}/api/storage`,
     onSuccess: (res) => {
-      onChange(toServingUrl(res.objectPath));
+      onChange(toStorageUrl(res.objectPath));
     },
   });
 
@@ -165,7 +161,7 @@ export function MultiImageUpload({ values, onChange, label = "Gallery Images" }:
   const { uploadFile, isUploading, progress } = useUpload({
     basePath: `${BASE}/api/storage`,
     onSuccess: (res) => {
-      onChange([...values, toServingUrl(res.objectPath)]);
+      onChange([...values, toStorageUrl(res.objectPath)]);
     },
   });
 

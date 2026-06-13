@@ -46,5 +46,17 @@ export function resolveImageUrl(url: string | null | undefined): string | undefi
     return url;
   }
   const separator = url.startsWith("/") ? "" : "/";
-  return `${API_BASE}${separator}${url}`;
+  return `${DEPLOYED_API}${separator}${url}`;
+}
+
+/**
+ * Converts an objectPath returned by the upload API (e.g. /objects/uploads/uuid)
+ * into the absolute serving URL that is stored in the database.
+ *
+ * Always uses the deployed Replit API as the origin so that stored URLs are
+ * absolute and work from any frontend host (GitHub Pages, custom domains, etc.)
+ * without any runtime patching.
+ */
+export function toStorageUrl(objectPath: string): string {
+  return `${DEPLOYED_API}/api/storage${objectPath}`;
 }

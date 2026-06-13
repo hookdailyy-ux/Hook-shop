@@ -66,7 +66,7 @@ import { AdminRewards } from "@/components/AdminRewards";
 import { AdminAnalytics } from "@/components/AdminAnalytics";
 import { NewsletterTab } from "@/components/NewsletterTab";
 import { ScrollableTabBar } from "@/components/ScrollableTabBar";
-import { API_BASE, resolveImageUrl } from "@/lib/apiBase";
+import { API_BASE, resolveImageUrl, toStorageUrl } from "@/lib/apiBase";
 
 type Tab =
   | "dashboard"
@@ -2210,7 +2210,7 @@ function LookDialog({ look }: { look?: Look }) {
       onSuccess: (res) =>
         setForm((f) => ({
           ...f,
-          imageUrl: `${lookCardBase}/api/storage${res.objectPath}`,
+          imageUrl: toStorageUrl(res.objectPath),
         })),
     });
   const [lookCropSrc, setLookCropSrc] = useState<string | null>(null);
@@ -2856,7 +2856,7 @@ function SetupDialog({ setup }: { setup?: Setup }) {
       onSuccess: (res) =>
         setForm((f) => ({
           ...f,
-          imageUrl: `${setupCardBase}/api/storage${res.objectPath}`,
+          imageUrl: toStorageUrl(res.objectPath),
         })),
     });
   const [setupCropSrc, setSetupCropSrc] = useState<string | null>(null);
@@ -4115,7 +4115,7 @@ function IconsSection() {
       toast({ title: "Upload failed", variant: "destructive" });
       return;
     }
-    const url = `${BASE_PATH}/api/storage${result.objectPath}`;
+    const url = toStorageUrl(result.objectPath);
     try {
       const res = await fetch(`${BASE}/api/site-settings`, {
         method: "PUT",
@@ -4343,7 +4343,7 @@ function SectionImageCard({
   const { uploadFile, isUploading, progress } = useUpload({
     basePath: `${cardBase}/api/storage`,
     onSuccess: (res) => {
-      onUploaded(`${cardBase}/api/storage${res.objectPath}`);
+      onUploaded(toStorageUrl(res.objectPath));
     },
   });
 

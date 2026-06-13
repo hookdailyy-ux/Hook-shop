@@ -6,13 +6,9 @@ import { useToast } from "@/hooks/use-toast";
 import { useUpload } from "@workspace/object-storage-web";
 import { Camera, MessageCircle, User, Check, ExternalLink, Loader2, X } from "lucide-react";
 import type { TeamMemberInfo } from "@/contexts/TeamAuthContext";
-import { API_BASE, resolveImageUrl } from "@/lib/apiBase";
+import { API_BASE, resolveImageUrl, toStorageUrl } from "@/lib/apiBase";
 
 const BASE = API_BASE;
-
-function toServingUrl(objectPath: string): string {
-  return `${BASE}/api/storage${objectPath}`;
-}
 
 interface ProfileForm {
   displayName: string;
@@ -41,7 +37,7 @@ function InlineImageUpload({
 
   const { uploadFile, isUploading, progress } = useUpload({
     basePath: `${BASE}/api/storage`,
-    onSuccess: (res) => onChange(toServingUrl(res.objectPath)),
+    onSuccess: (res) => onChange(toStorageUrl(res.objectPath)),
   });
 
   const handleFile = useCallback(
