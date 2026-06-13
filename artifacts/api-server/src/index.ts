@@ -39,4 +39,12 @@ app.listen(port, (err) => {
   `).catch((migrateErr: Error) =>
     logger.warn({ err: migrateErr }, "Placement migration skipped"),
   );
+
+  // Idempotent: rename stale electronics subcategories
+  void db.execute(sql`
+    UPDATE subcategories SET name = 'Tech'  WHERE name = 'Phone'      AND category = 'electronics';
+    UPDATE subcategories SET name = 'Setup' WHERE name = 'Desk Setup' AND category = 'electronics';
+  `).catch((migrateErr: Error) =>
+    logger.warn({ err: migrateErr }, "Subcategory rename skipped"),
+  );
 });

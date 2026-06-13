@@ -1,0 +1,97 @@
+Do not redesign anything else.
+
+Please focus only on these issues.
+
+## 1. Electronics category tabs on GitHub Pages
+
+GitHub Pages is still showing old tabs such as:
+
+* Phone
+* Desk Setup
+
+Expected:
+
+* Tech
+* Setup
+
+Search the entire repository and remove every stale reference. Make sure GitHub Pages uses the newest categories and not cached or old values.
+
+---
+
+## 2. Crop modal experience is broken on mobile
+
+Current problems:
+
+* The form remains visible behind the crop window.
+* Huge black empty areas appear above and below the image.
+* The crop frame is too small.
+* The slider placement feels awkward.
+* The image preview before saving is inaccurate.
+* The saved image becomes tiny or incorrectly positioned.
+* The crop modal does not feel isolated from the page.
+
+What I want:
+
+1. Open a true fullscreen crop modal.
+2. Hide the form behind a dark overlay.
+3. Make the image occupy most of the screen.
+4. Use a large crop area.
+5. Pinch zoom and drag should work naturally.
+6. Remove the large black spaces.
+7. What I see before pressing Crop & Save must be exactly what gets saved.
+8. Preserve the product size and composition after saving.
+9. Large products should remain large after saving.
+10. The experience should feel similar to Instagram or iPhone Photos.
+
+Very important:
+
+The problem is not styling.
+
+Please fix the crop algorithm itself.
+
+The scale and positioning being saved are different from what is shown in the preview.
+
+---
+
+## 3. Main product preview is incorrect
+
+Before opening the crop window and even after saving, the preview becomes wrong.
+
+Example:
+
+The hat image becomes extremely small and appears near the bottom with large empty spaces around it.
+
+Expected:
+
+* The product should remain centered.
+* The preview should accurately represent the final image.
+* No unexpected shrinking.
+* No large empty areas.
+* Product placement should stay consistent.
+
+---
+
+## 4. Existing product placement system
+
+Do NOT remove or redesign:
+
+* Fit
+* Cover
+* Product placement controls
+* Existing checkbox system
+
+Only improve their behavior and accuracy.
+
+---
+
+## 5. GitHub deployment
+
+After fixing everything:
+
+* Rebuild with the correct BASE_PATH for GitHub Pages.
+* Verify that the latest build is actually deployed.
+* Verify that GitHub Pages and Replit show the same result.
+* Verify that old assets are not being used.
+* Confirm that the production build is the newest build.
+
+I need fixes, not redesigns or additional features.

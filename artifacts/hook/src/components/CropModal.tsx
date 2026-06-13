@@ -5,16 +5,18 @@ import { ZoomIn, ZoomOut } from "lucide-react";
 
 async function getCroppedImg(imageSrc: string, pixelCrop: Area): Promise<Blob> {
   const image = new Image();
-  image.src = imageSrc;
+
   await new Promise<void>((resolve, reject) => {
     image.onload = () => resolve();
     image.onerror = () => reject(new Error("Image load error"));
+    image.src = imageSrc;
   });
 
   const canvas = document.createElement("canvas");
   canvas.width = pixelCrop.width;
   canvas.height = pixelCrop.height;
   const ctx = canvas.getContext("2d")!;
+
   ctx.drawImage(
     image,
     pixelCrop.x,
@@ -48,6 +50,8 @@ interface CropModalProps {
 export function CropModal({ imageSrc, onConfirm, onSkip }: CropModalProps) {
   const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     const prev = document.body.style.overflow;
@@ -56,8 +60,6 @@ export function CropModal({ imageSrc, onConfirm, onSkip }: CropModalProps) {
       document.body.style.overflow = prev;
     };
   }, []);
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleCropComplete = useCallback((_: Area, pixels: Area) => {
     setCroppedAreaPixels(pixels);
@@ -75,40 +77,52 @@ export function CropModal({ imageSrc, onConfirm, onSkip }: CropModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-[700] bg-black/95 flex flex-col select-none" style={{ paddingTop: "env(safe-area-inset-top)", paddingBottom: "env(safe-area-inset-bottom)" }}>
-      <div className="flex items-center justify-between px-6 py-4 shrink-0">
-        <p className="text-[10px] tracking-[0.35em] uppercase text-white/50">Crop Image</p>
+    <div
+      className="fixed inset-0 z-[700] bg-black flex flex-col select-none"
+      style={{
+        paddingTop: "env(safe-area-inset-top)",
+        paddingBottom: "env(safe-area-inset-bottom)",
+      }}
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between px-6 py-3 shrink-0">
+        <p className="text-[10px] tracking-[0.35em] uppercase text-white/50">
+          Crop Image
+        </p>
         <p className="text-[9px] text-white/30 tracking-wide hidden sm:block">
-          Drag to reposition · Scroll or pinch to zoom
+          Drag · Pinch to zoom
         </p>
       </div>
 
+      {/* Cropper — takes all remaining space */}
       <div className="relative flex-1 overflow-hidden">
         <Cropper
           image={imageSrc}
           crop={crop}
           zoom={zoom}
+          aspect={3 / 4}
           onCropChange={setCrop}
           onZoomChange={setZoom}
           onCropComplete={handleCropComplete}
+          objectFit="cover"
+          minZoom={1}
+          maxZoom={4}
+          zoomSpeed={0.4}
           style={{
-            containerStyle: { backgroundColor: "transparent" },
+            containerStyle: { backgroundColor: "#000" },
             cropAreaStyle: {
-              border: "1px solid rgba(255,255,255,0.35)",
-              boxShadow: "0 0 0 9999px rgba(0,0,0,0.5)",
+              border: "2px solid rgba(255,255,255,0.6)",
+              boxShadow: "0 0 0 9999px rgba(0,0,0,0.65)",
             },
           }}
-          minZoom={0.4}
-          maxZoom={4}
-          zoomSpeed={0.3}
-          objectFit="contain"
         />
       </div>
 
+      {/* Zoom slider */}
       <div className="px-6 py-3 flex items-center gap-4 shrink-0">
         <button
           type="button"
-          onClick={() => setZoom((z) => Math.max(0.4, +(z - 0.1).toFixed(2)))}
+          onClick={() => setZoom((z) => Math.max(1, +(z - 0.1).toFixed(2)))}
           className="text-white/40 hover:text-white/70 transition-colors p-1"
           aria-label="Zoom out"
         >
@@ -116,7 +130,7 @@ export function CropModal({ imageSrc, onConfirm, onSkip }: CropModalProps) {
         </button>
         <input
           type="range"
-          min={0.4}
+          min={1}
           max={4}
           step={0.01}
           value={zoom}
@@ -134,6 +148,7 @@ export function CropModal({ imageSrc, onConfirm, onSkip }: CropModalProps) {
         </button>
       </div>
 
+      {/* Action buttons */}
       <div className="flex items-center gap-3 px-6 py-5 border-t border-white/10 shrink-0">
         <button
           type="button"
