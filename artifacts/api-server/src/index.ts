@@ -1,5 +1,7 @@
 import app from "./app";
 import { logger } from "./lib/logger";
+import { db } from "@workspace/db";
+import { sql } from "drizzle-orm";
 
 const rawPort = process.env["PORT"];
 
@@ -22,4 +24,19 @@ app.listen(port, (err) => {
   }
 
   logger.info({ port }, "Server listening");
+
+  // One-time idempotent migration: populate placements for legacy products
+  void db.execute(sql`
+    UPDATE products
+    SET placements = CASE
+      WHEN category NOT IN ('none','') AND subcategory IS NOT NULL AND subcategory != ''
+        THEN jsonb_build_array(category, category || ':' || subcategory)
+      WHEN category NOT IN ('none','')
+        THEN jsonb_build_array(category)
+      ELSE '[]'::jsonb
+    END
+    WHERE placements IS NULL OR jsonb_array_length(placements) = 0
+  `).catch((migrateErr: Error) =>
+    logger.warn({ err: migrateErr }, "Placement migration skipped"),
+  );
 });

@@ -305,8 +305,8 @@ function ProductsTab() {
       (p) =>
         p.title.toLowerCase().includes(q) ||
         (p.brand?.toLowerCase().includes(q) ?? false) ||
-        p.category.toLowerCase().includes(q) ||
-        (p.subcategory?.toLowerCase().includes(q) ?? false),
+        (Array.isArray(p.placements) &&
+          p.placements.some((pl: string) => pl.toLowerCase().includes(q))),
     );
   }, [products, searchQuery]);
 
@@ -359,7 +359,7 @@ function ProductsTab() {
         </svg>
         <input
           type="text"
-          placeholder="Search by title, brand, category, subcategory…"
+          placeholder="Search by title, brand, placement…"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="w-full pl-9 pr-9 py-2.5 text-sm border border-border bg-background focus:outline-none focus:ring-1 focus:ring-foreground/30 placeholder:text-muted-foreground placeholder:text-xs placeholder:tracking-wide"
@@ -383,10 +383,7 @@ function ProductsTab() {
                 Product
               </th>
               <th className="px-4 py-3 text-[10px] tracking-widest uppercase text-muted-foreground font-medium">
-                Category
-              </th>
-              <th className="px-4 py-3 text-[10px] tracking-widest uppercase text-muted-foreground font-medium">
-                Subcategory
+                Placements
               </th>
               <th className="px-4 py-3 text-[10px] tracking-widest uppercase text-muted-foreground font-medium">
                 Price
@@ -403,7 +400,7 @@ function ProductsTab() {
             {isLoading ? (
               <tr>
                 <td
-                  colSpan={6}
+                  colSpan={5}
                   className="px-4 py-12 text-center text-xs tracking-widest uppercase text-muted-foreground animate-pulse"
                 >
                   Loading...
@@ -412,7 +409,7 @@ function ProductsTab() {
             ) : filteredProducts.length === 0 ? (
               <tr>
                 <td
-                  colSpan={6}
+                  colSpan={5}
                   className="px-4 py-12 text-center text-xs tracking-widest uppercase text-muted-foreground"
                 >
                   {searchQuery.trim()
@@ -450,11 +447,10 @@ function ProductsTab() {
                       </div>
                     </div>
                   </td>
-                  <td className="px-4 py-4 text-xs tracking-widest uppercase text-muted-foreground">
-                    {product.category}
-                  </td>
-                  <td className="px-4 py-4 text-xs text-muted-foreground">
-                    {product.subcategory || "—"}
+                  <td className="px-4 py-4 text-xs text-muted-foreground max-w-[180px] truncate">
+                    {Array.isArray(product.placements) && product.placements.length > 0
+                      ? (product.placements as string[]).join(", ")
+                      : "—"}
                   </td>
                   <td className="px-4 py-4 text-sm">{product.price || "—"}</td>
                   <td className="px-4 py-4">
@@ -658,8 +654,6 @@ type ProductFormData = {
   brand: string;
   description: string;
   source: string;
-  category: string;
-  subcategory: string;
   price: string;
   originalPrice: string;
   affiliateUrl: string;
@@ -679,17 +673,132 @@ type ProductFormData = {
   placements: string[];
 };
 
-const PLACEMENT_OPTIONS = [
+const PLACEMENT_GROUPS = [
   { value: "women", label: "Women" },
   { value: "men", label: "Men" },
   { value: "kids", label: "Kids" },
   { value: "couples", label: "Couples" },
-  { value: "favorites", label: "Favorites" },
+  { value: "accessories", label: "Accessories" },
   { value: "home", label: "Home Essentials" },
-  { value: "electronics", label: "Tech" },
+  { value: "electronics", label: "Electronics" },
+] as const;
+
+const STANDALONE_PLACEMENTS = [
   { value: "look", label: "Shop The Look" },
   { value: "setup", label: "Shop The Setup" },
+  { value: "favorites", label: "Favorites" },
 ] as const;
+
+function PlacementPanel({
+  placements,
+  onChange,
+}: {
+  placements: string[];
+  onChange: (placements: string[]) => void;
+}) {
+  const { data: allSubs } = useListSubcategories(
+    { category: "" } as { category: string },
+    {
+      query: {
+        queryKey: getListSubcategoriesQueryKey({ category: "" }),
+      },
+    },
+  );
+
+  const subsByCategory = useMemo(() => {
+    const map: Record<string, string[]> = {};
+    for (const sub of allSubs ?? []) {
+      if (!map[sub.category]) map[sub.category] = [];
+      map[sub.category].push(sub.name);
+    }
+    return map;
+  }, [allSubs]);
+
+  const toggle = (value: string) => {
+    onChange(
+      placements.includes(value)
+        ? placements.filter((v) => v !== value)
+        : [...placements, value],
+    );
+  };
+
+  return (
+    <div className="border border-border p-4 space-y-5">
+      <div className="flex items-center justify-between">
+        <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+          Product Placement
+        </p>
+        {placements.length > 0 && (
+          <button
+            type="button"
+            onClick={() => onChange([])}
+            className="text-[9px] tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Clear all
+          </button>
+        )}
+      </div>
+      <div className="space-y-5">
+        {PLACEMENT_GROUPS.map((group) => {
+          const subs = subsByCategory[group.value] ?? [];
+          return (
+            <div key={group.value}>
+              <p className="text-[10px] tracking-widest uppercase text-muted-foreground/50 mb-2 font-medium">
+                {group.label}
+              </p>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-1.5">
+                <label className="flex items-center gap-2 cursor-pointer text-xs text-muted-foreground hover:text-foreground transition-colors">
+                  <input
+                    type="checkbox"
+                    className="accent-foreground"
+                    checked={placements.includes(group.value)}
+                    onChange={() => toggle(group.value)}
+                  />
+                  All
+                </label>
+                {subs.map((sub) => (
+                  <label
+                    key={sub}
+                    className="flex items-center gap-2 cursor-pointer text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <input
+                      type="checkbox"
+                      className="accent-foreground"
+                      checked={placements.includes(`${group.value}:${sub}`)}
+                      onChange={() => toggle(`${group.value}:${sub}`)}
+                    />
+                    {sub}
+                  </label>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+        <div>
+          <p className="text-[10px] tracking-widest uppercase text-muted-foreground/50 mb-2 font-medium">
+            Special Sections
+          </p>
+          <div className="grid grid-cols-2 gap-x-6 gap-y-1.5">
+            {STANDALONE_PLACEMENTS.map((opt) => (
+              <label
+                key={opt.value}
+                className="flex items-center gap-2 cursor-pointer text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <input
+                  type="checkbox"
+                  className="accent-foreground"
+                  checked={placements.includes(opt.value)}
+                  onChange={() => toggle(opt.value)}
+                />
+                {opt.label}
+              </label>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // ─── Shared full-form dialog for creating a product from Look/Setup context ───
 
@@ -713,8 +822,6 @@ function NewProductDialog({
     brand: "",
     description: "",
     source: "SHEIN",
-    category: "women",
-    subcategory: "",
     price: "",
     originalPrice: "",
     affiliateUrl: "",
@@ -742,22 +849,25 @@ function NewProductDialog({
     if (open) setForm(makeDefault());
   }, [open]);
 
-  const { data: subcategories } = useListSubcategories(
-    { category: form.category },
-    { query: { queryKey: getListSubcategoriesQueryKey({ category: form.category }) } },
-  );
-
   const pBtnClass =
     "w-8 h-8 border border-border flex items-center justify-center text-sm hover:bg-accent transition-colors select-none";
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const isElectronics = form.category === "electronics";
+    const isAmazonStore = form.source === "Amazon";
+    const categoryForApi =
+      form.placements
+        .find((p) =>
+          ["women", "men", "kids", "couples", "electronics", "home", "accessories"].includes(
+            p.split(":")[0],
+          ),
+        )
+        ?.split(":")[0] ?? "none";
     const payload = {
       ...form,
+      category: categoryForApi,
       source: form.source as "SHEIN" | "Amazon",
       status: form.status as "active" | "hidden",
-      subcategory: form.subcategory || undefined,
       brand: form.brand || undefined,
       description: form.description || undefined,
       price: form.price || undefined,
@@ -767,7 +877,7 @@ function NewProductDialog({
       amazonPrice: form.amazonPrice || undefined,
       externalId: form.externalId || undefined,
       placements: form.placements,
-      affiliateUrl: isElectronics
+      affiliateUrl: isAmazonStore
         ? form.amazonUrl || form.affiliateUrl || ""
         : form.affiliateUrl,
     };
@@ -833,7 +943,6 @@ function NewProductDialog({
                   set("brand")(data.product.brand || "");
                   set("description")(data.product.description || "");
                   set("sizes")(data.product.sizes || []);
-                  set("category")(data.product.category || "women");
                 }
               }}
             >
@@ -868,29 +977,21 @@ function NewProductDialog({
 
           {/* Source + Status */}
           <div className="grid grid-cols-2 gap-4">
-            {form.category !== "electronics" && (
-              <div className="space-y-2">
-                <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
-                  Product Source *
-                </label>
-                <Select value={form.source} onValueChange={set("source")}>
-                  <SelectTrigger className="border-border">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="SHEIN">SHEIN</SelectItem>
-                    <SelectItem value="Amazon">Amazon</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-            <div
-              className={
-                form.category === "electronics"
-                  ? "col-span-2 space-y-2"
-                  : "space-y-2"
-              }
-            >
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                Product Source *
+              </label>
+              <Select value={form.source} onValueChange={set("source")}>
+                <SelectTrigger className="border-border">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="SHEIN">SHEIN</SelectItem>
+                  <SelectItem value="Amazon">Amazon</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
               <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
                 Status
               </label>
@@ -906,88 +1007,10 @@ function NewProductDialog({
             </div>
           </div>
 
-          {/* Category + Subcategory */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
-                Category *
-              </label>
-              <Select
-                value={form.category}
-                onValueChange={(v) => {
-                  set("category")(v);
-                  set("subcategory")("");
-                }}
-              >
-                <SelectTrigger className="border-border">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {CATEGORIES.map((c) => (
-                    <SelectItem key={c.value} value={c.value}>
-                      {c.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
-                Subcategory
-              </label>
-              <Select value={form.subcategory} onValueChange={set("subcategory")}>
-                <SelectTrigger className="border-border">
-                  <SelectValue placeholder="Select subcategory" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="__none__">None</SelectItem>
-                  {subcategories?.map((s) => (
-                    <SelectItem key={s.id} value={s.name}>
-                      {s.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {/* Product Placement */}
-          <div className="border border-border p-4 space-y-3">
-            <div>
-              <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-0.5">
-                Product Placement
-              </p>
-              <p className="text-[10px] text-muted-foreground/70 leading-relaxed">
-                By default the product appears in its primary category above.
-                Check boxes to <strong>also</strong> show it in other sections,
-                or to <strong>override</strong> placement entirely.
-              </p>
-            </div>
-            <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-              {PLACEMENT_OPTIONS.map((opt) => (
-                <label
-                  key={opt.value}
-                  className="flex items-center gap-2 cursor-pointer text-xs text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  <input
-                    type="checkbox"
-                    className="accent-foreground"
-                    checked={form.placements.includes(opt.value)}
-                    onChange={(e) => {
-                      const next = e.target.checked
-                        ? [...form.placements, opt.value]
-                        : form.placements.filter((v) => v !== opt.value);
-                      set("placements")(next);
-                    }}
-                  />
-                  {opt.label}
-                </label>
-              ))}
-            </div>
-          </div>
+          <PlacementPanel placements={form.placements} onChange={set("placements")} />
 
           {/* Price — hidden for electronics */}
-          {form.category !== "electronics" && (
+          {form.source !== "Amazon" && (
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
@@ -1015,13 +1038,13 @@ function NewProductDialog({
           )}
 
           {/* Product Link — hidden for electronics */}
-          {form.category !== "electronics" && (
+          {form.source !== "Amazon" && (
             <div className="space-y-2">
               <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
                 Product Link *
               </label>
               <Input
-                required={form.category !== "electronics"}
+                required={form.source !== "Amazon"}
                 value={form.affiliateUrl}
                 onChange={(e) => set("affiliateUrl")(e.target.value)}
                 placeholder="https://..."
@@ -1031,7 +1054,7 @@ function NewProductDialog({
           )}
 
           {/* Electronics: Amazon Store Link */}
-          {form.category === "electronics" && (
+          {form.source === "Amazon" && (
             <div className="border border-border/60 p-4 space-y-4">
               <p className="text-[9px] tracking-widest uppercase text-muted-foreground">
                 Amazon Store
@@ -1064,7 +1087,7 @@ function NewProductDialog({
           )}
 
           {/* External Product ID — hidden for electronics */}
-          {form.category !== "electronics" && (
+          {form.source !== "Amazon" && (
             <div className="space-y-2">
               <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
                 {form.source === "Amazon" ? "Amazon ASIN" : "SHEIN SKU"}{" "}
@@ -1276,8 +1299,6 @@ function ProductDialog({ product }: { product?: Product }) {
     brand: product?.brand ?? "",
     description: product?.description ?? "",
     source: (product as any)?.source ?? "SHEIN",
-    category: product?.category ?? "women",
-    subcategory: product?.subcategory ?? "",
     price: product?.price ?? "",
     originalPrice: product?.originalPrice ?? "",
     affiliateUrl: product?.affiliateUrl ?? "",
@@ -1303,26 +1324,25 @@ function ProductDialog({ product }: { product?: Product }) {
     if (open) setForm(defaultForm());
   }, [open]);
 
-  const { data: subcategories } = useListSubcategories(
-    { category: form.category },
-    {
-      query: {
-        queryKey: getListSubcategoriesQueryKey({ category: form.category }),
-      },
-    },
-  );
-
   const set = (k: keyof ProductFormData) => (v: ProductFormData[typeof k]) =>
     setForm((f) => ({ ...f, [k]: v }));
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const isElectronics = form.category === "electronics";
+    const isAmazonStore = form.source === "Amazon";
+    const categoryForApi =
+      form.placements
+        .find((p) =>
+          ["women", "men", "kids", "couples", "electronics", "home", "accessories"].includes(
+            p.split(":")[0],
+          ),
+        )
+        ?.split(":")[0] ?? "none";
     const payload = {
       ...form,
+      category: categoryForApi,
       source: form.source as "SHEIN" | "Amazon",
       status: form.status as "active" | "hidden",
-      subcategory: form.subcategory || undefined,
       brand: form.brand || undefined,
       description: form.description || undefined,
       price: form.price || undefined,
@@ -1332,7 +1352,7 @@ function ProductDialog({ product }: { product?: Product }) {
       amazonPrice: form.amazonPrice || undefined,
       externalId: form.externalId || undefined,
       placements: form.placements,
-      affiliateUrl: isElectronics
+      affiliateUrl: isAmazonStore
         ? form.amazonUrl || form.affiliateUrl || ""
         : form.affiliateUrl,
     };
@@ -1460,7 +1480,6 @@ if (data.success && data.product) {
   set("brand")(data.product.brand || "");
   set("description")(data.product.description || "");
   set("sizes")(data.product.sizes || []);
-  set("category")(data.product.category || "women");
 } else {
   console.log("HOOK AI response:", data);
 }
@@ -1497,32 +1516,24 @@ if (data.success && data.product) {
 
             {/* Source + Status */}
             <div className="grid grid-cols-2 gap-4">
-              {form.category !== "electronics" && (
-                <div className="space-y-2">
-                  <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
-                    Product Source *
-                  </label>
-                  <Select value={form.source} onValueChange={set("source")}>
-                    <SelectTrigger
-                      className="border-border"
-                      data-testid="select-product-source"
-                    >
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="SHEIN">SHEIN</SelectItem>
-                      <SelectItem value="Amazon">Amazon</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-              <div
-                className={
-                  form.category === "electronics"
-                    ? "col-span-2 space-y-2"
-                    : "space-y-2"
-                }
-              >
+              <div className="space-y-2">
+                <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Product Source *
+                </label>
+                <Select value={form.source} onValueChange={set("source")}>
+                  <SelectTrigger
+                    className="border-border"
+                    data-testid="select-product-source"
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="SHEIN">SHEIN</SelectItem>
+                    <SelectItem value="Amazon">Amazon</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
                 <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
                   Status
                 </label>
@@ -1541,98 +1552,10 @@ if (data.success && data.product) {
               </div>
             </div>
 
-            {/* Category + Subcategory */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
-                  Category *
-                </label>
-                <Select
-                  value={form.category}
-                  onValueChange={(v) => {
-                    set("category")(v);
-                    set("subcategory")("");
-                  }}
-                >
-                  <SelectTrigger className="border-border">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {CATEGORIES.map((c) => (
-                      <SelectItem key={c.value} value={c.value}>
-                        {c.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
-                  Subcategory
-                </label>
-                <Select
-                  value={form.subcategory}
-                  onValueChange={set("subcategory")}
-                >
-                  <SelectTrigger className="border-border">
-                    <SelectValue placeholder="Select subcategory" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="__none__">None</SelectItem>
-                    {subcategories?.map((s) => (
-                      <SelectItem key={s.id} value={s.name}>
-                        {s.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            {/* Product Placement */}
-            <div className="border border-border p-4 space-y-3">
-              <div>
-                <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-0.5">
-                  Product Placement
-                </p>
-                <p className="text-[10px] text-muted-foreground/70 leading-relaxed">
-                  By default the product appears in its primary category above. Check boxes to <strong>also</strong> show it in other sections, or to <strong>override</strong> placement entirely.
-                </p>
-              </div>
-              <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-                {PLACEMENT_OPTIONS.map((opt) => (
-                  <label
-                    key={opt.value}
-                    className="flex items-center gap-2 cursor-pointer text-xs text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    <input
-                      type="checkbox"
-                      className="accent-foreground"
-                      checked={form.placements.includes(opt.value)}
-                      onChange={(e) => {
-                        const next = e.target.checked
-                          ? [...form.placements, opt.value]
-                          : form.placements.filter((v) => v !== opt.value);
-                        set("placements")(next);
-                      }}
-                    />
-                    {opt.label}
-                  </label>
-                ))}
-              </div>
-              {form.placements.length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => set("placements")([])}
-                  className="text-[9px] tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  Clear placements
-                </button>
-              )}
-            </div>
+            <PlacementPanel placements={form.placements} onChange={set("placements")} />
 
             {/* Price — hidden for electronics (uses amazon price instead) */}
-            {form.category !== "electronics" && (
+            {form.source !== "Amazon" && (
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
@@ -1660,7 +1583,7 @@ if (data.success && data.product) {
             )}
 
             {/* Product Link — hidden for electronics (uses amazon URL instead) */}
-            {form.category !== "electronics" && (
+            {form.source !== "Amazon" && (
               <div className="space-y-2">
                 <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
                   Product Link *
@@ -1681,7 +1604,7 @@ if (data.success && data.product) {
             )}
 
             {/* Electronics: Amazon Store Link */}
-            {form.category === "electronics" && (
+            {form.source === "Amazon" && (
               <div className="border border-border/60 p-4 space-y-4">
                 <p className="text-[9px] tracking-widest uppercase text-muted-foreground">
                   Amazon Store
@@ -1714,7 +1637,7 @@ if (data.success && data.product) {
             )}
 
             {/* External Product ID — hidden for electronics */}
-            {form.category !== "electronics" && (
+            {form.source !== "Amazon" && (
               <div className="space-y-2">
                 <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
                   {form.source === "Amazon" ? "Amazon ASIN" : "SHEIN SKU"}{" "}
@@ -2022,7 +1945,7 @@ if (data.success && data.product) {
                 )}
                 {/* CTA preview */}
                 <div className="mt-auto pt-4">
-                  {form.category === "electronics" &&
+                  {form.source === "Amazon" &&
                   form.amazonUrl ? (
                     <div className="flex gap-4">
                       {form.amazonUrl && (

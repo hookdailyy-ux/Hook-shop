@@ -22,17 +22,11 @@ function serializeProduct(p: typeof productsTable.$inferSelect) {
 }
 
 /**
- * Build a category filter condition that respects the placements override model:
- * - Products with empty placements show in their primary category
- * - Products with non-empty placements show ONLY in those specific categories
+ * Build a category filter condition using placements as the sole source of truth.
+ * Products appear only where they are explicitly placed.
  */
 function categoryCondition(cat: string): SQL<unknown> {
-  const placementsHasCategory = sql<boolean>`${productsTable.placements} @> ${JSON.stringify([cat])}::jsonb`;
-  const isUnplaced = sql<boolean>`(${productsTable.placements} IS NULL OR jsonb_array_length(${productsTable.placements}) = 0)`;
-  return or(
-    and(eq(productsTable.category, cat), isUnplaced),
-    placementsHasCategory
-  ) as SQL<unknown>;
+  return sql<boolean>`${productsTable.placements} @> ${JSON.stringify([cat])}::jsonb` as SQL<unknown>;
 }
 
 router.get("/products", async (req, res) => {
@@ -41,8 +35,16 @@ router.get("/products", async (req, res) => {
     const conditions: SQL<unknown>[] = [];
     // Always exclude hidden products on the public endpoint
     conditions.push(ne(productsTable.status, "hidden"));
-    if (category && typeof category === "string") conditions.push(categoryCondition(category));
-    if (subcategory && typeof subcategory === "string") conditions.push(eq(productsTable.subcategory, subcategory));
+    if (category && typeof category === "string") {
+      if (subcategory && typeof subcategory === "string") {
+        // Subcategory filter: placement must contain "cat:sub"
+        conditions.push(
+          sql`${productsTable.placements} @> ${JSON.stringify([`${category}:${subcategory}`])}::jsonb` as SQL<unknown>
+        );
+      } else {
+        conditions.push(categoryCondition(category));
+      }
+    }
     if (featured === "true") conditions.push(eq(productsTable.featured, true));
     if (trending === "true") conditions.push(eq(productsTable.trending, true));
 
@@ -61,7 +63,7 @@ router.post("/products", async (req, res) => {
       title: z.string().min(1),
       description: z.string().optional(),
       source: z.enum(sourceEnum).default("SHEIN"),
-      category: z.enum(categoryEnum),
+      category: z.enum(categoryEnum).default("none"),
       subcategory: z.string().optional(),
       price: z.string().optional(),
       originalPrice: z.string().optional(),
