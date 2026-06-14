@@ -1,19 +1,34 @@
+import { useState } from "react";
 import { Heart } from "lucide-react";
 import { Link } from "wouter";
 import { useFavorites, type FavoriteProduct, type FavoriteLook, type FavoriteSetup } from "@/contexts/FavoritesContext";
 import { HeartButton } from "@/components/HeartButton";
+import { ProductDetailModal } from "@/components/ProductDetailModal";
 import { useTranslation } from "react-i18next";
 import { useSiteImages } from "@/hooks/useSiteImages";
 import { resolveImageUrl } from "@/lib/apiBase";
 
-function FavoriteProductCard({ item }: { item: FavoriteProduct }) {
+function FavoriteProductCard({
+  item,
+  onOpenDetail,
+}: {
+  item: FavoriteProduct;
+  onOpenDetail: (id: number) => void;
+}) {
   const { t } = useTranslation();
   const deliveryLabel = item.source === "Amazon" || item.category === "electronics"
     ? t("product.deliveredByAmazon")
     : t("product.deliveredByShein");
   return (
     <div className="flex flex-col group">
-      <div className="relative overflow-hidden aspect-[3/4] bg-[#ddd5c8] mb-3">
+      {/* Image — opens modal */}
+      <div
+        className="relative overflow-hidden aspect-[3/4] bg-[#ddd5c8] mb-3 cursor-pointer"
+        onClick={() => onOpenDetail(item.id)}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => e.key === "Enter" && onOpenDetail(item.id)}
+      >
         {item.imageUrl ? (
           <img
             src={resolveImageUrl(item.imageUrl)}
@@ -26,13 +41,17 @@ function FavoriteProductCard({ item }: { item: FavoriteProduct }) {
             <span className="text-[9px] tracking-widest uppercase text-[#8b7355]/50">{t("common.noImage")}</span>
           </div>
         )}
-        <div className="absolute top-2 right-2">
+        <div className="absolute top-2 right-2" onClick={(e) => e.stopPropagation()}>
           <HeartButton item={item} />
         </div>
       </div>
-      <Link href={`/product/${item.id}`} className="text-sm font-medium leading-snug line-clamp-2 hover:underline decoration-1 underline-offset-4 mb-1">
+      {/* Title — opens modal */}
+      <button
+        onClick={() => onOpenDetail(item.id)}
+        className="text-left text-sm font-medium leading-snug line-clamp-2 hover:underline decoration-1 underline-offset-4 mb-1"
+      >
         {item.title}
-      </Link>
+      </button>
       {item.price && <p className="text-sm font-medium mb-3">{item.price}</p>}
       <a
         href={item.affiliateUrl}
@@ -117,6 +136,8 @@ export default function Favorites() {
   const { favorites } = useFavorites();
   const { t } = useTranslation();
   const { data: siteImages } = useSiteImages();
+  const [detailId, setDetailId] = useState<number | null>(null);
+
   const heroImage = siteImages?.favorites;
   const hasImage = !!heroImage?.imageUrl;
   const products = favorites.filter((f) => f.type === "product") as FavoriteProduct[];
@@ -190,7 +211,7 @@ export default function Favorites() {
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-10 md:gap-x-8">
                   {products.map((item) => (
-                    <FavoriteProductCard key={item.id} item={item} />
+                    <FavoriteProductCard key={item.id} item={item} onOpenDetail={setDetailId} />
                   ))}
                 </div>
               </div>
@@ -230,6 +251,14 @@ export default function Favorites() {
           </div>
         )}
       </div>
+
+      {/* Product detail modal */}
+      {detailId !== null && (
+        <ProductDetailModal
+          productId={detailId}
+          onClose={() => setDetailId(null)}
+        />
+      )}
     </div>
   );
 }

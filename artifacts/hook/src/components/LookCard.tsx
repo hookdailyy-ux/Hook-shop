@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from "react";
-import { Link } from "wouter";
 import { ChevronLeft, ChevronRight, ShoppingBag, Check } from "lucide-react";
 import { HeartButton } from "./HeartButton";
+import { ProductDetailModal } from "./ProductDetailModal";
 import type { Look, Product } from "@workspace/api-client-react";
 import { useTranslation } from "react-i18next";
 import { resolveImageUrl } from "@/lib/apiBase";
@@ -97,12 +97,19 @@ function Gallery({ slides, title, lookId, lookImageUrl }: GalleryProps) {
 
 // ── Product card ───────────────────────────────────────────────────────────────
 
-function LookProductCard({ product, lookId }: { product: Product; lookId: number }) {
+function LookProductCard({
+  product,
+  onOpenDetail,
+}: {
+  product: Product;
+  onOpenDetail: (id: number) => void;
+}) {
   const { t } = useTranslation();
   const { addItem, openBasket } = useBasket();
   const [added, setAdded] = useState(false);
 
-  const handleAdd = () => {
+  const handleAdd = (e: React.MouseEvent) => {
+    e.stopPropagation();
     addItem({
       productId: product.id,
       productTitle: product.title,
@@ -130,46 +137,48 @@ function LookProductCard({ product, lookId }: { product: Product; lookId: number
 
   return (
     <div className="flex flex-col group" data-testid={`look-item-${product.id}`}>
-      {/* Image — navigate to product detail */}
-      <Link href={`/product/${product.id}`} className="block">
-        <div
-          className="aspect-[3/4] bg-[#e8e0d4] overflow-hidden mb-3 relative"
-        >
-          {product.imageUrl ? (
-            <img
-              src={resolveImageUrl(product.imageUrl)}
-              alt={product.title}
-              loading="lazy"
-              className="absolute inset-0 w-full h-full transition-transform duration-700 group-hover:scale-105"
-              style={{
-                objectFit: (product.imageObjectFit as "cover" | "contain") ?? "cover",
-                objectPosition: `${product.imagePosX ?? 50}% ${product.imagePosY ?? 50}%`,
-              }}
-            />
-          ) : (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <ShoppingBag className="h-6 w-6 text-muted-foreground/20" strokeWidth={1} />
-            </div>
-          )}
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center">
-            <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-white text-[9px] tracking-[0.3em] uppercase bg-black/50 px-4 py-2">
-              Quick View
-            </span>
+      {/* Image — opens product detail modal */}
+      <div
+        className="aspect-[3/4] bg-[#e8e0d4] overflow-hidden mb-3 relative cursor-pointer"
+        onClick={() => onOpenDetail(product.id)}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => e.key === "Enter" && onOpenDetail(product.id)}
+      >
+        {product.imageUrl ? (
+          <img
+            src={resolveImageUrl(product.imageUrl)}
+            alt={product.title}
+            loading="lazy"
+            className="absolute inset-0 w-full h-full transition-transform duration-700 group-hover:scale-105"
+            style={{
+              objectFit: (product.imageObjectFit as "cover" | "contain") ?? "cover",
+              objectPosition: `${product.imagePosX ?? 50}% ${product.imagePosY ?? 50}%`,
+            }}
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <ShoppingBag className="h-6 w-6 text-muted-foreground/20" strokeWidth={1} />
           </div>
+        )}
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center">
+          <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-white text-[9px] tracking-[0.3em] uppercase bg-black/50 px-4 py-2">
+            Quick View
+          </span>
         </div>
-      </Link>
+      </div>
 
       {/* Info */}
       <div className="flex flex-col gap-1 px-0.5">
-        <Link
-          href={`/product/${product.id}`}
-          className="text-xs font-medium leading-snug line-clamp-2 hover:underline decoration-1 underline-offset-2"
+        <button
+          onClick={() => onOpenDetail(product.id)}
+          className="text-left text-xs font-medium leading-snug line-clamp-2 hover:underline decoration-1 underline-offset-2"
         >
           {product.title}
-        </Link>
+        </button>
         <p className="text-sm font-semibold">{product.price || "TBA"}</p>
 
-        {/* Add to Basket — direct add */}
+        {/* Add to Basket */}
         <button
           onClick={handleAdd}
           disabled={added}
@@ -183,7 +192,7 @@ function LookProductCard({ product, lookId }: { product: Product; lookId: number
           )}
         </button>
 
-        {/* Heart — always visible below button */}
+        {/* Heart */}
         <div className="flex justify-center mt-1">
           <HeartButton
             item={{
@@ -209,6 +218,7 @@ interface LookCardProps {
 
 export function LookCard({ look }: LookCardProps) {
   const { t } = useTranslation();
+  const [detailId, setDetailId] = useState<number | null>(null);
 
   const slides: string[] = [];
   if (look.imageUrl) slides.push(look.imageUrl);
@@ -259,7 +269,7 @@ export function LookCard({ look }: LookCardProps) {
         <div className="no-scrollbar flex gap-4 overflow-x-auto -mx-4 sm:-mx-6 px-4 sm:px-6 pb-3">
           {look.products!.map((product) => (
             <div key={product.id} className="shrink-0 w-[44vw] sm:w-52 max-w-[220px]">
-              <LookProductCard product={product} lookId={look.id} />
+              <LookProductCard product={product} onOpenDetail={setDetailId} />
             </div>
           ))}
         </div>
@@ -269,6 +279,15 @@ export function LookCard({ look }: LookCardProps) {
             {t("shopTheLook.noItems")}
           </p>
         </div>
+      )}
+
+      {/* ── Product detail modal ── */}
+      {detailId !== null && (
+        <ProductDetailModal
+          productId={detailId}
+          onClose={() => setDetailId(null)}
+          sourceContext="look"
+        />
       )}
     </section>
   );

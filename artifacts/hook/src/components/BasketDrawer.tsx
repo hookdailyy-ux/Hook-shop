@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useLocation } from "wouter";
 import {
   X,
   Trash2,
@@ -22,6 +21,7 @@ import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useTranslation } from "react-i18next";
 import { useToast } from "@/hooks/use-toast";
 import { resolveImageUrl } from "@/lib/apiBase";
+import { ProductDetailModal } from "@/components/ProductDetailModal";
 
 // ── Store display config ──────────────────────────────────────────────────────
 
@@ -434,12 +434,11 @@ export function BasketDrawer() {
 
   const { t } = useTranslation();
   const { data: settings } = useSiteSettings();
-  const [, navigate] = useLocation();
+  const [detailId, setDetailId] = useState<number | null>(null);
 
-  // Navigate to full product detail page (same view as Women/Dresses)
+  // Open product detail as a floating modal (stays on basket page)
   const handleViewDetails = (item: BasketItem) => {
-    closeBasket();
-    navigate(`/product/${item.productId}`);
+    setDetailId(item.productId);
   };
 
   const generalLinks: Record<string, string> = {
@@ -564,6 +563,13 @@ export function BasketDrawer() {
         </div>
       </div>
 
+      {/* Product detail modal — floats above basket, no navigation */}
+      {detailId !== null && (
+        <ProductDetailModal
+          productId={detailId}
+          onClose={() => setDetailId(null)}
+        />
+      )}
     </>
   );
 }
