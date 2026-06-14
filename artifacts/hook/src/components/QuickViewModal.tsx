@@ -55,12 +55,22 @@ export function QuickViewModal({
   });
 
   const sizes = Array.isArray(fullProduct?.sizes) ? (fullProduct.sizes as string[]) : [];
+  const colors = Array.isArray(fullProduct?.colors) ? (fullProduct.colors as string[]) : [];
   const description = fullProduct?.description ?? null;
+
+  // Image display settings — use full product settings when available
+  const imgObjectFit = (fullProduct?.imageObjectFit ?? "cover") as "cover" | "contain";
+  const imgPosX = fullProduct?.imagePosX ?? 50;
+  const imgPosY = fullProduct?.imagePosY ?? 50;
+
   const isElectronics = fullProduct?.category === "electronics" || product.category === "electronics";
   const isAmazon = product.source === "Amazon" || (product.source == null && inferStore(product.affiliateUrl) === "Amazon");
   const deliveryLabel = isElectronics || isAmazon
     ? t("product.deliveredByAmazon")
     : t("product.deliveredByShein");
+
+  // "View on Store" only surfaces for store/collection context — not inside looks or setups
+  const showViewOnStore = sourceContext !== "look" && product.category !== "none";
 
   const handleAdd = () => {
     const productSource = product.source ?? inferStore(product.affiliateUrl);
@@ -101,7 +111,7 @@ export function QuickViewModal({
 
       {/* Panel — bottom sheet on mobile, right panel on desktop */}
       <div className="fixed inset-0 z-50 pointer-events-none flex items-end sm:items-stretch sm:justify-end">
-        <div className="pointer-events-auto w-full sm:w-[360px] bg-background shadow-2xl flex flex-col max-h-[88vh] sm:max-h-full overflow-y-auto animate-in slide-in-from-bottom-4 sm:slide-in-from-right-4 duration-300">
+        <div className="pointer-events-auto w-full sm:w-[360px] bg-background shadow-2xl flex flex-col max-h-[92vh] sm:max-h-full overflow-y-auto animate-in slide-in-from-bottom-4 sm:slide-in-from-right-4 duration-300">
 
           {/* Header: title + close */}
           <div className="flex items-start justify-between gap-4 p-5 pb-1">
@@ -126,14 +136,18 @@ export function QuickViewModal({
             </button>
           </div>
 
-          {/* Product image */}
+          {/* Product image — portrait 3:4 to match product cards */}
           <div className="mx-5 mt-4 bg-[#e8e0d4] relative overflow-hidden">
-            <div className="aspect-[4/3] relative">
+            <div className="aspect-[3/4] relative">
               {product.imageUrl ? (
                 <img
                   src={resolveImageUrl(product.imageUrl)}
                   alt={product.title}
-                  className="absolute inset-0 w-full h-full object-cover"
+                  className="absolute inset-0 w-full h-full transition-opacity duration-300"
+                  style={{
+                    objectFit: isLoading ? "cover" : imgObjectFit,
+                    objectPosition: isLoading ? "50% 50%" : `${imgPosX}% ${imgPosY}%`,
+                  }}
                 />
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center">
@@ -159,15 +173,18 @@ export function QuickViewModal({
 
           {/* Details */}
           <div className="p-5 flex flex-col gap-4 pb-8">
-            {/* Description */}
-            {isLoading ? (
+            {/* Loading skeleton */}
+            {isLoading && (
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <Loader2 className="h-3 w-3 animate-spin" />
                 Loading…
               </div>
-            ) : description ? (
+            )}
+
+            {/* Description */}
+            {!isLoading && description && (
               <p className="text-xs text-muted-foreground leading-relaxed">{description}</p>
-            ) : null}
+            )}
 
             {/* Sizes — display only */}
             {!isLoading && sizes.length > 0 && (
@@ -177,6 +194,18 @@ export function QuickViewModal({
                 </p>
                 <p className="text-sm text-foreground tracking-wide">
                   {sizes.join(" · ")}
+                </p>
+              </div>
+            )}
+
+            {/* Colors — display only */}
+            {!isLoading && colors.length > 0 && (
+              <div>
+                <p className="text-[9px] tracking-[0.3em] uppercase text-muted-foreground mb-2">
+                  Colors
+                </p>
+                <p className="text-sm text-foreground tracking-wide">
+                  {colors.join(" · ")}
                 </p>
               </div>
             )}
@@ -206,8 +235,8 @@ export function QuickViewModal({
                   )}
                 </button>
 
-                {/* View on Store — hidden for uncategorised products */}
-                {product.category !== "none" && (
+                {/* View on Store — only for store/collection context, not looks/setups */}
+                {showViewOnStore && (
                   <a
                     href={product.affiliateUrl}
                     target="_blank"

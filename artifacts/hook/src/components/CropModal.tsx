@@ -3,31 +3,55 @@ import Cropper from "react-easy-crop";
 import type { Area, Point } from "react-easy-crop";
 import { ZoomIn, ZoomOut } from "lucide-react";
 
+// Neutral background used both in the preview and the saved canvas output
+const BG_COLOR = "#f0ebe3";
+
 async function getCroppedImg(imageSrc: string, pixelCrop: Area): Promise<Blob> {
   const image = new Image();
+  // Required for cross-origin images so canvas is not tainted
+  image.crossOrigin = "anonymous";
 
   await new Promise<void>((resolve, reject) => {
     image.onload = () => resolve();
-    image.onerror = () => reject(new Error("Image load error"));
+    image.onerror = () => {
+      // Retry without crossOrigin (e.g. same-origin object URLs)
+      const img2 = new Image();
+      img2.onload = () => {
+        Object.assign(image, img2);
+        resolve();
+      };
+      img2.onerror = () => reject(new Error("Image load error"));
+      img2.src = imageSrc;
+    };
     image.src = imageSrc;
   });
 
+  const w = Math.round(pixelCrop.width);
+  const h = Math.round(pixelCrop.height);
+
   const canvas = document.createElement("canvas");
-  canvas.width = pixelCrop.width;
-  canvas.height = pixelCrop.height;
+  canvas.width = w;
+  canvas.height = h;
   const ctx = canvas.getContext("2d")!;
 
-  ctx.drawImage(
-    image,
-    pixelCrop.x,
-    pixelCrop.y,
-    pixelCrop.width,
-    pixelCrop.height,
-    0,
-    0,
-    pixelCrop.width,
-    pixelCrop.height,
-  );
+  // Fill with the same neutral background shown in the preview — no black bars
+  ctx.fillStyle = BG_COLOR;
+  ctx.fillRect(0, 0, w, h);
+
+  // Clamp source coords to actual image bounds to handle "contain" letterboxing
+  const srcX = Math.max(0, Math.round(pixelCrop.x));
+  const srcY = Math.max(0, Math.round(pixelCrop.y));
+  const srcRight = Math.min(image.naturalWidth, Math.round(pixelCrop.x + pixelCrop.width));
+  const srcBottom = Math.min(image.naturalHeight, Math.round(pixelCrop.y + pixelCrop.height));
+  const srcW = srcRight - srcX;
+  const srcH = srcBottom - srcY;
+  // Destination offset when crop origin is outside the image (e.g. left of image)
+  const dstX = Math.max(0, Math.round(-pixelCrop.x));
+  const dstY = Math.max(0, Math.round(-pixelCrop.y));
+
+  if (srcW > 0 && srcH > 0) {
+    ctx.drawImage(image, srcX, srcY, srcW, srcH, dstX, dstY, srcW, srcH);
+  }
 
   return new Promise<Blob>((resolve, reject) => {
     canvas.toBlob(
@@ -78,8 +102,9 @@ export function CropModal({ imageSrc, onConfirm, onSkip }: CropModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-[700] bg-black flex flex-col select-none"
+      className="fixed inset-0 z-[700] flex flex-col select-none"
       style={{
+        backgroundColor: "#1a1a1a",
         paddingTop: "env(safe-area-inset-top)",
         paddingBottom: "env(safe-area-inset-bottom)",
       }}
@@ -90,11 +115,11 @@ export function CropModal({ imageSrc, onConfirm, onSkip }: CropModalProps) {
           Crop Image
         </p>
         <p className="text-[9px] text-white/30 tracking-wide hidden sm:block">
-          Drag · Pinch to zoom
+          Drag · Pinch or slider to zoom
         </p>
       </div>
 
-      {/* Cropper — takes all remaining space */}
+      {/* Cropper — "contain" keeps the full product visible; background matches saved output */}
       <div className="relative flex-1 overflow-hidden">
         <Cropper
           image={imageSrc}
@@ -104,12 +129,12 @@ export function CropModal({ imageSrc, onConfirm, onSkip }: CropModalProps) {
           onCropChange={setCrop}
           onZoomChange={setZoom}
           onCropComplete={handleCropComplete}
-          objectFit="cover"
+          objectFit="contain"
           minZoom={1}
           maxZoom={4}
           zoomSpeed={0.4}
           style={{
-            containerStyle: { backgroundColor: "#000" },
+            containerStyle: { backgroundColor: BG_COLOR },
             cropAreaStyle: {
               border: "2px solid rgba(255,255,255,0.6)",
               boxShadow: "0 0 0 9999px rgba(0,0,0,0.65)",
