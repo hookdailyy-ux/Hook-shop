@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, ShoppingBag, Check, ExternalLink } from "lucide-react";
+import { X, ShoppingBag, Check } from "lucide-react";
 import { useGetProduct, getGetProductQueryKey } from "@workspace/api-client-react";
 import { PlaceholderImage } from "@/components/PlaceholderImage";
 import { HeartButton } from "@/components/HeartButton";
@@ -61,7 +61,6 @@ export function ProductDetailModal({ productId, onClose, sourceContext = "store"
 
   const isElectronics = product?.category === "electronics";
   const amazonUrl = product?.amazonUrl;
-  const hasRealCategory = !!product?.category && product.category !== "none";
 
   const deliveryLabel =
     product?.source === "Amazon"
@@ -362,19 +361,6 @@ export function ProductDetailModal({ productId, onClose, sourceContext = "store"
                         {deliveryLabel}
                       </p>
 
-                      {/* View in Store — only for products with a real category page */}
-                      {hasRealCategory && product.affiliateUrl && (
-                        <a
-                          href={product.affiliateUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="mt-3 w-full flex items-center justify-center gap-2 border border-border text-foreground text-[10px] tracking-widest uppercase py-3.5 hover:bg-accent transition-colors"
-                          data-testid={`modal-view-in-store-${product.id}`}
-                        >
-                          <ExternalLink className="h-3.5 w-3.5" />
-                          View in Store
-                        </a>
-                      )}
                     </>
                   )}
 
