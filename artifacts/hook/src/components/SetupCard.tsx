@@ -1,10 +1,11 @@
 import { useState, useRef, useCallback } from "react";
-import { ChevronLeft, ChevronRight, ShoppingBag } from "lucide-react";
+import { Link } from "wouter";
+import { ChevronLeft, ChevronRight, ShoppingBag, Check } from "lucide-react";
 import { HeartButton } from "./HeartButton";
-import { QuickViewModal, type QuickViewProduct } from "./QuickViewModal";
 import type { Setup, Product } from "@workspace/api-client-react";
 import { useTranslation } from "react-i18next";
 import { resolveImageUrl } from "@/lib/apiBase";
+import { useBasket, inferStore } from "@/contexts/BasketContext";
 
 // ── Gallery ────────────────────────────────────────────────────────────────────
 
@@ -51,7 +52,6 @@ function Gallery({ slides, title, setupId, setupImageUrl }: GalleryProps) {
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Slides */}
       {slides.map((url, i) => (
         <img
           key={url + i}
@@ -64,12 +64,10 @@ function Gallery({ slides, title, setupId, setupImageUrl }: GalleryProps) {
         />
       ))}
 
-      {/* Heart button */}
       <div className="absolute top-4 left-4 z-10">
         <HeartButton item={{ id: setupId, type: "setup", title, imageUrl: setupImageUrl }} />
       </div>
 
-      {/* Prev / Next arrows */}
       {slides.length > 1 && (
         <>
           <button
@@ -86,8 +84,6 @@ function Gallery({ slides, title, setupId, setupImageUrl }: GalleryProps) {
           >
             <ChevronRight className="h-5 w-5" />
           </button>
-
-          {/* Counter — bottom center */}
           <div className="absolute bottom-4 left-0 right-0 flex justify-center z-10">
             <span className="bg-black/50 backdrop-blur-sm text-white text-[11px] tracking-widest px-3 py-1">
               {current + 1} / {slides.length}
@@ -101,76 +97,88 @@ function Gallery({ slides, title, setupId, setupImageUrl }: GalleryProps) {
 
 // ── Product card ───────────────────────────────────────────────────────────────
 
-function SetupProductCard({
-  product,
-  onQuickView,
-}: {
-  product: Product;
-  onQuickView: (p: QuickViewProduct) => void;
-}) {
+function SetupProductCard({ product, setupId }: { product: Product; setupId: number }) {
   const { t } = useTranslation();
-  const qvProduct: QuickViewProduct = {
-    id: product.id,
-    title: product.title,
-    imageUrl: product.imageUrl ?? null,
-    price: product.price ?? null,
-    brand: product.brand ?? null,
-    affiliateUrl: product.affiliateUrl,
-    category: product.category,
-    source: product.source ?? null,
+  const { addItem, openBasket } = useBasket();
+  const [added, setAdded] = useState(false);
+
+  const handleAdd = () => {
+    addItem({
+      productId: product.id,
+      productTitle: product.title,
+      productImageUrl: product.imageUrl ?? null,
+      displayPrice: product.price ?? null,
+      affiliateUrl: product.affiliateUrl,
+      brand: product.brand ?? null,
+      size: null,
+      color: null,
+      productSource: product.source ?? inferStore(product.affiliateUrl),
+      amazonUrl: null,
+      amazonPrice: null,
+      sourceMemberId: 0,
+      sourceMemberUsername: "",
+      sourceMemberName: "",
+      sourceContext: "look",
+      sourceToken: null,
+    });
+    setAdded(true);
+    setTimeout(() => {
+      setAdded(false);
+      openBasket();
+    }, 800);
   };
 
   return (
     <div className="flex flex-col group" data-testid={`setup-item-${product.id}`}>
-      {/* Image */}
-      <div
-        className="aspect-[3/4] bg-[#e8e0d4] overflow-hidden mb-3 relative cursor-pointer"
-        onClick={() => onQuickView(qvProduct)}
-        role="button"
-        aria-label={`Quick view ${product.title}`}
-      >
-        {product.imageUrl ? (
-          <img
-            src={resolveImageUrl(product.imageUrl)}
-            alt={product.title}
-            loading="lazy"
-            className="absolute inset-0 w-full h-full transition-transform duration-700 group-hover:scale-105"
-            style={{
-              objectFit: (product.imageObjectFit as "cover" | "contain") ?? "cover",
-              objectPosition: `${product.imagePosX ?? 50}% ${product.imagePosY ?? 50}%`,
-            }}
-          />
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <ShoppingBag className="h-6 w-6 text-muted-foreground/20" strokeWidth={1} />
+      {/* Image — navigate to product detail */}
+      <Link href={`/products/${product.id}`} className="block">
+        <div className="aspect-[3/4] bg-[#e8e0d4] overflow-hidden mb-3 relative">
+          {product.imageUrl ? (
+            <img
+              src={resolveImageUrl(product.imageUrl)}
+              alt={product.title}
+              loading="lazy"
+              className="absolute inset-0 w-full h-full transition-transform duration-700 group-hover:scale-105"
+              style={{
+                objectFit: (product.imageObjectFit as "cover" | "contain") ?? "cover",
+                objectPosition: `${product.imagePosX ?? 50}% ${product.imagePosY ?? 50}%`,
+              }}
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <ShoppingBag className="h-6 w-6 text-muted-foreground/20" strokeWidth={1} />
+            </div>
+          )}
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center">
+            <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-white text-[9px] tracking-[0.3em] uppercase bg-black/50 px-4 py-2">
+              Quick View
+            </span>
           </div>
-        )}
-        {/* Quick view overlay */}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center">
-          <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-white text-[9px] tracking-[0.3em] uppercase bg-black/50 px-4 py-2">
-            Quick View
-          </span>
         </div>
-      </div>
+      </Link>
 
       {/* Info */}
       <div className="flex flex-col gap-1 px-0.5">
-        <button
-          onClick={() => onQuickView(qvProduct)}
-          className="text-xs font-medium leading-snug line-clamp-2 text-left hover:underline decoration-1 underline-offset-2"
+        <Link
+          href={`/products/${product.id}`}
+          className="text-xs font-medium leading-snug line-clamp-2 hover:underline decoration-1 underline-offset-2"
         >
           {product.title}
-        </button>
+        </Link>
         <p className="text-sm font-semibold">{product.price || "TBA"}</p>
 
-        {/* Add to Basket */}
+        {/* Add to Basket — direct add */}
         <button
-          onClick={() => onQuickView(qvProduct)}
-          className="mt-1.5 w-full text-center bg-foreground text-background text-[10px] tracking-widest uppercase py-3 hover:opacity-80 transition-opacity flex items-center justify-center gap-1.5"
+          onClick={handleAdd}
+          disabled={added}
+          className="mt-1.5 w-full text-center bg-foreground text-background text-[10px] tracking-widest uppercase py-3 hover:opacity-80 transition-opacity flex items-center justify-center gap-1.5 disabled:opacity-70"
           data-testid={`button-order-${product.id}`}
         >
-          <ShoppingBag className="h-3 w-3" />
-          {t("addToBasket.title")}
+          {added ? (
+            <><Check className="h-3 w-3" />Added!</>
+          ) : (
+            <><ShoppingBag className="h-3 w-3" />{t("addToBasket.title")}</>
+          )}
         </button>
 
         {/* Heart — always visible below button */}
@@ -199,9 +207,7 @@ interface SetupCardProps {
 
 export function SetupCard({ setup }: SetupCardProps) {
   const { t } = useTranslation();
-  const [quickViewProduct, setQuickViewProduct] = useState<QuickViewProduct | null>(null);
 
-  // Gallery slides: cover image + setup's own gallery images (no product images)
   const slides: string[] = [];
   if (setup.imageUrl) slides.push(setup.imageUrl);
   ((setup as any).images ?? []).forEach((url: string) => {
@@ -251,10 +257,7 @@ export function SetupCard({ setup }: SetupCardProps) {
         <div className="no-scrollbar flex gap-4 overflow-x-auto -mx-4 sm:-mx-6 px-4 sm:px-6 pb-3">
           {setup.products!.map((product) => (
             <div key={product.id} className="shrink-0 w-[44vw] sm:w-52 max-w-[220px]">
-              <SetupProductCard
-                product={product}
-                onQuickView={setQuickViewProduct}
-              />
+              <SetupProductCard product={product} setupId={setup.id} />
             </div>
           ))}
         </div>
@@ -264,15 +267,6 @@ export function SetupCard({ setup }: SetupCardProps) {
             {t("shopTheSetup.noItems")}
           </p>
         </div>
-      )}
-
-      {/* Quick View Modal */}
-      {quickViewProduct && (
-        <QuickViewModal
-          product={quickViewProduct}
-          sourceContext="look"
-          onClose={() => setQuickViewProduct(null)}
-        />
       )}
     </section>
   );

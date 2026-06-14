@@ -10,6 +10,28 @@ import { useTranslation } from "react-i18next";
 import { ShoppingBag, Check } from "lucide-react";
 import { resolveImageUrl } from "@/lib/apiBase";
 
+// ── Color name → CSS color ────────────────────────────────────────────────────
+function cssColor(name: string): string {
+  const n = name.toLowerCase().trim();
+  const map: Record<string, string> = {
+    black: "#1a1a1a", white: "#f5f5f5", red: "#dc2626", blue: "#2563eb",
+    navy: "#1e3a5f", "navy blue": "#1e3a5f", "dark blue": "#1e3a5f",
+    green: "#16a34a", "dark green": "#14532d", yellow: "#ca8a04",
+    orange: "#ea580c", pink: "#ec4899", purple: "#9333ea",
+    "light purple": "#c084fc", lavender: "#c4b5fd", lilac: "#c084fc",
+    brown: "#92400e", beige: "#d4b896", grey: "#6b7280", gray: "#6b7280",
+    "light gray": "#d1d5db", "light grey": "#d1d5db", charcoal: "#374151",
+    silver: "#94a3b8", gold: "#b45309", cream: "#fdf8f0", ivory: "#faf5eb",
+    camel: "#c19a6b", tan: "#d2b48c", nude: "#d4a494", "off white": "#faf5f0",
+    olive: "#4d7c0f", khaki: "#a3824b", teal: "#0d9488", turquoise: "#06b6d4",
+    mint: "#6ee7b7", coral: "#f97316", rose: "#fb7185", salmon: "#fa8072",
+    burgundy: "#7f1d1d", maroon: "#6b1a1a", mustard: "#d97706",
+    "light blue": "#bfdbfe", "sky blue": "#7dd3fc", "baby blue": "#bfdbfe",
+    "dark brown": "#451a03", "off-white": "#faf5f0",
+  };
+  return map[n] ?? "#e2e8f0";
+}
+
 
 export default function ProductDetail() {
   const params = useParams();
@@ -64,6 +86,7 @@ export default function ProductDetail() {
   const hasImages = allImages.length > 0;
 
   const sizes = Array.isArray(product.sizes) ? product.sizes : [];
+  const colors = Array.isArray((product as any).colors) ? ((product as any).colors as string[]) : [];
   const categoryPath =
     product.category === "home"
       ? "/home-essentials"
@@ -150,11 +173,11 @@ export default function ProductDetail() {
 
             <div className="flex gap-3">
 
-              {/* Vertical thumbnail strip — desktop only */}
-              {allImages.length > 1 && (
+              {/* Vertical thumbnail strip + color swatches — desktop only */}
+              {(allImages.length > 1 || colors.length > 0) && (
                 <div className="hidden md:flex flex-col gap-2 w-[72px] shrink-0 max-h-[600px] overflow-y-auto"
                   style={{ scrollbarWidth: "thin" }}>
-                  {allImages.map((img, i) => (
+                  {allImages.length > 1 && allImages.map((img, i) => (
                     <button
                       key={i}
                       onClick={() => setSelectedImage(i)}
@@ -169,6 +192,24 @@ export default function ProductDetail() {
                       <img src={resolveImageUrl(img)} alt="" className="w-full h-full object-cover" />
                     </button>
                   ))}
+
+                  {/* Color swatches */}
+                  {colors.length > 0 && (
+                    <div className={`flex flex-col gap-2 ${allImages.length > 1 ? "mt-2 pt-2 border-t border-border/40" : ""}`}>
+                      <p className="text-[8px] tracking-widest uppercase text-muted-foreground text-center">Colors</p>
+                      {colors.map((color) => (
+                        <div key={color} className="flex flex-col items-center gap-0.5" title={color}>
+                          <div
+                            className="w-9 h-9 border border-border/50"
+                            style={{ backgroundColor: cssColor(color) }}
+                          />
+                          <span className="text-[8px] tracking-wide text-muted-foreground text-center leading-tight w-full truncate px-0.5">
+                            {color}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -228,6 +269,23 @@ export default function ProductDetail() {
                   >
                     <img src={resolveImageUrl(img)} alt="" className="w-full h-full object-cover" />
                   </button>
+                ))}
+              </div>
+            )}
+
+            {/* Mobile color swatches */}
+            {colors.length > 0 && (
+              <div className="flex md:hidden gap-3 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
+                {colors.map((color) => (
+                  <div key={color} className="shrink-0 flex flex-col items-center gap-1" title={color}>
+                    <div
+                      className="w-8 h-8 border border-border/50"
+                      style={{ backgroundColor: cssColor(color) }}
+                    />
+                    <span className="text-[8px] tracking-wide text-muted-foreground text-center leading-tight max-w-[40px] truncate">
+                      {color}
+                    </span>
+                  </div>
                 ))}
               </div>
             )}

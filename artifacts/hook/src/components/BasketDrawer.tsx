@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import {
   X,
   Trash2,
@@ -17,7 +18,6 @@ import {
   type BasketItem,
   type BasketGroup,
 } from "@/contexts/BasketContext";
-import { QuickViewModal, type QuickViewProduct } from "@/components/QuickViewModal";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useTranslation } from "react-i18next";
 import { useToast } from "@/hooks/use-toast";
@@ -434,8 +434,13 @@ export function BasketDrawer() {
 
   const { t } = useTranslation();
   const { data: settings } = useSiteSettings();
+  const [, navigate] = useLocation();
 
-  const [quickViewItem, setQuickViewItem] = useState<BasketItem | null>(null);
+  // Navigate to full product detail page (same view as Women/Dresses)
+  const handleViewDetails = (item: BasketItem) => {
+    closeBasket();
+    navigate(`/products/${item.productId}`);
+  };
 
   const generalLinks: Record<string, string> = {
     SHEIN: settings?.sheinGeneralUrl ?? "",
@@ -458,19 +463,6 @@ export function BasketDrawer() {
   const activeStores = storeOrder.filter((s) => storeGroups[s]?.length);
 
   const hasContent = totalItems > 0;
-
-  const quickViewProduct: QuickViewProduct | null = quickViewItem
-    ? {
-        id: quickViewItem.productId,
-        title: quickViewItem.productTitle,
-        imageUrl: quickViewItem.productImageUrl,
-        price: quickViewItem.displayPrice,
-        brand: quickViewItem.brand,
-        affiliateUrl: quickViewItem.affiliateUrl,
-        category: "",
-        source: quickViewItem.productSource,
-      }
-    : null;
 
   if (!isOpen) return null;
 
@@ -551,7 +543,7 @@ export function BasketDrawer() {
                   group={group}
                   onRemoveGroup={removeGroup}
                   onRemoveGroupItem={removeGroupItem}
-                  onQuickView={setQuickViewItem}
+                  onQuickView={handleViewDetails}
                 />
               ))}
 
@@ -563,7 +555,7 @@ export function BasketDrawer() {
                   items={storeGroups[store]}
                   onRemove={removeItem}
                   onRemoveMultiple={removeItems}
-                  onQuickView={setQuickViewItem}
+                  onQuickView={handleViewDetails}
                   exploreUrl={generalLinks[store] ?? ""}
                 />
               ))}
@@ -572,14 +564,6 @@ export function BasketDrawer() {
         </div>
       </div>
 
-      {/* QuickView modal */}
-      {quickViewProduct && (
-        <QuickViewModal
-          product={quickViewProduct}
-          fromBasket
-          onClose={() => setQuickViewItem(null)}
-        />
-      )}
     </>
   );
 }
