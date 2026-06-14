@@ -68,7 +68,7 @@ export default function LookDetail() {
     {},
     { query: { queryKey: getListLooksQueryKey() } },
   );
-  const otherLooks = (allLooks ?? []).filter((l) => l.id !== id).slice(0, 4);
+  const otherLooks = (allLooks ?? []).filter((l) => l.id !== id).slice(0, 8);
 
   const handleAddAll = () => {
     if (!look?.products?.length) return;
@@ -172,15 +172,17 @@ export default function LookDetail() {
           </div>
         )}
 
-        {/* You May Also Like — other looks only */}
+        {/* You May Also Like — other looks */}
         {otherLooks.length > 0 && (
-          <div className="mt-24 pt-16 border-t border-border">
-            <h2 className="font-serif text-2xl md:text-3xl font-light mb-10">
+          <div className="mt-14 pt-10 border-t border-border">
+            <h2 className="font-serif text-2xl font-light mb-6 px-0">
               {t("product.youMayAlsoLike")}
             </h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-10 md:gap-x-8">
+            <div className="no-scrollbar flex gap-4 overflow-x-auto -mx-4 sm:-mx-6 px-4 sm:px-6 pb-3">
               {otherLooks.map((l) => (
-                <LookMiniCard key={l.id} look={l} />
+                <div key={l.id} className="shrink-0 w-[44vw] sm:w-48 max-w-[200px]">
+                  <LookMiniCard look={l} />
+                </div>
               ))}
             </div>
           </div>

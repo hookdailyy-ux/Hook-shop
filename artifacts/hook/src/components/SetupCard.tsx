@@ -248,13 +248,14 @@ export function SetupCard({ setup }: SetupCardProps) {
 
       {/* ── Products ── */}
       {hasProducts ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8">
+        <div className="no-scrollbar flex gap-4 overflow-x-auto -mx-4 sm:-mx-6 px-4 sm:px-6 pb-3">
           {setup.products!.map((product) => (
-            <SetupProductCard
-              key={product.id}
-              product={product}
-              onQuickView={setQuickViewProduct}
-            />
+            <div key={product.id} className="shrink-0 w-[44vw] sm:w-52 max-w-[220px]">
+              <SetupProductCard
+                product={product}
+                onQuickView={setQuickViewProduct}
+              />
+            </div>
           ))}
         </div>
       ) : (

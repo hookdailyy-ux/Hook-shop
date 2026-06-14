@@ -68,7 +68,7 @@ export default function SetupDetail() {
     {},
     { query: { queryKey: getListSetupsQueryKey() } },
   );
-  const otherSetups = (allSetups ?? []).filter((s) => s.id !== id).slice(0, 4);
+  const otherSetups = (allSetups ?? []).filter((s) => s.id !== id).slice(0, 8);
 
   const handleAddAll = () => {
     if (!setup?.products?.length) return;
@@ -172,15 +172,17 @@ export default function SetupDetail() {
           </div>
         )}
 
-        {/* You May Also Like — other setups only */}
+        {/* You May Also Like — other setups */}
         {otherSetups.length > 0 && (
-          <div className="mt-24 pt-16 border-t border-border">
-            <h2 className="font-serif text-2xl md:text-3xl font-light mb-10">
+          <div className="mt-14 pt-10 border-t border-border">
+            <h2 className="font-serif text-2xl font-light mb-6">
               {t("product.youMayAlsoLike")}
             </h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-10 md:gap-x-8">
+            <div className="no-scrollbar flex gap-4 overflow-x-auto -mx-4 sm:-mx-6 px-4 sm:px-6 pb-3">
               {otherSetups.map((s) => (
-                <SetupMiniCard key={s.id} setup={s} />
+                <div key={s.id} className="shrink-0 w-[44vw] sm:w-48 max-w-[200px]">
+                  <SetupMiniCard setup={s} />
+                </div>
               ))}
             </div>
           </div>
