@@ -131,7 +131,7 @@ function SetupProductCard({ product, setupId }: { product: Product; setupId: num
   return (
     <div className="flex flex-col group" data-testid={`setup-item-${product.id}`}>
       {/* Image — navigate to product detail */}
-      <Link href={`/products/${product.id}`} className="block">
+      <Link href={`/product/${product.id}`} className="block">
         <div className="aspect-[3/4] bg-[#e8e0d4] overflow-hidden mb-3 relative">
           {product.imageUrl ? (
             <img
@@ -160,7 +160,7 @@ function SetupProductCard({ product, setupId }: { product: Product; setupId: num
       {/* Info */}
       <div className="flex flex-col gap-1 px-0.5">
         <Link
-          href={`/products/${product.id}`}
+          href={`/product/${product.id}`}
           className="text-xs font-medium leading-snug line-clamp-2 hover:underline decoration-1 underline-offset-2"
         >
           {product.title}

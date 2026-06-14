@@ -439,7 +439,7 @@ export function BasketDrawer() {
   // Navigate to full product detail page (same view as Women/Dresses)
   const handleViewDetails = (item: BasketItem) => {
     closeBasket();
-    navigate(`/products/${item.productId}`);
+    navigate(`/product/${item.productId}`);
   };
 
   const generalLinks: Record<string, string> = {
