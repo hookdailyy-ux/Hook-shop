@@ -7,13 +7,12 @@
  */
 import type { ProductUpdateCategory } from './productUpdateCategory';
 import type { ProductUpdateImageObjectFit } from './productUpdateImageObjectFit';
-import type { ProductUpdateSource } from './productUpdateSource';
 import type { ProductUpdateStatus } from './productUpdateStatus';
 
 export interface ProductUpdate {
   title?: string;
   description?: string;
-  source?: ProductUpdateSource;
+  source?: string;
   category?: ProductUpdateCategory;
   subcategory?: string;
   price?: string;
@@ -35,4 +34,5 @@ export interface ProductUpdate {
   amazonUrl?: string;
   amazonPrice?: string;
   placements?: string[];
+  deliveredBy?: string;
 }

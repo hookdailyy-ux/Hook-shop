@@ -82,7 +82,7 @@ export const ListProductsResponseItem = zod.object({
   "id": zod.number(),
   "title": zod.string(),
   "description": zod.string().nullish(),
-  "source": zod.enum(['SHEIN', 'Amazon']),
+  "source": zod.string(),
   "category": zod.enum(['none', 'women', 'men', 'couples', 'kids', 'electronics', 'home', 'accessories']),
   "subcategory": zod.string().nullish(),
   "price": zod.string().nullish(),
@@ -104,6 +104,7 @@ export const ListProductsResponseItem = zod.object({
   "amazonUrl": zod.string().nullish(),
   "amazonPrice": zod.string().nullish(),
   "placements": zod.array(zod.string()).nullish(),
+  "deliveredBy": zod.string().nullish(),
   "createdAt": zod.string()
 })
 export const ListProductsResponse = zod.array(ListProductsResponseItem)
@@ -115,7 +116,7 @@ export const ListProductsResponse = zod.array(ListProductsResponseItem)
 export const CreateProductBody = zod.object({
   "title": zod.string(),
   "description": zod.string().optional(),
-  "source": zod.enum(['SHEIN', 'Amazon']),
+  "source": zod.string(),
   "category": zod.enum(['none', 'women', 'men', 'couples', 'kids', 'electronics', 'home', 'accessories']),
   "subcategory": zod.string().optional(),
   "price": zod.string().optional(),
@@ -136,7 +137,8 @@ export const CreateProductBody = zod.object({
   "imageObjectFit": zod.enum(['cover', 'contain']).optional(),
   "amazonUrl": zod.string().optional(),
   "amazonPrice": zod.string().optional(),
-  "placements": zod.array(zod.string()).optional()
+  "placements": zod.array(zod.string()).optional(),
+  "deliveredBy": zod.string().optional()
 })
 
 
@@ -151,7 +153,7 @@ export const GetProductResponse = zod.object({
   "id": zod.number(),
   "title": zod.string(),
   "description": zod.string().nullish(),
-  "source": zod.enum(['SHEIN', 'Amazon']),
+  "source": zod.string(),
   "category": zod.enum(['none', 'women', 'men', 'couples', 'kids', 'electronics', 'home', 'accessories']),
   "subcategory": zod.string().nullish(),
   "price": zod.string().nullish(),
@@ -173,6 +175,7 @@ export const GetProductResponse = zod.object({
   "amazonUrl": zod.string().nullish(),
   "amazonPrice": zod.string().nullish(),
   "placements": zod.array(zod.string()).nullish(),
+  "deliveredBy": zod.string().nullish(),
   "createdAt": zod.string()
 })
 
@@ -187,7 +190,7 @@ export const UpdateProductParams = zod.object({
 export const UpdateProductBody = zod.object({
   "title": zod.string().optional(),
   "description": zod.string().optional(),
-  "source": zod.enum(['SHEIN', 'Amazon']).optional(),
+  "source": zod.string().optional(),
   "category": zod.enum(['none', 'women', 'men', 'couples', 'kids', 'electronics', 'home', 'accessories']).optional(),
   "subcategory": zod.string().optional(),
   "price": zod.string().optional(),
@@ -208,14 +211,15 @@ export const UpdateProductBody = zod.object({
   "imageObjectFit": zod.enum(['cover', 'contain']).optional(),
   "amazonUrl": zod.string().optional(),
   "amazonPrice": zod.string().optional(),
-  "placements": zod.array(zod.string()).optional()
+  "placements": zod.array(zod.string()).optional(),
+  "deliveredBy": zod.string().optional()
 })
 
 export const UpdateProductResponse = zod.object({
   "id": zod.number(),
   "title": zod.string(),
   "description": zod.string().nullish(),
-  "source": zod.enum(['SHEIN', 'Amazon']),
+  "source": zod.string(),
   "category": zod.enum(['none', 'women', 'men', 'couples', 'kids', 'electronics', 'home', 'accessories']),
   "subcategory": zod.string().nullish(),
   "price": zod.string().nullish(),
@@ -237,6 +241,7 @@ export const UpdateProductResponse = zod.object({
   "amazonUrl": zod.string().nullish(),
   "amazonPrice": zod.string().nullish(),
   "placements": zod.array(zod.string()).nullish(),
+  "deliveredBy": zod.string().nullish(),
   "createdAt": zod.string()
 })
 
@@ -269,7 +274,7 @@ export const ListLooksResponseItem = zod.object({
   "id": zod.number(),
   "title": zod.string(),
   "description": zod.string().nullish(),
-  "source": zod.enum(['SHEIN', 'Amazon']),
+  "source": zod.string(),
   "category": zod.enum(['none', 'women', 'men', 'couples', 'kids', 'electronics', 'home', 'accessories']),
   "subcategory": zod.string().nullish(),
   "price": zod.string().nullish(),
@@ -291,6 +296,7 @@ export const ListLooksResponseItem = zod.object({
   "amazonUrl": zod.string().nullish(),
   "amazonPrice": zod.string().nullish(),
   "placements": zod.array(zod.string()).nullish(),
+  "deliveredBy": zod.string().nullish(),
   "createdAt": zod.string()
 })).optional(),
   "createdAt": zod.string()
@@ -333,7 +339,7 @@ export const GetLookResponse = zod.object({
   "id": zod.number(),
   "title": zod.string(),
   "description": zod.string().nullish(),
-  "source": zod.enum(['SHEIN', 'Amazon']),
+  "source": zod.string(),
   "category": zod.enum(['none', 'women', 'men', 'couples', 'kids', 'electronics', 'home', 'accessories']),
   "subcategory": zod.string().nullish(),
   "price": zod.string().nullish(),
@@ -355,6 +361,7 @@ export const GetLookResponse = zod.object({
   "amazonUrl": zod.string().nullish(),
   "amazonPrice": zod.string().nullish(),
   "placements": zod.array(zod.string()).nullish(),
+  "deliveredBy": zod.string().nullish(),
   "createdAt": zod.string()
 })).optional(),
   "createdAt": zod.string()
@@ -392,7 +399,7 @@ export const UpdateLookResponse = zod.object({
   "id": zod.number(),
   "title": zod.string(),
   "description": zod.string().nullish(),
-  "source": zod.enum(['SHEIN', 'Amazon']),
+  "source": zod.string(),
   "category": zod.enum(['none', 'women', 'men', 'couples', 'kids', 'electronics', 'home', 'accessories']),
   "subcategory": zod.string().nullish(),
   "price": zod.string().nullish(),
@@ -414,6 +421,7 @@ export const UpdateLookResponse = zod.object({
   "amazonUrl": zod.string().nullish(),
   "amazonPrice": zod.string().nullish(),
   "placements": zod.array(zod.string()).nullish(),
+  "deliveredBy": zod.string().nullish(),
   "createdAt": zod.string()
 })).optional(),
   "createdAt": zod.string()
@@ -448,7 +456,7 @@ export const ListSetupsResponseItem = zod.object({
   "id": zod.number(),
   "title": zod.string(),
   "description": zod.string().nullish(),
-  "source": zod.enum(['SHEIN', 'Amazon']),
+  "source": zod.string(),
   "category": zod.enum(['none', 'women', 'men', 'couples', 'kids', 'electronics', 'home', 'accessories']),
   "subcategory": zod.string().nullish(),
   "price": zod.string().nullish(),
@@ -470,6 +478,7 @@ export const ListSetupsResponseItem = zod.object({
   "amazonUrl": zod.string().nullish(),
   "amazonPrice": zod.string().nullish(),
   "placements": zod.array(zod.string()).nullish(),
+  "deliveredBy": zod.string().nullish(),
   "createdAt": zod.string()
 })).optional(),
   "createdAt": zod.string()
@@ -512,7 +521,7 @@ export const GetSetupResponse = zod.object({
   "id": zod.number(),
   "title": zod.string(),
   "description": zod.string().nullish(),
-  "source": zod.enum(['SHEIN', 'Amazon']),
+  "source": zod.string(),
   "category": zod.enum(['none', 'women', 'men', 'couples', 'kids', 'electronics', 'home', 'accessories']),
   "subcategory": zod.string().nullish(),
   "price": zod.string().nullish(),
@@ -534,6 +543,7 @@ export const GetSetupResponse = zod.object({
   "amazonUrl": zod.string().nullish(),
   "amazonPrice": zod.string().nullish(),
   "placements": zod.array(zod.string()).nullish(),
+  "deliveredBy": zod.string().nullish(),
   "createdAt": zod.string()
 })).optional(),
   "createdAt": zod.string()
@@ -571,7 +581,7 @@ export const UpdateSetupResponse = zod.object({
   "id": zod.number(),
   "title": zod.string(),
   "description": zod.string().nullish(),
-  "source": zod.enum(['SHEIN', 'Amazon']),
+  "source": zod.string(),
   "category": zod.enum(['none', 'women', 'men', 'couples', 'kids', 'electronics', 'home', 'accessories']),
   "subcategory": zod.string().nullish(),
   "price": zod.string().nullish(),
@@ -593,6 +603,7 @@ export const UpdateSetupResponse = zod.object({
   "amazonUrl": zod.string().nullish(),
   "amazonPrice": zod.string().nullish(),
   "placements": zod.array(zod.string()).nullish(),
+  "deliveredBy": zod.string().nullish(),
   "createdAt": zod.string()
 })).optional(),
   "createdAt": zod.string()
@@ -640,7 +651,7 @@ export const ListAdminProductsResponseItem = zod.object({
   "id": zod.number(),
   "title": zod.string(),
   "description": zod.string().nullish(),
-  "source": zod.enum(['SHEIN', 'Amazon']),
+  "source": zod.string(),
   "category": zod.enum(['none', 'women', 'men', 'couples', 'kids', 'electronics', 'home', 'accessories']),
   "subcategory": zod.string().nullish(),
   "price": zod.string().nullish(),
@@ -662,6 +673,7 @@ export const ListAdminProductsResponseItem = zod.object({
   "amazonUrl": zod.string().nullish(),
   "amazonPrice": zod.string().nullish(),
   "placements": zod.array(zod.string()).nullish(),
+  "deliveredBy": zod.string().nullish(),
   "createdAt": zod.string()
 })
 export const ListAdminProductsResponse = zod.array(ListAdminProductsResponseItem)

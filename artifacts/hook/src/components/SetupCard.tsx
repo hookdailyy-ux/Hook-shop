@@ -114,7 +114,7 @@ function SetupProductCard({
       productId: product.id,
       productTitle: product.title,
       productImageUrl: product.imageUrl ?? null,
-      displayPrice: product.price ?? null,
+      displayPrice: product.price ?? (product as any).amazonPrice ?? null,
       affiliateUrl: product.affiliateUrl,
       brand: product.brand ?? null,
       size: null,
@@ -176,7 +176,7 @@ function SetupProductCard({
         >
           {product.title}
         </button>
-        <p className="text-sm font-semibold">{product.price || "TBA"}</p>
+        <p className="text-sm font-semibold">{product.price || (product as any).amazonPrice || "TBA"}</p>
 
         {/* Add to Basket */}
         <button

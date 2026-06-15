@@ -7,7 +7,6 @@
  */
 import type { ProductCategory } from './productCategory';
 import type { ProductImageObjectFit } from './productImageObjectFit';
-import type { ProductSource } from './productSource';
 import type { ProductStatus } from './productStatus';
 
 export interface Product {
@@ -15,7 +14,7 @@ export interface Product {
   title: string;
   /** @nullable */
   description?: string | null;
-  source: ProductSource;
+  source: string;
   category: ProductCategory;
   /** @nullable */
   subcategory?: string | null;
@@ -45,5 +44,7 @@ export interface Product {
   /** @nullable */
   amazonPrice?: string | null;
   placements?: string[] | null;
+  /** @nullable */
+  deliveredBy?: string | null;
   createdAt: string;
 }

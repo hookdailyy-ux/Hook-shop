@@ -40,14 +40,6 @@ export interface SubcategoryInput {
   name: string;
 }
 
-export type ProductSource = typeof ProductSource[keyof typeof ProductSource];
-
-
-export const ProductSource = {
-  SHEIN: 'SHEIN',
-  Amazon: 'Amazon',
-} as const;
-
 export type ProductCategory = typeof ProductCategory[keyof typeof ProductCategory];
 
 
@@ -83,7 +75,7 @@ export interface Product {
   title: string;
   /** @nullable */
   description?: string | null;
-  source: ProductSource;
+  source: string;
   category: ProductCategory;
   /** @nullable */
   subcategory?: string | null;
@@ -113,16 +105,10 @@ export interface Product {
   /** @nullable */
   amazonPrice?: string | null;
   placements?: string[] | null;
+  /** @nullable */
+  deliveredBy?: string | null;
   createdAt: string;
 }
-
-export type ProductInputSource = typeof ProductInputSource[keyof typeof ProductInputSource];
-
-
-export const ProductInputSource = {
-  SHEIN: 'SHEIN',
-  Amazon: 'Amazon',
-} as const;
 
 export type ProductInputCategory = typeof ProductInputCategory[keyof typeof ProductInputCategory];
 
@@ -157,7 +143,7 @@ export const ProductInputImageObjectFit = {
 export interface ProductInput {
   title: string;
   description?: string;
-  source: ProductInputSource;
+  source: string;
   category: ProductInputCategory;
   subcategory?: string;
   price?: string;
@@ -179,15 +165,8 @@ export interface ProductInput {
   amazonUrl?: string;
   amazonPrice?: string;
   placements?: string[];
+  deliveredBy?: string;
 }
-
-export type ProductUpdateSource = typeof ProductUpdateSource[keyof typeof ProductUpdateSource];
-
-
-export const ProductUpdateSource = {
-  SHEIN: 'SHEIN',
-  Amazon: 'Amazon',
-} as const;
 
 export type ProductUpdateCategory = typeof ProductUpdateCategory[keyof typeof ProductUpdateCategory];
 
@@ -222,7 +201,7 @@ export const ProductUpdateImageObjectFit = {
 export interface ProductUpdate {
   title?: string;
   description?: string;
-  source?: ProductUpdateSource;
+  source?: string;
   category?: ProductUpdateCategory;
   subcategory?: string;
   price?: string;
@@ -244,6 +223,7 @@ export interface ProductUpdate {
   amazonUrl?: string;
   amazonPrice?: string;
   placements?: string[];
+  deliveredBy?: string;
 }
 
 export interface Look {

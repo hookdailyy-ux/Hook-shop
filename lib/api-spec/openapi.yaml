@@ -531,7 +531,6 @@ components:
           type: ["string", "null"]
         source:
           type: string
-          enum: [SHEIN, Amazon]
         category:
           type: string
           enum: [none, women, men, couples, kids, electronics, home, accessories]
@@ -586,6 +585,8 @@ components:
           items:
             type: string
           nullable: true
+        deliveredBy:
+          type: ["string", "null"]
         createdAt:
           type: string
 
@@ -599,7 +600,6 @@ components:
           type: string
         source:
           type: string
-          enum: [SHEIN, Amazon]
         category:
           type: string
           enum: [none, women, men, couples, kids, electronics, home, accessories]
@@ -653,6 +653,8 @@ components:
           type: array
           items:
             type: string
+        deliveredBy:
+          type: string
 
     ProductUpdate:
       type: object
@@ -663,7 +665,6 @@ components:
           type: string
         source:
           type: string
-          enum: [SHEIN, Amazon]
         category:
           type: string
           enum: [none, women, men, couples, kids, electronics, home, accessories]
@@ -717,6 +718,8 @@ components:
           type: array
           items:
             type: string
+        deliveredBy:
+          type: string
 
     Look:
       type: object

@@ -38,12 +38,12 @@ export function ProductCard({ product }: ProductCardProps) {
       productId: product.id,
       productTitle: product.title,
       productImageUrl: product.imageUrl ?? null,
-      displayPrice: product.price ?? null,
+      displayPrice: product.price ?? (product as any).amazonPrice ?? null,
       affiliateUrl: product.affiliateUrl,
       brand: product.brand ?? null,
       size: null,
       color: null,
-      productSource: inferStore(product.affiliateUrl),
+      productSource: product.source ?? inferStore(product.affiliateUrl),
       amazonUrl: null,
       amazonPrice: null,
       sourceMemberId: 0,
@@ -130,7 +130,7 @@ export function ProductCard({ product }: ProductCardProps) {
             {product.title}
           </Link>
           <div className="flex items-center gap-2 mt-0.5">
-            <p className="text-sm font-medium">{product.price || "TBA"}</p>
+            <p className="text-sm font-medium">{product.price || (product as any).amazonPrice || "TBA"}</p>
             {product.originalPrice && (
               <p className="text-xs text-muted-foreground line-through">{product.originalPrice}</p>
             )}

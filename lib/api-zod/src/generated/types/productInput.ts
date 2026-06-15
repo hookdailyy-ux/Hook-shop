@@ -7,13 +7,12 @@
  */
 import type { ProductInputCategory } from './productInputCategory';
 import type { ProductInputImageObjectFit } from './productInputImageObjectFit';
-import type { ProductInputSource } from './productInputSource';
 import type { ProductInputStatus } from './productInputStatus';
 
 export interface ProductInput {
   title: string;
   description?: string;
-  source: ProductInputSource;
+  source: string;
   category: ProductInputCategory;
   subcategory?: string;
   price?: string;
@@ -35,4 +34,5 @@ export interface ProductInput {
   amazonUrl?: string;
   amazonPrice?: string;
   placements?: string[];
+  deliveredBy?: string;
 }
