@@ -106,10 +106,8 @@ export default function ProductDetail() {
       ? t("nav.accessories")
       : (product.category as string).charAt(0).toUpperCase() + (product.category as string).slice(1);
 
-  const deliveryLabel =
-    product.source === "Amazon"
-      ? t("product.deliveredByAmazon")
-      : t("product.deliveredByShein");
+  const deliveryName = (product as any).deliveredBy || product.source || "SHEIN";
+  const deliveryLabel = `Delivered by ${deliveryName}`;
 
   const isElectronics = product.category === "electronics";
   const amazonUrl = product.amazonUrl;
@@ -305,7 +303,7 @@ export default function ProductDetail() {
 
             {!isElectronics && (
               <div className="flex items-baseline gap-3 mb-6">
-                <p className="text-xl font-medium">{product.price || "TBA"}</p>
+                <p className="text-xl font-medium">{product.price || (product as any).amazonPrice || "TBA"}</p>
                 {product.originalPrice && (
                   <p className="text-sm text-muted-foreground line-through">{product.originalPrice}</p>
                 )}
@@ -351,7 +349,7 @@ export default function ProductDetail() {
                     )}
                   </button>
                   <p className="text-[9px] tracking-wide text-muted-foreground text-center mt-2.5">
-                    Delivered by Amazon
+                    {deliveryLabel}
                   </p>
                 </div>
               ) : (

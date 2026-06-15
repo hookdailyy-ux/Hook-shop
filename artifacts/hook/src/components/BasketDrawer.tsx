@@ -193,7 +193,7 @@ function StoreSection({
       const lines = items
         .map((item) => `• ${item.productTitle} → ${item.affiliateUrl}`)
         .join("\n");
-      const text = `🛍 Shop my picks from ${meta.label}:\n\n${lines}`;
+      const text = `🛍 Shop my picks from ${storeName}:\n\n${lines}`;
 
       if (navigator.share) {
         await navigator.share({ text });
@@ -224,7 +224,7 @@ function StoreSection({
       >
         <div className="flex items-center gap-2.5">
           <span className="text-[10px] tracking-[0.3em] uppercase font-semibold">
-            {meta.label}
+            {storeName}
           </span>
           <span className="text-[9px] text-muted-foreground">
             — {totalItems} {totalItems === 1 ? "item" : "items"}

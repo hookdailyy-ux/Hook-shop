@@ -7,7 +7,6 @@ import { requireTeamMember } from "../middlewares/requireTeamMember";
 const router: IRouter = Router();
 
 const categoryEnum = ["none", "women", "men", "couples", "kids", "electronics", "home", "accessories"] as const;
-const sourceEnum = ["SHEIN", "Amazon"] as const;
 const statusEnum = ["active", "hidden"] as const;
 
 function serializeProduct(p: typeof productsTable.$inferSelect) {
@@ -62,7 +61,7 @@ router.post("/products", async (req, res) => {
     const schema = z.object({
       title: z.string().min(1),
       description: z.string().optional(),
-      source: z.enum(sourceEnum).default("SHEIN"),
+      source: z.string().default("SHEIN"),
       category: z.enum(categoryEnum).default("none"),
       subcategory: z.string().optional(),
       price: z.string().optional(),
@@ -85,6 +84,7 @@ router.post("/products", async (req, res) => {
       amazonUrl: z.string().optional(),
       amazonPrice: z.string().optional(),
       placements: z.array(z.string()).optional(),
+      deliveredBy: z.string().optional(),
     });
     const data = schema.parse(req.body);
     const [product] = await db.insert(productsTable).values({
@@ -113,6 +113,7 @@ router.post("/products", async (req, res) => {
       amazonUrl: data.amazonUrl ?? null,
       amazonPrice: data.amazonPrice ?? null,
       placements: data.placements ?? [],
+      deliveredBy: data.deliveredBy ?? null,
     }).returning();
     res.status(201).json(serializeProduct(product));
   } catch (err) {
@@ -177,7 +178,7 @@ router.patch("/products/:id", async (req, res) => {
     const schema = z.object({
       title: z.string().optional(),
       description: z.string().optional(),
-      source: z.enum(sourceEnum).optional(),
+      source: z.string().optional(),
       category: z.enum(categoryEnum).optional(),
       subcategory: z.string().optional().nullable(),
       price: z.string().optional().nullable(),
@@ -200,6 +201,7 @@ router.patch("/products/:id", async (req, res) => {
       amazonUrl: z.string().optional().nullable(),
       amazonPrice: z.string().optional().nullable(),
       placements: z.array(z.string()).optional(),
+      deliveredBy: z.string().optional().nullable(),
     });
     const data = schema.parse(req.body);
     const [product] = await db.update(productsTable).set(data).where(eq(productsTable.id, id)).returning();

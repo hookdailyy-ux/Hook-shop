@@ -62,10 +62,8 @@ export function ProductDetailModal({ productId, onClose, sourceContext = "store"
   const isElectronics = product?.category === "electronics";
   const amazonUrl = product?.amazonUrl;
 
-  const deliveryLabel =
-    product?.source === "Amazon"
-      ? t("product.deliveredByAmazon")
-      : t("product.deliveredByShein");
+  const deliveryName = (product as any)?.deliveredBy || product?.source || "SHEIN";
+  const deliveryLabel = `Delivered by ${deliveryName}`;
 
   const handleAddToBasket = () => {
     if (!product) return;
@@ -294,7 +292,7 @@ export function ProductDetailModal({ productId, onClose, sourceContext = "store"
 
                   {!isElectronics && (
                     <div className="flex items-baseline gap-3 mb-5">
-                      <p className="text-xl font-medium">{product.price || "TBA"}</p>
+                      <p className="text-xl font-medium">{product.price || (product as any).amazonPrice || "TBA"}</p>
                       {product.originalPrice && (
                         <p className="text-sm text-muted-foreground line-through">{product.originalPrice}</p>
                       )}
@@ -336,7 +334,7 @@ export function ProductDetailModal({ productId, onClose, sourceContext = "store"
                           )}
                         </button>
                         <p className="text-[9px] tracking-wide text-muted-foreground text-center mt-2">
-                          Delivered by Amazon
+                          {deliveryLabel}
                         </p>
                       </div>
                     ) : (

@@ -654,6 +654,8 @@ type ProductFormData = {
   brand: string;
   description: string;
   source: string;
+  customSource: string;
+  deliveredBy: string;
   price: string;
   originalPrice: string;
   affiliateUrl: string;
@@ -822,6 +824,8 @@ function NewProductDialog({
     brand: "",
     description: "",
     source: "SHEIN",
+    customSource: "",
+    deliveredBy: "",
     price: "",
     originalPrice: "",
     affiliateUrl: "",
@@ -854,7 +858,8 @@ function NewProductDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const isAmazonStore = form.source === "Amazon";
+    const resolvedSource = form.source === "Other" ? (form.customSource.trim() || "Other") : form.source;
+    const isAmazonStore = resolvedSource === "Amazon";
     const categoryForApi =
       form.placements
         .find((p) =>
@@ -866,7 +871,7 @@ function NewProductDialog({
     const payload = {
       ...form,
       category: categoryForApi,
-      source: form.source as "SHEIN" | "Amazon",
+      source: resolvedSource,
       status: form.status as "active" | "hidden",
       brand: form.brand || undefined,
       description: form.description || undefined,
@@ -876,6 +881,7 @@ function NewProductDialog({
       amazonUrl: form.amazonUrl || undefined,
       amazonPrice: form.amazonPrice || undefined,
       externalId: form.externalId || undefined,
+      deliveredBy: form.deliveredBy || undefined,
       placements: form.placements,
       affiliateUrl: isAmazonStore
         ? form.amazonUrl || form.affiliateUrl || ""
@@ -988,8 +994,17 @@ function NewProductDialog({
                 <SelectContent>
                   <SelectItem value="SHEIN">SHEIN</SelectItem>
                   <SelectItem value="Amazon">Amazon</SelectItem>
+                  <SelectItem value="Other">Other</SelectItem>
                 </SelectContent>
               </Select>
+              {form.source === "Other" && (
+                <Input
+                  value={form.customSource}
+                  onChange={(e) => set("customSource")(e.target.value)}
+                  placeholder="e.g. Noon, Temu, AliExpress"
+                  className="border-border mt-2"
+                />
+              )}
             </div>
             <div className="space-y-2">
               <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
@@ -1005,6 +1020,20 @@ function NewProductDialog({
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          {/* Delivered by */}
+          <div className="space-y-2">
+            <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+              Delivered by{" "}
+              <span className="normal-case tracking-normal font-normal opacity-60">(optional)</span>
+            </label>
+            <Input
+              value={form.deliveredBy}
+              onChange={(e) => set("deliveredBy")(e.target.value)}
+              placeholder="e.g. SHEIN, Amazon, Noon"
+              className="border-border"
+            />
           </div>
 
           <PlacementPanel placements={form.placements} onChange={set("placements")} />
@@ -1294,29 +1323,35 @@ function ProductDialog({ product }: { product?: Product }) {
   const createMutation = useCreateProduct();
   const updateMutation = useUpdateProduct();
 
-  const defaultForm = (): ProductFormData => ({
-    title: product?.title ?? "",
-    brand: product?.brand ?? "",
-    description: product?.description ?? "",
-    source: (product as any)?.source ?? "SHEIN",
-    price: product?.price ?? "",
-    originalPrice: product?.originalPrice ?? "",
-    affiliateUrl: product?.affiliateUrl ?? "",
-    amazonUrl: (product as any)?.amazonUrl ?? "",
-    amazonPrice: (product as any)?.amazonPrice ?? "",
-    externalId: (product as any)?.externalId ?? "",
-    imageUrl: product?.imageUrl ?? "",
-    images: Array.isArray(product?.images) ? (product.images as string[]) : [],
-    sizes: Array.isArray(product?.sizes) ? (product.sizes as string[]) : [],
-    status: (product as any)?.status ?? "active",
-    featured: product?.featured ?? false,
-    trending: product?.trending ?? false,
-    imagePosX: product?.imagePosX ?? 50,
-    imagePosY: product?.imagePosY ?? 50,
-    imageScale: product?.imageScale ?? 100,
-    imageObjectFit: (product?.imageObjectFit as "cover" | "contain") ?? "cover",
-    placements: Array.isArray((product as any)?.placements) ? ((product as any).placements as string[]) : [],
-  });
+  const defaultForm = (): ProductFormData => {
+    const rawSource = (product as any)?.source ?? "SHEIN";
+    const isKnownSource = rawSource === "SHEIN" || rawSource === "Amazon";
+    return {
+      title: product?.title ?? "",
+      brand: product?.brand ?? "",
+      description: product?.description ?? "",
+      source: isKnownSource ? rawSource : "Other",
+      customSource: isKnownSource ? "" : rawSource,
+      deliveredBy: (product as any)?.deliveredBy ?? "",
+      price: product?.price ?? "",
+      originalPrice: product?.originalPrice ?? "",
+      affiliateUrl: product?.affiliateUrl ?? "",
+      amazonUrl: (product as any)?.amazonUrl ?? "",
+      amazonPrice: (product as any)?.amazonPrice ?? "",
+      externalId: (product as any)?.externalId ?? "",
+      imageUrl: product?.imageUrl ?? "",
+      images: Array.isArray(product?.images) ? (product.images as string[]) : [],
+      sizes: Array.isArray(product?.sizes) ? (product.sizes as string[]) : [],
+      status: (product as any)?.status ?? "active",
+      featured: product?.featured ?? false,
+      trending: product?.trending ?? false,
+      imagePosX: product?.imagePosX ?? 50,
+      imagePosY: product?.imagePosY ?? 50,
+      imageScale: product?.imageScale ?? 100,
+      imageObjectFit: (product?.imageObjectFit as "cover" | "contain") ?? "cover",
+      placements: Array.isArray((product as any)?.placements) ? ((product as any).placements as string[]) : [],
+    };
+  };
 
   const [form, setForm] = useState<ProductFormData>(defaultForm);
 
@@ -1329,7 +1364,8 @@ function ProductDialog({ product }: { product?: Product }) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const isAmazonStore = form.source === "Amazon";
+    const resolvedSource = form.source === "Other" ? (form.customSource.trim() || "Other") : form.source;
+    const isAmazonStore = resolvedSource === "Amazon";
     const categoryForApi =
       form.placements
         .find((p) =>
@@ -1341,7 +1377,7 @@ function ProductDialog({ product }: { product?: Product }) {
     const payload = {
       ...form,
       category: categoryForApi,
-      source: form.source as "SHEIN" | "Amazon",
+      source: resolvedSource,
       status: form.status as "active" | "hidden",
       brand: form.brand || undefined,
       description: form.description || undefined,
@@ -1351,6 +1387,7 @@ function ProductDialog({ product }: { product?: Product }) {
       amazonUrl: form.amazonUrl || undefined,
       amazonPrice: form.amazonPrice || undefined,
       externalId: form.externalId || undefined,
+      deliveredBy: form.deliveredBy || undefined,
       placements: form.placements,
       affiliateUrl: isAmazonStore
         ? form.amazonUrl || form.affiliateUrl || ""
@@ -1530,8 +1567,17 @@ if (data.success && data.product) {
                   <SelectContent>
                     <SelectItem value="SHEIN">SHEIN</SelectItem>
                     <SelectItem value="Amazon">Amazon</SelectItem>
+                    <SelectItem value="Other">Other</SelectItem>
                   </SelectContent>
                 </Select>
+                {form.source === "Other" && (
+                  <Input
+                    value={form.customSource}
+                    onChange={(e) => set("customSource")(e.target.value)}
+                    placeholder="e.g. Noon, Temu, AliExpress"
+                    className="border-border mt-2"
+                  />
+                )}
               </div>
               <div className="space-y-2">
                 <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
@@ -1550,6 +1596,20 @@ if (data.success && data.product) {
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+
+            {/* Delivered by */}
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                Delivered by{" "}
+                <span className="normal-case tracking-normal font-normal opacity-60">(optional)</span>
+              </label>
+              <Input
+                value={form.deliveredBy}
+                onChange={(e) => set("deliveredBy")(e.target.value)}
+                placeholder="e.g. SHEIN, Amazon, Noon"
+                className="border-border"
+              />
             </div>
 
             <PlacementPanel placements={form.placements} onChange={set("placements")} />
