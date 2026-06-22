@@ -458,8 +458,14 @@ export function BasketDrawer() {
     {}
   );
 
-  const storeOrder = ["SHEIN", "Amazon", "Other"];
-  const activeStores = storeOrder.filter((s) => storeGroups[s]?.length);
+  const preferredOrder = ["SHEIN", "Amazon"];
+  const dynamicStores = Object.keys(storeGroups).filter(
+    (s) => !preferredOrder.includes(s)
+  );
+  const activeStores = [
+    ...preferredOrder.filter((s) => storeGroups[s]?.length),
+    ...dynamicStores.filter((s) => storeGroups[s]?.length),
+  ];
 
   const hasContent = totalItems > 0;
 

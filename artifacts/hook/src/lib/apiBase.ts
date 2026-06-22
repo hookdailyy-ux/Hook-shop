@@ -42,11 +42,16 @@ export const API_BASE: string = (
  */
 export function resolveImageUrl(url: string | null | undefined): string | undefined {
   if (!url) return undefined;
-  if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("data:")) {
+  if (url.startsWith("data:")) return url;
+  if (url.startsWith(DEPLOYED_API)) {
+    const path = url.slice(DEPLOYED_API.length);
+    return `${API_BASE}${path}`;
+  }
+  if (url.startsWith("http://") || url.startsWith("https://")) {
     return url;
   }
   const separator = url.startsWith("/") ? "" : "/";
-  return `${DEPLOYED_API}${separator}${url}`;
+  return `${API_BASE}${separator}${url}`;
 }
 
 /**

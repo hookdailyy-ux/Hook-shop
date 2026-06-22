@@ -7,6 +7,8 @@ import NotFound from "@/pages/not-found";
 import { AppLayout } from "@/components/AppLayout";
 import Home from "@/pages/Home";
 import ShopTheLook from "@/pages/ShopTheLook";
+import ShopTheLookKids from "@/pages/ShopTheLookKids";
+import ShopTheLookCouples from "@/pages/ShopTheLookCouples";
 import ShopTheSetup from "@/pages/ShopTheSetup";
 import LookDetail from "@/pages/LookDetail";
 import SetupDetail from "@/pages/SetupDetail";
@@ -130,6 +132,8 @@ function Router() {
               <Route path="/" component={Home} />
               <Route path="/shop-the-look/:id" component={LookDetail} />
               <Route path="/shop-the-look" component={ShopTheLook} />
+              <Route path="/shop-the-look-kids" component={ShopTheLookKids} />
+              <Route path="/shop-the-look-couples" component={ShopTheLookCouples} />
               <Route path="/shop-the-setup/:id" component={SetupDetail} />
               <Route path="/shop-the-setup" component={ShopTheSetup} />
               <Route path="/women" component={() => <CategoryPage category="women" />} />

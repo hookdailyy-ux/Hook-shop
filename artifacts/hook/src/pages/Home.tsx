@@ -63,12 +63,7 @@ export default function Home() {
           <p className={`text-[11px] tracking-[0.3em] uppercase font-medium max-w-xs md:max-w-sm leading-relaxed ${heroImage ? "text-white/60" : "text-[#8b7355]/70"}`}>
             {t("hero.subtitle")}
           </p>
-          <Link
-            href="/women"
-            className={`mt-2 inline-block text-xs tracking-[0.25em] uppercase px-10 py-4 transition-colors ${heroImage ? "bg-white/90 text-[#2a2318] hover:bg-white" : "bg-[#2a2318] text-[#f0ebe3] hover:bg-[#3d3226]"}`}
-          >
-            {t("hero.cta")}
-          </Link>
+
         </div>
         <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none" style={{ background: "linear-gradient(to bottom, transparent, hsl(var(--background)))" }} />
       </section>

@@ -2191,6 +2191,7 @@ function LookDialog({ look }: { look?: Look }) {
     imagePosY: look?.imagePosY ?? 50,
     imageScale: look?.imageScale ?? 100,
     imageObjectFit: (look as any)?.imageObjectFit ?? "cover",
+    lookGroup: (look as any)?.lookGroup ?? "main",
     productIds: look?.products?.map((p) => p.id) ?? [],
   });
   const [search, setSearch] = useState("");
@@ -2264,6 +2265,7 @@ function LookDialog({ look }: { look?: Look }) {
       imagePosY: form.imagePosY,
       imageScale: form.imageScale,
       imageObjectFit: form.imageObjectFit,
+      lookGroup: form.lookGroup,
       productIds: form.productIds,
     };
     if (look) {
@@ -2328,6 +2330,27 @@ function LookDialog({ look }: { look?: Look }) {
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-5 mt-4">
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                Look Section
+              </label>
+              <Select
+                value={form.lookGroup}
+                onValueChange={(value) =>
+                  setForm((f) => ({ ...f, lookGroup: value }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose section" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="main">Main</SelectItem>
+                  <SelectItem value="kids">Kids</SelectItem>
+                  <SelectItem value="couples">Couples</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="space-y-2">
               <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
                 Title *
@@ -2910,6 +2933,7 @@ function SetupDialog({ setup }: { setup?: Setup }) {
       imagePosY: form.imagePosY,
       imageScale: form.imageScale,
       imageObjectFit: form.imageObjectFit,
+      lookGroup: form.lookGroup,
       productIds: form.productIds,
     };
     if (setup) {

@@ -115,6 +115,7 @@ export default function ShopTheLook() {
   const discoverMoreUrl = siteSettings?.discoverMoreUrl;
   const { t } = useTranslation();
   const hasImage = !!sectionImage?.imageUrl;
+  const visibleLooks = (looks ?? []).filter((look: any) => (look.lookGroup ?? "main") === "main");
 
   return (
     <div className="pb-24">
@@ -169,17 +170,28 @@ export default function ShopTheLook() {
         </div>
       </div>
 
+
+
+      {/* ── Look Sections ── */}
+      <div className="container mx-auto px-4 sm:px-6 mt-8">
+        <div className="no-scrollbar flex items-center gap-8 overflow-x-auto text-[10px] tracking-[0.35em] uppercase text-muted-foreground">
+          <Link href="/shop-the-look" className="text-foreground border-b border-foreground pb-2">Main</Link>
+          <Link href="/shop-the-look-kids" className="hover:text-foreground pb-2">Kids</Link>
+          <Link href="/shop-the-look-couples" className="hover:text-foreground pb-2">Couples</Link>
+        </div>
+      </div>
+
       {/* ── Looks carousel ── */}
       <div className="container mx-auto px-4 sm:px-6 mt-12">
         {isLoading ? (
           <CarouselSkeleton />
-        ) : !looks || looks.length === 0 ? (
+        ) : visibleLooks.length === 0 ? (
           <div className="text-center py-28 border border-dashed border-border">
             <p className="text-xs tracking-widest text-muted-foreground uppercase">{t("shopTheLook.empty")}</p>
           </div>
         ) : (
           <div className="no-scrollbar flex gap-4 overflow-x-auto -mx-4 sm:-mx-6 px-4 sm:px-6 pb-3">
-            {looks.map((look) => (
+            {visibleLooks.map((look) => (
               <div key={look.id} className="shrink-0 w-[44vw] sm:w-52 max-w-[220px]">
                 <LookGridCard look={look} />
               </div>
@@ -188,21 +200,7 @@ export default function ShopTheLook() {
         )}
       </div>
 
-      {/* ── You May Like — setups ── */}
-      {setups && setups.length > 0 && (
-        <div className="container mx-auto px-4 sm:px-6 mt-14 pt-10 border-t border-border">
-          <p className="text-[10px] tracking-[0.35em] uppercase text-muted-foreground mb-6">
-            You May Like
-          </p>
-          <div className="no-scrollbar flex gap-4 overflow-x-auto -mx-4 sm:-mx-6 px-4 sm:px-6 pb-3">
-            {setups.map((setup) => (
-              <div key={setup.id} className="shrink-0 w-[44vw] sm:w-48 max-w-[200px]">
-                <SetupMiniCard setup={setup} />
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      
     </div>
   );
 }

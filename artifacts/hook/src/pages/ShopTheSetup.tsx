@@ -169,21 +169,7 @@ export default function ShopTheSetup() {
         )}
       </div>
 
-      {/* ── You May Like — looks ── */}
-      {looks && looks.length > 0 && (
-        <div className="container mx-auto px-4 sm:px-6 mt-14 pt-10 border-t border-border">
-          <p className="text-[10px] tracking-[0.35em] uppercase text-muted-foreground mb-6">
-            You May Like
-          </p>
-          <div className="no-scrollbar flex gap-4 overflow-x-auto -mx-4 sm:-mx-6 px-4 sm:px-6 pb-3">
-            {looks.map((look) => (
-              <div key={look.id} className="shrink-0 w-[44vw] sm:w-48 max-w-[200px]">
-                <LookMiniCard look={look} />
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      
     </div>
   );
 }

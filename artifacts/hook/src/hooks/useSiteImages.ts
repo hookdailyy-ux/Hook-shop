@@ -24,7 +24,15 @@ export function useSiteImages() {
     queryFn: async () => {
       const res = await fetch(`${BASE}/api/site-images`);
       if (!res.ok) throw new Error("Failed to fetch site images");
-      return res.json() as Promise<SiteImagesMap>;
+      const data = await res.json() as SiteImagesMap;
+      return Object.fromEntries(
+        Object.entries(data).map(([key, value]) => [
+          key,
+          value?.imageUrl?.startsWith("/api/")
+            ? { ...value, imageUrl: `${BASE}${value.imageUrl}` }
+            : value,
+        ])
+      ) as SiteImagesMap;
     },
     staleTime: 2 * 60 * 1000,
   });
