@@ -14,6 +14,7 @@ export const looksTable = pgTable("looks", {
   imagePosY: integer("image_pos_y").notNull().default(50),
   imageScale: integer("image_scale").notNull().default(100),
   imageObjectFit: text("image_object_fit").notNull().default("cover"),
+  lookGroup: text("look_group").notNull().default("main"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

@@ -38,7 +38,7 @@ router.get("/site-images", async (req, res) => {
     for (const row of rows) {
       const key = row.key.replace("site_image_", "");
       try {
-        result[key] = JSON.parse(row.value) as SiteImageData;
+        result[key] = JSON.parse(String(row.value)) as SiteImageData;
       } catch {
         // skip malformed entries
       }
@@ -58,7 +58,7 @@ router.put("/site-images/:key", requireAdmin, async (req, res) => {
       return;
     }
     const data = imageSchema.parse(req.body);
-    const dbKey = toDbKey(key);
+    const dbKey = toDbKey(key as ImageKey);
     const value = JSON.stringify(data);
 
     await db
@@ -80,7 +80,7 @@ router.delete("/site-images/:key", requireAdmin, async (req, res) => {
       res.status(400).json({ error: "Invalid key" });
       return;
     }
-    await db.delete(settingsTable).where(eq(settingsTable.key, toDbKey(key)));
+    await db.delete(settingsTable).where(eq(settingsTable.key, toDbKey(key as ImageKey)));
     res.status(204).send();
   } catch (err) {
     req.log.error({ err }, "Failed to delete site image");
