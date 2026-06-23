@@ -5,19 +5,19 @@ import { sql } from "drizzle-orm";
 
 const rawPort = process.env["PORT"];
 
-if (!rawPort) {
+if (!rawPort && !process.env["VERCEL"]) {
   throw new Error(
     "PORT environment variable is required but was not provided.",
   );
 }
 
-const port = Number(rawPort);
+const port = Number(rawPort ?? 3001);
 
 if (Number.isNaN(port) || port <= 0) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
 }
 
-app.listen(port, (err) => {
+if (!process.env["VERCEL"]) app.listen(port, (err) => {
   if (err) {
     logger.error({ err }, "Error listening on port");
     process.exit(1);
@@ -92,3 +92,5 @@ app.listen(port, (err) => {
     logger.warn({ err: migrateErr }, "Subcategory sync skipped"),
   );
 });
+
+export default app;
