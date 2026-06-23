@@ -90,7 +90,8 @@ const CATEGORIES = [
   { value: "kids", label: "Kids" },
   { value: "electronics", label: "Electronics" },
   { value: "home", label: "Home Essentials" },
-  { value: "accessories", label: "Accessories" },
+  { value: "women-accessories", label: "Women Accessories" },
+  { value: "men-accessories", label: "Men Accessories" },
 ];
 
 export default function AdminDashboard() {
@@ -680,7 +681,8 @@ const PLACEMENT_GROUPS = [
   { value: "men", label: "Men" },
   { value: "kids", label: "Kids" },
   { value: "couples", label: "Couples" },
-  { value: "accessories", label: "Accessories" },
+  { value: "women-accessories", label: "Women Accessories" },
+  { value: "men-accessories", label: "Men Accessories" },
   { value: "home", label: "Home Essentials" },
   { value: "electronics", label: "Electronics" },
 ] as const;
@@ -742,7 +744,7 @@ function PlacementPanel({
       </div>
       <div className="space-y-5">
         {PLACEMENT_GROUPS.map((group) => {
-          const subs = subsByCategory[group.value] ?? [];
+          const subs = group.value === "women-accessories" || group.value === "men-accessories" ? subsByCategory["accessories"] ?? [] : subsByCategory[group.value] ?? [];
           return (
             <div key={group.value}>
               <p className="text-[10px] tracking-widest uppercase text-muted-foreground/50 mb-2 font-medium">
