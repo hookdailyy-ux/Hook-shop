@@ -73,10 +73,17 @@ export default function CategoryPage({ category }: CategoryPageProps) {
     { query: { queryKey: getListSubcategoriesQueryKey({ category }) } }
   );
 
-  const { data: products, isLoading } = useListProducts({
-    category,
-    ...(activeSub ? { subcategory: activeSub } : {}),
-  });
+  const { data: products, isLoading } = useListProducts(
+    {
+      category,
+      ...(activeSub ? { subcategory: activeSub } : {}),
+    },
+    {
+      refetchInterval: 2000,
+      refetchOnWindowFocus: true,
+      staleTime: 0,
+    },
+  );
 
   const meta = CATEGORY_META[category];
   const title = meta ? t(meta.titleKey) : category.charAt(0).toUpperCase() + category.slice(1);
